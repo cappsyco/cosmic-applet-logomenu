@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 use cosmic::app::{Core, Task};
+use cosmic::applet::{menu_button, padded_control};
+use cosmic::cosmic_theme::Spacing;
 use cosmic::iced::window::Id;
 use cosmic::iced::Limits;
 use cosmic::iced_winit::commands::popup::{destroy_popup, get_popup};
@@ -46,7 +48,7 @@ impl Application for YourApp {
 
     type Message = Message;
 
-    const APP_ID: &'static str = "com.example.CosmicAppletTemplate";
+    const APP_ID: &'static str = "co.uk.cappsy.CosmicAppletLogoMenu";
 
     fn core(&self) -> &Core {
         &self.core
@@ -83,21 +85,60 @@ impl Application for YourApp {
     ///
     /// To get a better sense of which widgets are available, check out the `widget` module.
     fn view(&self) -> Element<Self::Message> {
+        let bytes = include_bytes!(concat!("../res/icons/ublue-logo-symbolic.svg"));
+
         self.core
             .applet
-            .icon_button("display-symbolic")
+            .icon_button_from_handle(cosmic::widget::icon::from_svg_bytes(bytes).symbolic(true))
             .on_press(Message::TogglePopup)
             .into()
     }
 
     fn view_window(&self, _id: Id) -> Element<Self::Message> {
-        let content_list = widget::list_column()
-            .padding(5)
-            .spacing(0)
-            .add(settings::item(
-                fl!("example-row"),
-                widget::toggler(self.example_row).on_toggle(Message::ToggleExampleRow),
-            ));
+        let Spacing {
+            space_xxs, space_s, ..
+        } = cosmic::theme::active().cosmic().spacing;
+
+        let mut content_list = widget::column().padding([8, 0]).spacing(0);
+
+        content_list = content_list.push(
+            menu_button(widget::text::body(fl!("app-library"))).on_press(Message::TogglePopup),
+        );
+
+        content_list = content_list.push(
+            menu_button(widget::text::body(fl!("app-launcher"))).on_press(Message::TogglePopup),
+        );
+
+        content_list = content_list.push(
+            menu_button(widget::text::body(fl!("workspaces"))).on_press(Message::TogglePopup),
+        );
+
+        content_list = content_list.push(
+            padded_control(widget::divider::horizontal::default()).padding([space_xxs, space_s]),
+        );
+
+        content_list = content_list
+            .push(menu_button(widget::text::body(fl!("software"))).on_press(Message::TogglePopup));
+
+        content_list = content_list
+            .push(menu_button(widget::text::body(fl!("terminal"))).on_press(Message::TogglePopup));
+
+        content_list = content_list.push(
+            menu_button(widget::text::body(fl!("containers"))).on_press(Message::TogglePopup),
+        );
+
+        content_list = content_list
+            .push(menu_button(widget::text::body(fl!("system"))).on_press(Message::TogglePopup));
+
+        content_list = content_list
+            .push(
+                padded_control(widget::divider::horizontal::default())
+                    .padding([space_xxs, space_s]),
+            )
+            .push(
+                menu_button(widget::text::body(fl!("menu-settings")))
+                    .on_press(Message::TogglePopup),
+            );
 
         self.core.applet.popup_container(content_list).into()
     }
@@ -141,4 +182,14 @@ impl Application for YourApp {
     fn style(&self) -> Option<cosmic::iced_runtime::Appearance> {
         Some(cosmic::applet::style())
     }
+
+    /*
+    #[macro_export]
+    macro_rules! icon_handle {
+        ($name:literal) => {{
+            let bytes = include_bytes!(concat!("../res/icons/hicolor/16x16/", $name, ".svg"));
+            cosmic::widget::icon::from_svg_bytes(bytes).symbolic(true)
+        }};
+    }
+    */
 }

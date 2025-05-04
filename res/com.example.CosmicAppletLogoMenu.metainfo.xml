@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<component type="desktop-application">
+  <id>co.uk.cappsy.CosmicAppletLogoMenu</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  <project_group>COSMIC</project_group>
+  <developer_name>Jonathan Capps</developer_name>
+  <update_contact>cappsy@gmail.com</update_contact>
+  <url type="homepage" />
+  <url type="bugtracker" />
+  <name>COSMIC Logo Menu</name>
+  <summary>A customisable menu applet for the COSMIC desktop.</summary>
+  <description>
+    <p>A customisable menu applet for the COSMIC desktop.</p>
+  </description>
+  <launchable type="desktop-id">co.uk.cappsy.CosmicAppletLogoMenu</launchable>
+  <icon
+        type="remote"
+        height="256"
+        width="256"
+    >https://raw.githubusercontent.com/edfloreshz/cosmic-applet-template/master/res/icons/hicolor/256x256/apps/com.example.CosmicAppletTemplate.svg</icon>
+  <screenshots>
+  </screenshots>
+  <provides>
+    <mimetypes>
+      <mimetype>text/plain</mimetype>
+    </mimetypes>
+    <binaries>
+      <binary>cosmic-applet-logomenu</binary>
+    </binaries>
+  </provides>
+</component>

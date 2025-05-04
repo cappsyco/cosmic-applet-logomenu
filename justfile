@@ -1,5 +1,5 @@
 name := 'cosmic-applet-template'
-export APPID := 'com.example.CosmicAppletTemplate'
+export APPID := 'co.uk.cappsy.CosmicAppletLogoMenu'
 
 rootdir := ''
 prefix := '/usr'
