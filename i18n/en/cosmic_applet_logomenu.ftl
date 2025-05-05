@@ -1,8 +1,8 @@
-app-library = App library
-app-launcher = App launcher
+applications = Applications
 containers = Containers
+files = Files
+launcher = Launcher
+menu-settings = Menu settings...
 software = Software
-system = System
 terminal = Terminal
 workspaces = Workspaces
-menu-settings = Menu settings

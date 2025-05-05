@@ -6,21 +6,20 @@ use cosmic::cosmic_theme::Spacing;
 use cosmic::iced::window::Id;
 use cosmic::iced::Limits;
 use cosmic::iced_winit::commands::popup::{destroy_popup, get_popup};
-use cosmic::widget::{self, settings};
+use cosmic::widget::{self};
 use cosmic::{Application, Element};
+use std::process::Command;
 
 use crate::fl;
 
 /// This is the struct that represents your application.
 /// It is used to define the data that will be used by your application.
 #[derive(Default)]
-pub struct YourApp {
+pub struct LogoMenu {
     /// Application state which is managed by the COSMIC runtime.
     core: Core,
     /// The popup id.
     popup: Option<Id>,
-    /// Example row toggler.
-    example_row: bool,
 }
 
 /// This is the enum that contains all the possible variants that your application will need to transmit messages.
@@ -30,7 +29,7 @@ pub struct YourApp {
 pub enum Message {
     TogglePopup,
     PopupClosed(Id),
-    ToggleExampleRow(bool),
+    Run(String),
 }
 
 /// Implement the `Application` trait for your application.
@@ -41,7 +40,7 @@ pub enum Message {
 /// - `Flags` is the data that your application needs to use before it starts.
 /// - `Message` is the enum that contains all the possible variants that your application will need to transmit messages.
 /// - `APP_ID` is the unique identifier of your application.
-impl Application for YourApp {
+impl Application for LogoMenu {
     type Executor = cosmic::executor::Default;
 
     type Flags = ();
@@ -66,11 +65,10 @@ impl Application for YourApp {
     /// - `flags` is used to pass in any data that your application needs to use before it starts.
     /// - `Command` type is used to send messages to your application. `Command::none()` can be used to send no messages to your application.
     fn init(core: Core, _flags: Self::Flags) -> (Self, Task<Self::Message>) {
-        let app = YourApp {
+        let app = LogoMenu {
             core,
             ..Default::default()
         };
-
         (app, Task::none())
     }
 
@@ -85,11 +83,14 @@ impl Application for YourApp {
     ///
     /// To get a better sense of which widgets are available, check out the `widget` module.
     fn view(&self) -> Element<Self::Message> {
-        let bytes = include_bytes!(concat!("../res/icons/ublue-logo-symbolic.svg"));
+        let menu_icon = get_menu_icon();
+        let icon_bytes = include_bytes!("../res/icons/cosmic-logo-symbolic.svg");
 
         self.core
             .applet
-            .icon_button_from_handle(cosmic::widget::icon::from_svg_bytes(bytes).symbolic(true))
+            .icon_button_from_handle(
+                cosmic::widget::icon::from_svg_bytes(icon_bytes).symbolic(menu_icon.symbolic()),
+            )
             .on_press(Message::TogglePopup)
             .into()
     }
@@ -99,46 +100,31 @@ impl Application for YourApp {
             space_xxs, space_s, ..
         } = cosmic::theme::active().cosmic().spacing;
 
+        let menu_items = get_menu_items();
         let mut content_list = widget::column().padding([8, 0]).spacing(0);
 
-        content_list = content_list.push(
-            menu_button(widget::text::body(fl!("app-library"))).on_press(Message::TogglePopup),
-        );
-
-        content_list = content_list.push(
-            menu_button(widget::text::body(fl!("app-launcher"))).on_press(Message::TogglePopup),
-        );
-
-        content_list = content_list.push(
-            menu_button(widget::text::body(fl!("workspaces"))).on_press(Message::TogglePopup),
-        );
-
-        content_list = content_list.push(
-            padded_control(widget::divider::horizontal::default()).padding([space_xxs, space_s]),
-        );
-
-        content_list = content_list
-            .push(menu_button(widget::text::body(fl!("software"))).on_press(Message::TogglePopup));
-
-        content_list = content_list
-            .push(menu_button(widget::text::body(fl!("terminal"))).on_press(Message::TogglePopup));
-
-        content_list = content_list.push(
-            menu_button(widget::text::body(fl!("containers"))).on_press(Message::TogglePopup),
-        );
-
-        content_list = content_list
-            .push(menu_button(widget::text::body(fl!("system"))).on_press(Message::TogglePopup));
-
-        content_list = content_list
-            .push(
-                padded_control(widget::divider::horizontal::default())
-                    .padding([space_xxs, space_s]),
-            )
-            .push(
-                menu_button(widget::text::body(fl!("menu-settings")))
-                    .on_press(Message::TogglePopup),
-            );
+        for item in menu_items {
+            match item.item_type() {
+                MenuItemType::Action => {
+                    content_list = content_list.push(
+                        menu_button(widget::text::body(match item.label() {
+                            Some(label) => label,
+                            None => String::from(""),
+                        }))
+                        .on_press(Message::Run(match item.exec() {
+                            Some(exec) => exec,
+                            None => String::from(""),
+                        })),
+                    )
+                }
+                MenuItemType::Divider => {
+                    content_list = content_list.push(
+                        padded_control(widget::divider::horizontal::default())
+                            .padding([space_xxs, space_s]),
+                    )
+                }
+            };
+        }
 
         self.core.applet.popup_container(content_list).into()
     }
@@ -174,7 +160,9 @@ impl Application for YourApp {
                     self.popup = None;
                 }
             }
-            Message::ToggleExampleRow(toggled) => self.example_row = toggled,
+            Message::Run(action) => {
+                let _ = Command::new("sh").arg("-c").arg(action).spawn().unwrap();
+            }
         }
         Task::none()
     }
@@ -182,14 +170,92 @@ impl Application for YourApp {
     fn style(&self) -> Option<cosmic::iced_runtime::Appearance> {
         Some(cosmic::applet::style())
     }
+}
 
-    /*
-    #[macro_export]
-    macro_rules! icon_handle {
-        ($name:literal) => {{
-            let bytes = include_bytes!(concat!("../res/icons/hicolor/16x16/", $name, ".svg"));
-            cosmic::widget::icon::from_svg_bytes(bytes).symbolic(true)
-        }};
+// Menu structs and implementations
+pub struct MenuIcon {
+    symbolic: bool,
+}
+impl MenuIcon {
+    pub fn symbolic(&self) -> bool {
+        self.symbolic
     }
-    */
+}
+
+#[derive(Clone)]
+pub enum MenuItemType {
+    Action,
+    Divider,
+}
+pub struct MenuItem {
+    item_type: MenuItemType,
+    label: Option<String>,
+    exec: Option<String>,
+}
+impl MenuItem {
+    pub fn item_type(&self) -> MenuItemType {
+        self.item_type.clone()
+    }
+    pub fn label(&self) -> Option<String> {
+        self.label.clone()
+    }
+    pub fn exec(&self) -> Option<String> {
+        self.exec.clone()
+    }
+}
+
+pub fn get_menu_icon() -> MenuIcon {
+    // Get the logo
+    // TODO: Make configurable
+    MenuIcon { symbolic: true }
+}
+
+pub fn get_menu_items() -> Vec<MenuItem> {
+    let mut items = Vec::new();
+
+    // Define menu items
+    // TODO: Make this configurable
+    items.push(MenuItem {
+        item_type: MenuItemType::Action,
+        label: Some(fl!("applications")),
+        exec: Some(String::from(
+            "cosmic-panel-button com.system76.CosmicAppLibrary",
+        )),
+    });
+    items.push(MenuItem {
+        item_type: MenuItemType::Action,
+        label: Some(fl!("launcher")),
+        exec: Some(String::from(
+            "cosmic-panel-button com.system76.CosmicLauncher",
+        )),
+    });
+    items.push(MenuItem {
+        item_type: MenuItemType::Action,
+        label: Some(fl!("workspaces")),
+        exec: Some(String::from(
+            "cosmic-panel-button com.system76.CosmicWorkspaces",
+        )),
+    });
+    items.push(MenuItem {
+        item_type: MenuItemType::Divider,
+        label: None,
+        exec: None,
+    });
+    items.push(MenuItem {
+        item_type: MenuItemType::Action,
+        label: Some(fl!("terminal")),
+        exec: Some(String::from("cosmic-term")),
+    });
+    items.push(MenuItem {
+        item_type: MenuItemType::Action,
+        label: Some(fl!("files")),
+        exec: Some(String::from("cosmic-files")),
+    });
+    items.push(MenuItem {
+        item_type: MenuItemType::Action,
+        label: Some(fl!("software")),
+        exec: Some(String::from("cosmic-store")),
+    });
+
+    items
 }
