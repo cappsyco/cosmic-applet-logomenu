@@ -12,19 +12,12 @@ use std::process::Command;
 
 use crate::fl;
 
-/// This is the struct that represents your application.
-/// It is used to define the data that will be used by your application.
 #[derive(Default)]
 pub struct LogoMenu {
-    /// Application state which is managed by the COSMIC runtime.
     core: Core,
-    /// The popup id.
     popup: Option<Id>,
 }
 
-/// This is the enum that contains all the possible variants that your application will need to transmit messages.
-/// This is used to communicate between the different parts of your application.
-/// If your application does not need to send messages, you can use an empty enum or `()`.
 #[derive(Debug, Clone)]
 pub enum Message {
     TogglePopup,
@@ -32,14 +25,6 @@ pub enum Message {
     Run(String),
 }
 
-/// Implement the `Application` trait for your application.
-/// This is where you define the behavior of your application.
-///
-/// The `Application` trait requires you to define the following types and constants:
-/// - `Executor` is the async executor that will be used to run your application's commands.
-/// - `Flags` is the data that your application needs to use before it starts.
-/// - `Message` is the enum that contains all the possible variants that your application will need to transmit messages.
-/// - `APP_ID` is the unique identifier of your application.
 impl Application for LogoMenu {
     type Executor = cosmic::executor::Default;
     type Flags = ();
@@ -54,13 +39,6 @@ impl Application for LogoMenu {
         &mut self.core
     }
 
-    /// This is the entry point of your application, it is where you initialize your application.
-    ///
-    /// Any work that needs to be done before the application starts should be done here.
-    ///
-    /// - `core` is used to passed on for you by libcosmic to use in the core of your own application.
-    /// - `flags` is used to pass in any data that your application needs to use before it starts.
-    /// - `Command` type is used to send messages to your application. `Command::none()` can be used to send no messages to your application.
     fn init(core: Core, _flags: Self::Flags) -> (Self, Task<Self::Message>) {
         let app = LogoMenu {
             core,
@@ -73,12 +51,6 @@ impl Application for LogoMenu {
         Some(Message::PopupClosed(id))
     }
 
-    /// This is the main view of your application, it is the root of your widget tree.
-    ///
-    /// The `Element` type is used to represent the visual elements of your application,
-    /// it has a `Message` associated with it, which dictates what type of message it can send.
-    ///
-    /// To get a better sense of which widgets are available, check out the `widget` module.
     fn view(&self) -> Element<Self::Message> {
         let menu_icon = get_menu_icon();
         let icon_bytes = include_bytes!("../res/icons/cosmic-logo-symbolic.svg");
@@ -126,9 +98,6 @@ impl Application for LogoMenu {
         self.core.applet.popup_container(content_list).into()
     }
 
-    /// Application messages are handled here. The application state can be modified based on
-    /// what message was received. Commands may be returned for asynchronous execution on a
-    /// background thread managed by the application's executor.
     fn update(&mut self, message: Self::Message) -> Task<Self::Message> {
         match message {
             Message::TogglePopup => {
@@ -174,7 +143,6 @@ impl Application for LogoMenu {
     }
 }
 
-// Menu structs and implementations
 pub struct MenuIcon {
     symbolic: bool,
 }
