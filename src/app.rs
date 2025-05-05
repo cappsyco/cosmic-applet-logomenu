@@ -42,11 +42,8 @@ pub enum Message {
 /// - `APP_ID` is the unique identifier of your application.
 impl Application for LogoMenu {
     type Executor = cosmic::executor::Default;
-
     type Flags = ();
-
     type Message = Message;
-
     const APP_ID: &'static str = "co.uk.cappsy.CosmicAppletLogoMenu";
 
     fn core(&self) -> &Core {
@@ -162,6 +159,11 @@ impl Application for LogoMenu {
             }
             Message::Run(action) => {
                 let _ = Command::new("sh").arg("-c").arg(action).spawn().unwrap();
+                return if let Some(p) = self.popup.take() {
+                    destroy_popup(p)
+                } else {
+                    Task::none()
+                };
             }
         }
         Task::none()
@@ -218,23 +220,17 @@ pub fn get_menu_items() -> Vec<MenuItem> {
     items.push(MenuItem {
         item_type: MenuItemType::Action,
         label: Some(fl!("applications")),
-        exec: Some(String::from(
-            "cosmic-panel-button com.system76.CosmicAppLibrary",
-        )),
+        exec: Some(String::from("cosmic-app-library")),
     });
     items.push(MenuItem {
         item_type: MenuItemType::Action,
         label: Some(fl!("launcher")),
-        exec: Some(String::from(
-            "cosmic-panel-button com.system76.CosmicLauncher",
-        )),
+        exec: Some(String::from("cosmic-launcher")),
     });
     items.push(MenuItem {
         item_type: MenuItemType::Action,
         label: Some(fl!("workspaces")),
-        exec: Some(String::from(
-            "cosmic-panel-button com.system76.CosmicWorkspaces",
-        )),
+        exec: Some(String::from("cosmic-workspaces")),
     });
     items.push(MenuItem {
         item_type: MenuItemType::Divider,

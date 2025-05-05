@@ -1,4 +1,4 @@
-name := 'cosmic-applet-template'
+name := 'cosmic-applet-logomenu'
 export APPID := 'co.uk.cappsy.CosmicAppletLogoMenu'
 
 rootdir := ''

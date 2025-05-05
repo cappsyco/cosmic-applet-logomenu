@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=COSMIC Logo Menu
+Name=Logo Menu
 Exec=cosmic-applet-logomenu %F
 Terminal=false
 Type=Application
