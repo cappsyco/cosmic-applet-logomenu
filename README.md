@@ -1,6 +1,6 @@
 # COSMIC Logo Menu
 
-A simple logo menu (in the style of the popular GNOME extension) to combine your launcher options in a nice menu.
+A simple logo menu (in the style of the popular [GNOME extension](https://github.com/Aryan20/Logomenu)) to combine your launcher options in a nice menu.
 
 This is in a very early state and currently has no customisation available. The plan for features are:
 
