@@ -25,3 +25,6 @@ After you install it, you can run the following commands to build and install th
 just build-release
 sudo just install
 ```
+
+## With thanks
+* [Logo Menu](https://github.com/Aryan20/Logomenu) by Aryan20 - For the inspiration and being a fantastic resource for the logos used here
