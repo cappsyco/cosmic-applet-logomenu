@@ -6,9 +6,10 @@ A simple logo menu (in the style of the popular [GNOME extension](https://github
 
 This is in a very early state and currently has no customisation available. The plan for features are:
 
-* Configurable distro logo (currently defaults to COSMIC, the thing that unites us all)
-* Hide / Show existing default launcher options
-* Complete customisation to add custom launchers, dividers and reorder everything to your liking
+* A better and more comprehensive solution for settings (currently you can only update the logo from within the menu itself)
+* Add / remove custom options
+* Hide / show default options
+* Reorder the menu and dividers among custom and default options as you please
 
 ## Install
 
