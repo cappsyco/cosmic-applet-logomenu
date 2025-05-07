@@ -2,20 +2,31 @@
 
 use cosmic::app::{Core, Task};
 use cosmic::applet::{menu_button, padded_control};
+use cosmic::cosmic_config::Config;
 use cosmic::cosmic_theme::Spacing;
 use cosmic::iced::window::Id;
-use cosmic::iced::Limits;
+use cosmic::iced::{Alignment, Length, Limits};
+use cosmic::iced_widget::row;
 use cosmic::iced_winit::commands::popup::{destroy_popup, get_popup};
-use cosmic::widget::{self};
+use cosmic::widget::{self, container, dropdown};
 use cosmic::{Application, Element};
+use phf::phf_map;
 use std::process::Command;
 
+use crate::config::{load_config, update_config};
 use crate::fl;
 
-#[derive(Default)]
+const ID: &'static str = "co.uk.cappsy.CosmicAppletLogoMenu";
+const CONFIG_VER: u64 = 1;
+
 pub struct LogoMenu {
     core: Core,
+    config: Config,
     popup: Option<Id>,
+    show_menu_settings: bool,
+    logo_options: Vec<String>,
+    selected_logo_idx: Option<usize>,
+    selected_logo_name: String,
 }
 
 #[derive(Debug, Clone)]
@@ -23,13 +34,15 @@ pub enum Message {
     TogglePopup,
     PopupClosed(Id),
     Run(String),
+    UpdateLogo(usize),
+    ToggleMenuSettings,
 }
 
 impl Application for LogoMenu {
     type Executor = cosmic::executor::Default;
     type Flags = ();
     type Message = Message;
-    const APP_ID: &'static str = "co.uk.cappsy.CosmicAppletLogoMenu";
+    const APP_ID: &'static str = ID;
 
     fn core(&self) -> &Core {
         &self.core
@@ -40,9 +53,35 @@ impl Application for LogoMenu {
     }
 
     fn init(core: Core, _flags: Self::Flags) -> (Self, Task<Self::Message>) {
+        let default_logo = String::from("Cosmic (Symbolic)");
+
+        let config_logo = match load_config("logo", CONFIG_VER) {
+            Some(val) => val,
+            None => default_logo.to_owned(),
+        };
+
+        let selected_logo_name = if LOGOS.contains_key(&config_logo) {
+            config_logo
+        } else {
+            default_logo
+        };
+
+        let mut logo_options = vec![];
+        for (key, _value) in &LOGOS {
+            logo_options.push(key.to_string());
+        }
+        logo_options.sort();
+
+        let selected_logo_idx = logo_options.iter().position(|n| n == &selected_logo_name);
+
         let app = LogoMenu {
             core,
-            ..Default::default()
+            config: Config::new(ID, CONFIG_VER).unwrap(),
+            popup: None,
+            show_menu_settings: false,
+            selected_logo_idx,
+            selected_logo_name,
+            logo_options,
         };
         (app, Task::none())
     }
@@ -52,13 +91,12 @@ impl Application for LogoMenu {
     }
 
     fn view(&self) -> Element<Self::Message> {
-        let menu_icon = get_menu_icon();
-        let icon_bytes = include_bytes!("../res/icons/cosmic-logo-symbolic.svg");
+        let logo_bytes = LOGOS[&self.selected_logo_name];
 
         self.core
             .applet
             .icon_button_from_handle(
-                cosmic::widget::icon::from_svg_bytes(icon_bytes).symbolic(menu_icon.symbolic()),
+                cosmic::widget::icon::from_svg_bytes(logo_bytes.0).symbolic(logo_bytes.1),
             )
             .on_press(Message::TogglePopup)
             .into()
@@ -93,6 +131,42 @@ impl Application for LogoMenu {
                     )
                 }
             };
+        }
+
+        content_list = content_list.push(
+            padded_control(widget::divider::horizontal::default()).padding([space_xxs, space_s]),
+        );
+
+        let dropdown_icon = if self.show_menu_settings {
+            "go-up-symbolic"
+        } else {
+            "go-down-symbolic"
+        };
+        let menu_settings_btn = menu_button(row![
+            widget::text::body(fl!("menu-settings"))
+                .width(Length::Fill)
+                .height(Length::Fixed(24.0))
+                .align_y(Alignment::Center),
+            container(
+                widget::icon::from_name(dropdown_icon)
+                    .size(16)
+                    .symbolic(true)
+            )
+            .center(Length::Fixed(24.0))
+        ])
+        .on_press(Message::ToggleMenuSettings);
+        content_list = content_list.push(menu_settings_btn);
+
+        if self.show_menu_settings {
+            content_list = content_list.push(container(
+                padded_control(dropdown(
+                    &self.logo_options,
+                    self.selected_logo_idx,
+                    Message::UpdateLogo,
+                ))
+                .width(Length::Fill)
+                .padding([space_xxs, space_s]),
+            ));
         }
 
         self.core.applet.popup_container(content_list).into()
@@ -134,21 +208,23 @@ impl Application for LogoMenu {
                     Task::none()
                 };
             }
+            Message::UpdateLogo(logo) => {
+                self.selected_logo_name = self.logo_options[logo].clone();
+                self.selected_logo_idx = Some(logo);
+
+                if logo > 0 {
+                    let _ = update_config(self.config.clone(), "logo", &self.selected_logo_name);
+                }
+            }
+            Message::ToggleMenuSettings => {
+                self.show_menu_settings = !self.show_menu_settings;
+            }
         }
         Task::none()
     }
 
     fn style(&self) -> Option<cosmic::iced_runtime::Appearance> {
         Some(cosmic::applet::style())
-    }
-}
-
-pub struct MenuIcon {
-    symbolic: bool,
-}
-impl MenuIcon {
-    pub fn symbolic(&self) -> bool {
-        self.symbolic
     }
 }
 
@@ -172,12 +248,6 @@ impl MenuItem {
     pub fn exec(&self) -> Option<String> {
         self.exec.clone()
     }
-}
-
-pub fn get_menu_icon() -> MenuIcon {
-    // Get the logo
-    // TODO: Make configurable
-    MenuIcon { symbolic: true }
 }
 
 pub fn get_menu_items() -> Vec<MenuItem> {
@@ -223,3 +293,69 @@ pub fn get_menu_items() -> Vec<MenuItem> {
 
     items
 }
+
+// Preload all logos
+// TODO: Better way to do this?
+static LOGOS: phf::Map<&'static str, (&[u8], bool)> = phf_map! {
+    "Alma" => (include_bytes!("../res/icons/almalinux-logo.svg"), false),
+    "Alma (Symbolic)" => (include_bytes!("../res/icons/almalinux-logo-symbolic.svg"), true),
+    "Arch" => (include_bytes!("../res/icons/arch-logo.svg"), false),
+    "Arch (Symbolic)" => (include_bytes!("../res/icons/arch-logo-symbolic.svg"), true),
+    "Asahi" => (include_bytes!("../res/icons/asahilinux-logo.svg"), false),
+    "Asahi (Symbolic)" => (include_bytes!("../res/icons/asahilinux-logo-symbolic.svg"), true),
+    "Bazzite" => (include_bytes!("../res/icons/bazzite-logo.svg"), false),
+    "Clear" => (include_bytes!("../res/icons/clear-linux-logo.svg"), false),
+    "Cosmic (Black)" => (include_bytes!("../res/icons/cosmic-logo-black.svg"), false),
+    "Cosmic" => (include_bytes!("../res/icons/cosmic-logo.svg"), false),
+    "Cosmic (Symbolic)" => (include_bytes!("../res/icons/cosmic-logo-symbolic.svg"), true),
+    "Debian" => (include_bytes!("../res/icons/debian-logo.svg"), false),
+    "Debian (Symbolic)" => (include_bytes!("../res/icons/debian-logo-symbolic.svg"), true),
+    "EndeavourOS" => (include_bytes!("../res/icons/endeavouros_logo.svg"), false),
+    "EndeavourO (Symbolic)" => (include_bytes!("../res/icons/endeavouros_logo-symbolic.svg"), true),
+    "Fedora" => (include_bytes!("../res/icons/fedora-logo.svg"), false),
+    "Fedora (Symbolic)" => (include_bytes!("../res/icons/fedora-logo-symbolic.svg"), true),
+    "FreeBSD" => (include_bytes!("../res/icons/freebsd-logo.svg"), false),
+    "FreeBSD (Symbolic)" => (include_bytes!("../res/icons/freebsd-logo-symbolic.svg"), true),
+    "Garuda" => (include_bytes!("../res/icons/garuda-logo-symbolic.svg"), true),
+    "Garuda (Symbolic)" => (include_bytes!("../res/icons/gentoo-logo.svg"), false),
+    "Gentoo (Symbolic)" => (include_bytes!("../res/icons/gentoo-logo-symbolic.svg"), true),
+    "Kali" => (include_bytes!("../res/icons/kali-linux-logo.svg"), false),
+    "Kali (Symbolic)" => (include_bytes!("../res/icons/kali-linux-logo-symbolic.svg"), true),
+    "Manjaro" => (include_bytes!("../res/icons/manjaro-logo.svg"), false),
+    "Manjaro (Symbolic)" => (include_bytes!("../res/icons/manjaro-logo-symbolic.svg"), true),
+    "MX (Symbolic)" => (include_bytes!("../res/icons/mx-logo-symbolic.svg"), true),
+    "NetBSD" => (include_bytes!("../res/icons/netbsd-logo.svg"), false),
+    "NixOS" => (include_bytes!("../res/icons/nixos-logo.svg"), false),
+    "NixOS (Symbolic)" => (include_bytes!("../res/icons/nixos-logo-symbolic.svg"), true),
+    "Nobara (Symbolic)" => (include_bytes!("../res/icons/nobara-logo-symbolic.svg"), true),
+    "OpenBSD" => (include_bytes!("../res/icons/openbsd-logo.svg"), false),
+    "OpenSuse" => (include_bytes!("../res/icons/opensuse-logo.svg"), false),
+    "OpenSuse (Symbolic)" => (include_bytes!("../res/icons/opensuse-logo-symbolic.svg"), true),
+    "Pop!_OS" => (include_bytes!("../res/icons/pop-os-logo.svg"), false),
+    "Pop!_OS (Symbolic)" => (include_bytes!("../res/icons/pop-os-logo-symbolic.svg"), true),
+    "PureOS (Symbolic)" => (include_bytes!("../res/icons/pureos-logo-symbolic.svg"), true),
+    "Raspbian (Symbolic)" => (include_bytes!("../res/icons/raspbian-logo-symbolic.svg"), true),
+    "Red Hat" => (include_bytes!("../res/icons/redhat-logo.svg"), false),
+    "Red Hat (Symbolic)" => (include_bytes!("../res/icons/redhat-logo-symbolic.svg"), true),
+    "Rocky" => (include_bytes!("../res/icons/rockylinux-logo.svg"), false),
+    "Rocky (Symbolic)" => (include_bytes!("../res/icons/rockylinux-logo-symbolic.svg"), true),
+    "ShastraOS" => (include_bytes!("../res/icons/shastraos-logo.svg"), false),
+    "ShastraOS (Symbolic)" => (include_bytes!("../res/icons/shastraos-logo-symbolic.svg"), true),
+    "Solus" => (include_bytes!("../res/icons/solus-logo.svg"), false),
+    "Solus (Symbolic)" => (include_bytes!("../res/icons/solus-logo-symbolic.svg"), true),
+    "SteamDeck (Orange)" => (include_bytes!("../res/icons/steam-deck-le-logo.svg"), false),
+    "SteamDeck (Blue)" => (include_bytes!("../res/icons/steam-deck-logo.svg"), false),
+    "SteamDeck (Symbolic)" => (include_bytes!("../res/icons/steam-deck-logo-symbolic.svg"), true),
+    "Tux" => (include_bytes!("../res/icons/tux-logo.svg"), false),
+    "Tux (Symbolic)" => (include_bytes!("../res/icons/tux-logo-symbolic.svg"), true),
+    "uBlue" => (include_bytes!("../res/icons/ublue-logo.svg"), false),
+    "uBlue (Symbolic)" => (include_bytes!("../res/icons/ublue-logo-symbolic.svg"), true),
+    "Ubuntu" => (include_bytes!("../res/icons/ubuntu-logo.svg"), false),
+    "Ubuntu (Symbolic)" => (include_bytes!("../res/icons/ubuntu-logo-symbolic.svg"), true),
+    "Vanilla" => (include_bytes!("../res/icons/vanilla-logo.svg"), false),
+    "Void" => (include_bytes!("../res/icons/void-logo.svg"), false),
+    "Void (Symbolic)" => (include_bytes!("../res/icons/void-logo-symbolic.svg"), true),
+    "Voyager (Symbolic)" => (include_bytes!("../res/icons/voyager-logo-symbolic.svg"), true),
+    "Zorin" => (include_bytes!("../res/icons/zorin-logo.svg"), false),
+    "Zorin (Symbolic)" => (include_bytes!("../res/icons/zorin-logo-symbolic.svg"), true),
+};
