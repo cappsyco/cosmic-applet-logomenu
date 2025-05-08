@@ -12,9 +12,20 @@ use cosmic::widget::{self, container, dropdown};
 use cosmic::{Application, Element};
 use phf::phf_map;
 use std::process::Command;
+use zbus::Connection;
+
+use logind_zbus::{
+    manager::ManagerProxy,
+    session::{SessionClass, SessionProxy, SessionType},
+    user::UserProxy,
+};
+use rustix::process::getuid;
+
+pub mod cosmic_session;
 
 use crate::config::{load_config, update_config};
 use crate::fl;
+use cosmic_session::CosmicSessionProxy;
 
 const ID: &'static str = "co.uk.cappsy.CosmicAppletLogoMenu";
 const CONFIG_VER: u64 = 1;
@@ -36,6 +47,29 @@ pub enum Message {
     Run(String),
     UpdateLogo(usize),
     ToggleMenuSettings,
+    Action(PowerAction),
+    Zbus(Result<(), zbus::Error>),
+}
+
+#[derive(Debug, Clone, Copy)]
+enum PowerAction {
+    Lock,
+    LogOut,
+    Suspend,
+    Restart,
+    Shutdown,
+}
+impl PowerAction {
+    fn perform(self) -> cosmic::iced::Task<cosmic::Action<Message>> {
+        let msg = |m| cosmic::action::app(Message::Zbus(m));
+        match self {
+            PowerAction::Lock => cosmic::iced::Task::perform(lock(), msg),
+            PowerAction::LogOut => cosmic::iced::Task::perform(log_out(), msg),
+            PowerAction::Suspend => cosmic::iced::Task::perform(suspend(), msg),
+            PowerAction::Restart => cosmic::iced::Task::perform(restart(), msg),
+            PowerAction::Shutdown => cosmic::iced::Task::perform(shutdown(), msg),
+        }
+    }
 }
 
 impl Application for LogoMenu {
@@ -112,7 +146,7 @@ impl Application for LogoMenu {
 
         for item in menu_items {
             match item.item_type() {
-                MenuItemType::Action => {
+                MenuItemType::TermAction => {
                     content_list = content_list.push(
                         menu_button(widget::text::body(match item.label() {
                             Some(label) => label,
@@ -122,6 +156,15 @@ impl Application for LogoMenu {
                             Some(exec) => exec,
                             None => String::from(""),
                         })),
+                    )
+                }
+                MenuItemType::PowerAction => {
+                    content_list = content_list.push(
+                        menu_button(widget::text::body(match item.label() {
+                            Some(label) => label,
+                            None => String::from(""),
+                        }))
+                        .on_press(Message::Action(item.action().unwrap())),
                     )
                 }
                 MenuItemType::Divider => {
@@ -195,6 +238,40 @@ impl Application for LogoMenu {
                     get_popup(popup_settings)
                 }
             }
+            Message::Action(action) => {
+                match action {
+                    PowerAction::LogOut => {
+                        if let Err(_err) = Command::new("cosmic-osd").arg("log-out").spawn() {
+                            //tracing::error!("Failed to spawn cosmic-osd. {err:?}");
+                            return PowerAction::LogOut.perform();
+                        }
+                    }
+                    PowerAction::Restart => {
+                        if let Err(_err) = Command::new("cosmic-osd").arg("restart").spawn() {
+                            //tracing::error!("Failed to spawn cosmic-osd. {err:?}");
+                            return PowerAction::Restart.perform();
+                        }
+                    }
+                    PowerAction::Shutdown => {
+                        if let Err(_err) = Command::new("cosmic-osd").arg("shutdown").spawn() {
+                            //tracing::error!("Failed to spawn cosmic-osd. {err:?}");
+                            return PowerAction::Shutdown.perform();
+                        }
+                    }
+                    a => return a.perform(),
+                };
+
+                return if let Some(p) = self.popup.take() {
+                    destroy_popup(p)
+                } else {
+                    Task::none()
+                };
+            }
+            Message::Zbus(result) => {
+                if let Err(e) = result {
+                    eprintln!("cosmic-applet-power ERROR: '{}'", e);
+                }
+            }
             Message::PopupClosed(id) => {
                 if self.popup.as_ref() == Some(&id) {
                     self.popup = None;
@@ -230,13 +307,15 @@ impl Application for LogoMenu {
 
 #[derive(Clone)]
 pub enum MenuItemType {
-    Action,
+    TermAction,
+    PowerAction,
     Divider,
 }
 pub struct MenuItem {
     item_type: MenuItemType,
     label: Option<String>,
     exec: Option<String>,
+    action: Option<PowerAction>,
 }
 impl MenuItem {
     pub fn item_type(&self) -> MenuItemType {
@@ -248,6 +327,9 @@ impl MenuItem {
     pub fn exec(&self) -> Option<String> {
         self.exec.clone()
     }
+    pub fn action(&self) -> Option<PowerAction> {
+        self.action.clone()
+    }
 }
 
 pub fn get_menu_items() -> Vec<MenuItem> {
@@ -256,42 +338,149 @@ pub fn get_menu_items() -> Vec<MenuItem> {
     // Define menu items
     // TODO: Make this configurable
     items.push(MenuItem {
-        item_type: MenuItemType::Action,
+        item_type: MenuItemType::TermAction,
         label: Some(fl!("applications")),
         exec: Some(String::from("cosmic-app-library")),
+        action: None,
     });
     items.push(MenuItem {
-        item_type: MenuItemType::Action,
+        item_type: MenuItemType::TermAction,
         label: Some(fl!("launcher")),
         exec: Some(String::from("cosmic-launcher")),
+        action: None,
     });
     items.push(MenuItem {
-        item_type: MenuItemType::Action,
+        item_type: MenuItemType::TermAction,
         label: Some(fl!("workspaces")),
         exec: Some(String::from("cosmic-workspaces")),
+        action: None,
     });
     items.push(MenuItem {
         item_type: MenuItemType::Divider,
         label: None,
         exec: None,
+        action: None,
     });
     items.push(MenuItem {
-        item_type: MenuItemType::Action,
+        item_type: MenuItemType::TermAction,
         label: Some(fl!("terminal")),
         exec: Some(String::from("cosmic-term")),
+        action: None,
     });
     items.push(MenuItem {
-        item_type: MenuItemType::Action,
+        item_type: MenuItemType::TermAction,
         label: Some(fl!("files")),
         exec: Some(String::from("cosmic-files")),
+        action: None,
     });
     items.push(MenuItem {
-        item_type: MenuItemType::Action,
+        item_type: MenuItemType::TermAction,
         label: Some(fl!("software")),
         exec: Some(String::from("cosmic-store")),
+        action: None,
+    });
+    items.push(MenuItem {
+        item_type: MenuItemType::Divider,
+        label: None,
+        exec: None,
+        action: None,
+    });
+    items.push(MenuItem {
+        item_type: MenuItemType::PowerAction,
+        label: Some(fl!("lock-screen")),
+        exec: None,
+        action: Some(PowerAction::Lock),
+    });
+    items.push(MenuItem {
+        item_type: MenuItemType::PowerAction,
+        label: Some(fl!("log-out")),
+        exec: None,
+        action: Some(PowerAction::LogOut),
+    });
+    items.push(MenuItem {
+        item_type: MenuItemType::PowerAction,
+        label: Some(fl!("suspend")),
+        exec: None,
+        action: Some(PowerAction::Suspend),
+    });
+    items.push(MenuItem {
+        item_type: MenuItemType::PowerAction,
+        label: Some(fl!("restart")),
+        exec: None,
+        action: Some(PowerAction::Restart),
+    });
+    items.push(MenuItem {
+        item_type: MenuItemType::PowerAction,
+        label: Some(fl!("shutdown")),
+        exec: None,
+        action: Some(PowerAction::Shutdown),
     });
 
     items
+}
+
+// ### System helpers
+
+async fn restart() -> zbus::Result<()> {
+    let connection = Connection::system().await?;
+    let manager_proxy = ManagerProxy::new(&connection).await?;
+    manager_proxy.reboot(true).await
+}
+
+async fn shutdown() -> zbus::Result<()> {
+    let connection = Connection::system().await?;
+    let manager_proxy = ManagerProxy::new(&connection).await?;
+    manager_proxy.power_off(true).await
+}
+
+async fn suspend() -> zbus::Result<()> {
+    let connection = Connection::system().await?;
+    let manager_proxy = ManagerProxy::new(&connection).await?;
+    manager_proxy.suspend(true).await
+}
+
+async fn lock() -> zbus::Result<()> {
+    let connection = Connection::system().await?;
+    let manager_proxy = ManagerProxy::new(&connection).await?;
+    // Get the session this current process is running in
+    let our_uid = getuid().as_raw() as u32;
+    let user_path = manager_proxy.get_user(our_uid).await?;
+    let user = UserProxy::builder(&connection)
+        .path(user_path)?
+        .build()
+        .await?;
+    // Lock all non-TTY sessions of this user
+    let sessions = user.sessions().await?;
+    let mut locked_successfully = false;
+    for (_, session_path) in sessions {
+        let Ok(session) = SessionProxy::builder(&connection)
+            .path(session_path)?
+            .build()
+            .await
+        else {
+            continue;
+        };
+
+        if session.class().await == Ok(SessionClass::User)
+            && session.type_().await? != SessionType::TTY
+            && session.lock().await.is_ok()
+        {
+            locked_successfully = true;
+        }
+    }
+
+    if locked_successfully {
+        Ok(())
+    } else {
+        Err(zbus::Error::Failure("locking session failed".to_string()))
+    }
+}
+
+async fn log_out() -> zbus::Result<()> {
+    let connection = Connection::session().await?;
+    let cosmic_session = CosmicSessionProxy::new(&connection).await?;
+    cosmic_session.exit().await?;
+    Ok(())
 }
 
 // Preload all logos
