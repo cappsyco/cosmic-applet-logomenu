@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+use crate::config::{load_config, update_config};
+use crate::fl;
+use crate::logos;
+use crate::power;
 use cosmic::app::{Core, Task};
 use cosmic::applet::{menu_button, padded_control};
 use cosmic::cosmic_config::Config;
@@ -10,22 +14,7 @@ use cosmic::iced_widget::row;
 use cosmic::iced_winit::commands::popup::{destroy_popup, get_popup};
 use cosmic::widget::{self, container, dropdown};
 use cosmic::{Application, Element};
-use phf::phf_map;
 use std::process::Command;
-use zbus::Connection;
-
-use logind_zbus::{
-    manager::ManagerProxy,
-    session::{SessionClass, SessionProxy, SessionType},
-    user::UserProxy,
-};
-use rustix::process::getuid;
-
-pub mod cosmic_session;
-
-use crate::config::{load_config, update_config};
-use crate::fl;
-use cosmic_session::CosmicSessionProxy;
 
 const ID: &'static str = "co.uk.cappsy.CosmicAppletLogoMenu";
 const CONFIG_VER: u64 = 1;
@@ -47,29 +36,8 @@ pub enum Message {
     Run(String),
     UpdateLogo(usize),
     ToggleMenuSettings,
-    Action(PowerAction),
+    Action(power::PowerAction),
     Zbus(Result<(), zbus::Error>),
-}
-
-#[derive(Debug, Clone, Copy)]
-enum PowerAction {
-    Lock,
-    LogOut,
-    Suspend,
-    Restart,
-    Shutdown,
-}
-impl PowerAction {
-    fn perform(self) -> cosmic::iced::Task<cosmic::Action<Message>> {
-        let msg = |m| cosmic::action::app(Message::Zbus(m));
-        match self {
-            PowerAction::Lock => cosmic::iced::Task::perform(lock(), msg),
-            PowerAction::LogOut => cosmic::iced::Task::perform(log_out(), msg),
-            PowerAction::Suspend => cosmic::iced::Task::perform(suspend(), msg),
-            PowerAction::Restart => cosmic::iced::Task::perform(restart(), msg),
-            PowerAction::Shutdown => cosmic::iced::Task::perform(shutdown(), msg),
-        }
-    }
 }
 
 impl Application for LogoMenu {
@@ -94,14 +62,15 @@ impl Application for LogoMenu {
             None => default_logo.to_owned(),
         };
 
-        let selected_logo_name = if LOGOS.contains_key(&config_logo) {
+        let selected_logo_name = if logos::IMAGES.contains_key(&config_logo) {
             config_logo
         } else {
             default_logo
         };
 
         let mut logo_options = vec![];
-        for (key, _value) in &LOGOS {
+        let images_iter = &logos::IMAGES;
+        for (key, _value) in images_iter {
             logo_options.push(key.to_string());
         }
         logo_options.sort();
@@ -125,7 +94,7 @@ impl Application for LogoMenu {
     }
 
     fn view(&self) -> Element<Self::Message> {
-        let logo_bytes = LOGOS[&self.selected_logo_name];
+        let logo_bytes = logos::IMAGES[&self.selected_logo_name];
 
         self.core
             .applet
@@ -240,32 +209,28 @@ impl Application for LogoMenu {
             }
             Message::Action(action) => {
                 match action {
-                    PowerAction::LogOut => {
+                    power::PowerAction::LogOut => {
                         if let Err(_err) = Command::new("cosmic-osd").arg("log-out").spawn() {
                             //tracing::error!("Failed to spawn cosmic-osd. {err:?}");
-                            return PowerAction::LogOut.perform();
+                            return power::PowerAction::LogOut.perform();
                         }
                     }
-                    PowerAction::Restart => {
+                    power::PowerAction::Restart => {
                         if let Err(_err) = Command::new("cosmic-osd").arg("restart").spawn() {
                             //tracing::error!("Failed to spawn cosmic-osd. {err:?}");
-                            return PowerAction::Restart.perform();
+                            return power::PowerAction::Restart.perform();
                         }
                     }
-                    PowerAction::Shutdown => {
+                    power::PowerAction::Shutdown => {
                         if let Err(_err) = Command::new("cosmic-osd").arg("shutdown").spawn() {
                             //tracing::error!("Failed to spawn cosmic-osd. {err:?}");
-                            return PowerAction::Shutdown.perform();
+                            return power::PowerAction::Shutdown.perform();
                         }
                     }
                     a => return a.perform(),
                 };
 
-                return if let Some(p) = self.popup.take() {
-                    destroy_popup(p)
-                } else {
-                    Task::none()
-                };
+                return close_popup(self.popup);
             }
             Message::Zbus(result) => {
                 if let Err(e) = result {
@@ -275,15 +240,12 @@ impl Application for LogoMenu {
             Message::PopupClosed(id) => {
                 if self.popup.as_ref() == Some(&id) {
                     self.popup = None;
+                    self.show_menu_settings = false;
                 }
             }
             Message::Run(action) => {
                 let _ = Command::new("sh").arg("-c").arg(action).spawn().unwrap();
-                return if let Some(p) = self.popup.take() {
-                    destroy_popup(p)
-                } else {
-                    Task::none()
-                };
+                return close_popup(self.popup);
             }
             Message::UpdateLogo(logo) => {
                 self.selected_logo_name = self.logo_options[logo].clone();
@@ -305,6 +267,19 @@ impl Application for LogoMenu {
     }
 }
 
+fn close_popup(mut popup: Option<Id>) -> Task<Message> {
+    return if let Some(p) = popup.take() {
+        destroy_popup(p)
+    } else {
+        Task::none()
+    };
+}
+
+// TODO: Break out the rest of this file into its own module, with:
+// * hide / show toggles for default actions
+// * renaming for default actions
+// * custom options / dividers
+// * reording of option
 #[derive(Clone)]
 pub enum MenuItemType {
     TermAction,
@@ -315,7 +290,7 @@ pub struct MenuItem {
     item_type: MenuItemType,
     label: Option<String>,
     exec: Option<String>,
-    action: Option<PowerAction>,
+    action: Option<power::PowerAction>,
 }
 impl MenuItem {
     pub fn item_type(&self) -> MenuItemType {
@@ -327,7 +302,7 @@ impl MenuItem {
     pub fn exec(&self) -> Option<String> {
         self.exec.clone()
     }
-    pub fn action(&self) -> Option<PowerAction> {
+    pub fn action(&self) -> Option<power::PowerAction> {
         self.action.clone()
     }
 }
@@ -335,8 +310,6 @@ impl MenuItem {
 pub fn get_menu_items() -> Vec<MenuItem> {
     let mut items = Vec::new();
 
-    // Define menu items
-    // TODO: Make this configurable
     items.push(MenuItem {
         item_type: MenuItemType::TermAction,
         label: Some(fl!("applications")),
@@ -389,162 +362,32 @@ pub fn get_menu_items() -> Vec<MenuItem> {
         item_type: MenuItemType::PowerAction,
         label: Some(fl!("lock-screen")),
         exec: None,
-        action: Some(PowerAction::Lock),
+        action: Some(power::PowerAction::Lock),
     });
     items.push(MenuItem {
         item_type: MenuItemType::PowerAction,
         label: Some(fl!("log-out")),
         exec: None,
-        action: Some(PowerAction::LogOut),
+        action: Some(power::PowerAction::LogOut),
     });
     items.push(MenuItem {
         item_type: MenuItemType::PowerAction,
         label: Some(fl!("suspend")),
         exec: None,
-        action: Some(PowerAction::Suspend),
+        action: Some(power::PowerAction::Suspend),
     });
     items.push(MenuItem {
         item_type: MenuItemType::PowerAction,
         label: Some(fl!("restart")),
         exec: None,
-        action: Some(PowerAction::Restart),
+        action: Some(power::PowerAction::Restart),
     });
     items.push(MenuItem {
         item_type: MenuItemType::PowerAction,
         label: Some(fl!("shutdown")),
         exec: None,
-        action: Some(PowerAction::Shutdown),
+        action: Some(power::PowerAction::Shutdown),
     });
 
     items
 }
-
-// ### System helpers
-
-async fn restart() -> zbus::Result<()> {
-    let connection = Connection::system().await?;
-    let manager_proxy = ManagerProxy::new(&connection).await?;
-    manager_proxy.reboot(true).await
-}
-
-async fn shutdown() -> zbus::Result<()> {
-    let connection = Connection::system().await?;
-    let manager_proxy = ManagerProxy::new(&connection).await?;
-    manager_proxy.power_off(true).await
-}
-
-async fn suspend() -> zbus::Result<()> {
-    let connection = Connection::system().await?;
-    let manager_proxy = ManagerProxy::new(&connection).await?;
-    manager_proxy.suspend(true).await
-}
-
-async fn lock() -> zbus::Result<()> {
-    let connection = Connection::system().await?;
-    let manager_proxy = ManagerProxy::new(&connection).await?;
-    // Get the session this current process is running in
-    let our_uid = getuid().as_raw() as u32;
-    let user_path = manager_proxy.get_user(our_uid).await?;
-    let user = UserProxy::builder(&connection)
-        .path(user_path)?
-        .build()
-        .await?;
-    // Lock all non-TTY sessions of this user
-    let sessions = user.sessions().await?;
-    let mut locked_successfully = false;
-    for (_, session_path) in sessions {
-        let Ok(session) = SessionProxy::builder(&connection)
-            .path(session_path)?
-            .build()
-            .await
-        else {
-            continue;
-        };
-
-        if session.class().await == Ok(SessionClass::User)
-            && session.type_().await? != SessionType::TTY
-            && session.lock().await.is_ok()
-        {
-            locked_successfully = true;
-        }
-    }
-
-    if locked_successfully {
-        Ok(())
-    } else {
-        Err(zbus::Error::Failure("locking session failed".to_string()))
-    }
-}
-
-async fn log_out() -> zbus::Result<()> {
-    let connection = Connection::session().await?;
-    let cosmic_session = CosmicSessionProxy::new(&connection).await?;
-    cosmic_session.exit().await?;
-    Ok(())
-}
-
-// Preload all logos
-// TODO: Better way to do this?
-static LOGOS: phf::Map<&'static str, (&[u8], bool)> = phf_map! {
-    "Alma" => (include_bytes!("../res/icons/almalinux-logo.svg"), false),
-    "Alma (Symbolic)" => (include_bytes!("../res/icons/almalinux-logo-symbolic.svg"), true),
-    "Arch" => (include_bytes!("../res/icons/arch-logo.svg"), false),
-    "Arch (Symbolic)" => (include_bytes!("../res/icons/arch-logo-symbolic.svg"), true),
-    "Asahi" => (include_bytes!("../res/icons/asahilinux-logo.svg"), false),
-    "Asahi (Symbolic)" => (include_bytes!("../res/icons/asahilinux-logo-symbolic.svg"), true),
-    "Bazzite" => (include_bytes!("../res/icons/bazzite-logo.svg"), false),
-    "Clear" => (include_bytes!("../res/icons/clear-linux-logo.svg"), false),
-    "Cosmic (Black)" => (include_bytes!("../res/icons/cosmic-logo-black.svg"), false),
-    "Cosmic" => (include_bytes!("../res/icons/cosmic-logo.svg"), false),
-    "Cosmic (Symbolic)" => (include_bytes!("../res/icons/cosmic-logo-symbolic.svg"), true),
-    "Debian" => (include_bytes!("../res/icons/debian-logo.svg"), false),
-    "Debian (Symbolic)" => (include_bytes!("../res/icons/debian-logo-symbolic.svg"), true),
-    "EndeavourOS" => (include_bytes!("../res/icons/endeavouros_logo.svg"), false),
-    "EndeavourOS (Symbolic)" => (include_bytes!("../res/icons/endeavouros_logo-symbolic.svg"), true),
-    "Fedora" => (include_bytes!("../res/icons/fedora-logo.svg"), false),
-    "Fedora (Symbolic)" => (include_bytes!("../res/icons/fedora-logo-symbolic.svg"), true),
-    "FreeBSD" => (include_bytes!("../res/icons/freebsd-logo.svg"), false),
-    "FreeBSD (Symbolic)" => (include_bytes!("../res/icons/freebsd-logo-symbolic.svg"), true),
-    "Garuda" => (include_bytes!("../res/icons/garuda-logo-symbolic.svg"), true),
-    "Garuda (Symbolic)" => (include_bytes!("../res/icons/gentoo-logo.svg"), false),
-    "Gentoo (Symbolic)" => (include_bytes!("../res/icons/gentoo-logo-symbolic.svg"), true),
-    "Kali" => (include_bytes!("../res/icons/kali-linux-logo.svg"), false),
-    "Kali (Symbolic)" => (include_bytes!("../res/icons/kali-linux-logo-symbolic.svg"), true),
-    "Manjaro" => (include_bytes!("../res/icons/manjaro-logo.svg"), false),
-    "Manjaro (Symbolic)" => (include_bytes!("../res/icons/manjaro-logo-symbolic.svg"), true),
-    "MX (Symbolic)" => (include_bytes!("../res/icons/mx-logo-symbolic.svg"), true),
-    "NetBSD" => (include_bytes!("../res/icons/netbsd-logo.svg"), false),
-    "NixOS" => (include_bytes!("../res/icons/nixos-logo.svg"), false),
-    "NixOS (Symbolic)" => (include_bytes!("../res/icons/nixos-logo-symbolic.svg"), true),
-    "Nobara (Symbolic)" => (include_bytes!("../res/icons/nobara-logo-symbolic.svg"), true),
-    "OpenBSD" => (include_bytes!("../res/icons/openbsd-logo.svg"), false),
-    "OpenSuse" => (include_bytes!("../res/icons/opensuse-logo.svg"), false),
-    "OpenSuse (Symbolic)" => (include_bytes!("../res/icons/opensuse-logo-symbolic.svg"), true),
-    "Pop!_OS" => (include_bytes!("../res/icons/pop-os-logo.svg"), false),
-    "Pop!_OS (Symbolic)" => (include_bytes!("../res/icons/pop-os-logo-symbolic.svg"), true),
-    "PureOS (Symbolic)" => (include_bytes!("../res/icons/pureos-logo-symbolic.svg"), true),
-    "Raspbian (Symbolic)" => (include_bytes!("../res/icons/raspbian-logo-symbolic.svg"), true),
-    "Red Hat" => (include_bytes!("../res/icons/redhat-logo.svg"), false),
-    "Red Hat (Symbolic)" => (include_bytes!("../res/icons/redhat-logo-symbolic.svg"), true),
-    "Rocky" => (include_bytes!("../res/icons/rockylinux-logo.svg"), false),
-    "Rocky (Symbolic)" => (include_bytes!("../res/icons/rockylinux-logo-symbolic.svg"), true),
-    "ShastraOS" => (include_bytes!("../res/icons/shastraos-logo.svg"), false),
-    "ShastraOS (Symbolic)" => (include_bytes!("../res/icons/shastraos-logo-symbolic.svg"), true),
-    "Solus" => (include_bytes!("../res/icons/solus-logo.svg"), false),
-    "Solus (Symbolic)" => (include_bytes!("../res/icons/solus-logo-symbolic.svg"), true),
-    "SteamDeck (Orange)" => (include_bytes!("../res/icons/steam-deck-le-logo.svg"), false),
-    "SteamDeck (Blue)" => (include_bytes!("../res/icons/steam-deck-logo.svg"), false),
-    "SteamDeck (Symbolic)" => (include_bytes!("../res/icons/steam-deck-logo-symbolic.svg"), true),
-    "Tux" => (include_bytes!("../res/icons/tux-logo.svg"), false),
-    "Tux (Symbolic)" => (include_bytes!("../res/icons/tux-logo-symbolic.svg"), true),
-    "uBlue" => (include_bytes!("../res/icons/ublue-logo.svg"), false),
-    "uBlue (Symbolic)" => (include_bytes!("../res/icons/ublue-logo-symbolic.svg"), true),
-    "Ubuntu" => (include_bytes!("../res/icons/ubuntu-logo.svg"), false),
-    "Ubuntu (Symbolic)" => (include_bytes!("../res/icons/ubuntu-logo-symbolic.svg"), true),
-    "Vanilla" => (include_bytes!("../res/icons/vanilla-logo.svg"), false),
-    "Void" => (include_bytes!("../res/icons/void-logo.svg"), false),
-    "Void (Symbolic)" => (include_bytes!("../res/icons/void-logo-symbolic.svg"), true),
-    "Voyager (Symbolic)" => (include_bytes!("../res/icons/voyager-logo-symbolic.svg"), true),
-    "Zorin" => (include_bytes!("../res/icons/zorin-logo.svg"), false),
-    "Zorin (Symbolic)" => (include_bytes!("../res/icons/zorin-logo-symbolic.svg"), true),
-};
