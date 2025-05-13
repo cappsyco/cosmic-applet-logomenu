@@ -33,6 +33,7 @@ pub enum Message {
     ToggleContextPage(ContextPage),
     LaunchUrl(String),
     UpdateLogo(usize),
+    ToggleSetting(bool),
 }
 
 impl cosmic::Application for AppModel {
@@ -140,7 +141,7 @@ impl cosmic::Application for AppModel {
                     .align_x(Alignment::Center),
             ),
         );
-        page_content = page_content.push(Space::with_height(30));
+        page_content = page_content.push(Space::with_height(padding));
 
         // Currently selected logo
         let logo_bytes = logos::IMAGES[&self.selected_logo_name];
@@ -159,12 +160,48 @@ impl cosmic::Application for AppModel {
 
         // Logo selector
         page_content = page_content.push(settings::section().title("Logo").add({
-            cosmic::Element::from(settings::item::builder("Selected logo").control(dropdown(
-                &self.logo_options,
-                self.selected_logo_idx,
-                Message::UpdateLogo,
-            )))
+            cosmic::Element::from(
+                settings::item::builder("Selected logo")
+                    .description(
+                        "Changes will appear when you next interact with the Logo Menu applet",
+                    )
+                    .control(dropdown(
+                        &self.logo_options,
+                        self.selected_logo_idx,
+                        Message::UpdateLogo,
+                    )),
+            )
         }));
+        page_content = page_content.push(Space::with_height(25));
+
+        // Menu items
+
+        // General settings
+        page_content = page_content.push(
+            settings::section()
+                .title("General settings")
+                .add({
+                    cosmic::Element::from(
+                        settings::item::builder("Toggle option 1'")
+                            .description("This will make a toggle happen!")
+                            .toggler(true, Message::ToggleSetting),
+                    )
+                })
+                .add({
+                    cosmic::Element::from(
+                        settings::item::builder("Toggle option 1'")
+                            .description("This will make a toggle happen!")
+                            .toggler(true, Message::ToggleSetting),
+                    )
+                })
+                .add({
+                    cosmic::Element::from(
+                        settings::item::builder("Toggle option 1'")
+                            .description("This will make a toggle happen!")
+                            .toggler(true, Message::ToggleSetting),
+                    )
+                }),
+        );
 
         // Combine all elements to finished page
         let page_container = scrollable(
@@ -213,6 +250,10 @@ impl cosmic::Application for AppModel {
                 if logo > 0 {
                     let _ = update_config(self.config.clone(), "logo", &self.selected_logo_name);
                 }
+            }
+
+            Message::ToggleSetting(toggle) => {
+                println!("{:?}", toggle);
             }
         }
         Task::none()

@@ -21,7 +21,6 @@ const CONFIG_VER: u64 = 1;
 pub struct LogoMenu {
     core: Core,
     popup: Option<Id>,
-    selected_logo_name: String,
 }
 
 #[derive(Debug, Clone)]
@@ -48,6 +47,15 @@ impl Application for LogoMenu {
     }
 
     fn init(core: Core, _flags: Self::Flags) -> (Self, Task<Self::Message>) {
+        let app = LogoMenu { core, popup: None };
+        (app, Task::none())
+    }
+
+    fn on_close_requested(&self, id: Id) -> Option<Message> {
+        Some(Message::PopupClosed(id))
+    }
+
+    fn view(&self) -> Element<Self::Message> {
         let default_logo = String::from("Cosmic (Symbolic)");
 
         let config_logo = match load_config("logo", CONFIG_VER) {
@@ -61,20 +69,7 @@ impl Application for LogoMenu {
             default_logo
         };
 
-        let app = LogoMenu {
-            core,
-            popup: None,
-            selected_logo_name,
-        };
-        (app, Task::none())
-    }
-
-    fn on_close_requested(&self, id: Id) -> Option<Message> {
-        Some(Message::PopupClosed(id))
-    }
-
-    fn view(&self) -> Element<Self::Message> {
-        let logo_bytes = logos::IMAGES[&self.selected_logo_name];
+        let logo_bytes = logos::IMAGES[&selected_logo_name];
 
         self.core
             .applet
