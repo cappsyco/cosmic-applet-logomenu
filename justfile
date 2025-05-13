@@ -1,5 +1,7 @@
 name := 'cosmic-applet-logomenu'
+name2 := 'cosmic-logomenu-settings'
 export APPID := 'co.uk.cappsy.CosmicAppletLogoMenu'
+export APPID2 := 'co.uk.cappsy.CosmicLogoMenuSettings'
 
 rootdir := ''
 prefix := '/usr'
@@ -10,17 +12,26 @@ flatpak-base-dir := absolute_path(clean(rootdir / flatpak-prefix))
 
 export INSTALL_DIR := base-dir / 'share'
 
-bin-src := 'target' / 'release' / name
-bin-dst := base-dir / 'bin' / name
-flatpak-bin-dst := flatpak-base-dir / 'bin' / name
+bin-src1 := 'target' / 'release' / name
+bin-src2 := 'target' / 'release' / name2
+bin-dst1 := base-dir / 'bin' / name
+bin-dst2 := base-dir / 'bin' / name2
+flatpak-bin-dst1 := flatpak-base-dir / 'bin' / name
+flatpak-bin-dst2 := flatpak-base-dir / 'bin' / name2
 
-desktop := APPID + '.desktop'
-desktop-src := 'res' / desktop
-desktop-dst := clean(rootdir / prefix) / 'share' / 'applications' / desktop
+desktop1 := APPID + '.desktop'
+desktop2 := APPID2 + '.desktop'
+desktop-src1 := 'res' / desktop1
+desktop-src2 := 'res' / desktop2
+desktop-dst1 := clean(rootdir / prefix) / 'share' / 'applications' / desktop1
+desktop-dst2 := clean(rootdir / prefix) / 'share' / 'applications' / desktop2
 
-metainfo := APPID + '.metainfo.xml'
-metainfo-src := 'res' / metainfo
-metainfo-dst := clean(rootdir / prefix) / 'share' / 'metainfo' / metainfo
+metainfo1 := APPID + '.metainfo.xml'
+metainfo2 := APPID2 + '.metainfo.xml'
+metainfo-src1 := 'res' / metainfo1
+metainfo-src2 := 'res' / metainfo2
+metainfo-dst1 := clean(rootdir / prefix) / 'share' / 'metainfo' / metainfo1
+metainfo-dst2 := clean(rootdir / prefix) / 'share' / 'metainfo' / metainfo2
 
 icons-src := 'res' / 'icons' / 'hicolor'
 icons-dst := clean(rootdir / prefix) / 'share' / 'icons' / 'hicolor'
@@ -66,30 +77,36 @@ run *args:
 
 # Installs files
 install:
-    install -Dm0755 {{bin-src}} {{bin-dst}}
-    install -Dm0644 {{desktop-src}} {{desktop-dst}}
-    install -Dm0644 {{metainfo-src}} {{metainfo-dst}}
-    for size in `ls {{icons-src}}`; do \
-        install -Dm0644 "{{icons-src}}/$size/apps/{{APPID}}.svg" "{{icons-dst}}/$size/apps/{{APPID}}.svg"; \
-    done
+    install -Dm0755 {{bin-src1}} {{bin-dst1}}
+    install -Dm0755 {{bin-src2}} {{bin-dst2}}
+    install -Dm0644 {{desktop-src1}} {{desktop-dst1}}
+    install -Dm0644 {{desktop-src2}} {{desktop-dst2}}
+    install -Dm0644 {{metainfo-src1}} {{metainfo-dst1}}
+    install -Dm0644 {{metainfo-src2}} {{metainfo-dst2}}
+    install -Dm0644 "{{icons-src}}/scalable/apps/{{APPID}}.svg" "{{icons-dst}}/scalable/apps/{{APPID}}.svg"; \
+    install -Dm0644 "{{icons-src}}/scalable/apps/{{APPID2}}.svg" "{{icons-dst}}/scalable/apps/{{APPID2}}.svg"; \
 
 # Installs files
 flatpak:
-    install -Dm0755 {{bin-src}} {{flatpak-bin-dst}}
-    install -Dm0644 {{desktop-src}} {{desktop-dst}}
-    install -Dm0644 {{metainfo-src}} {{metainfo-dst}}
-    for size in `ls {{icons-src}}`; do \
-        install -Dm0644 "{{icons-src}}/$size/apps/{{APPID}}.svg" "{{icons-dst}}/$size/apps/{{APPID}}.svg"; \
-    done
+    install -Dm0755 {{bin-src1}} {{flatpak-bin-dst2}}
+    install -Dm0755 {{bin-src2}} {{flatpak-bin-dst2}}
+    install -Dm0644 {{desktop-src1}} {{desktop-dst1}}
+    install -Dm0644 {{desktop-src2}} {{desktop-dst2}}
+    install -Dm0644 {{metainfo-src1}} {{metainfo-dst1}}
+    install -Dm0644 {{metainfo-src2}} {{metainfo-dst2}}
+    install -Dm0644 "{{icons-src}}/scalable/apps/{{APPID}}.svg" "{{icons-dst}}/scalable/apps/{{APPID}}.svg"; \
+    install -Dm0644 "{{icons-src}}/scalable/apps/{{APPID2}}.svg" "{{icons-dst}}/scalable/apps/{{APPID2}}.svg"; \
 
 # Uninstalls installed files
 uninstall:
-    rm {{bin-dst}}
-    rm {{desktop-dst}}
-    rm {{metainfo-dst}}
-    for size in `ls {{icons-src}}`; do \
-        rm "{{icons-dst}}/$size/apps/{{APPID}}.svg"; \
-    done
+    rm {{bin-dst1}}
+    rm {{bin-dst2}}
+    rm {{desktop-dst1}}
+    rm {{desktop-dst2}}
+    rm {{metainfo-dst1}}
+    rm {{metainfo-dst2}}
+    rm "{{icons-dst}}/scalable/apps/{{APPID}}.svg"; \
+    rm "{{icons-dst}}/scalable/apps/{{APPID2}}.svg"; \
 
 # Vendor dependencies locally
 vendor:
