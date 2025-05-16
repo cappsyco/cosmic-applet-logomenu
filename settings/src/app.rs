@@ -2,14 +2,14 @@
 
 use crate::config::{load_config, update_config};
 use crate::fl;
-use crate::logos;
 use cosmic::app::context_drawer;
 use cosmic::cosmic_config::Config;
 use cosmic::iced::{Alignment, Length};
 use cosmic::iced_widget::scrollable;
 use cosmic::prelude::*;
-use cosmic::widget::{self, container, dropdown, menu, settings, Space};
+use cosmic::widget::{self, Space, container, dropdown, menu, settings};
 use cosmic::{cosmic_theme, theme};
+use liblog::{IMAGES, MenuItem, MenuItemType, MenuItems};
 use std::collections::HashMap;
 
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
@@ -25,6 +25,7 @@ pub struct AppModel {
     logo_options: Vec<String>,
     selected_logo_idx: Option<usize>,
     selected_logo_name: String,
+    show_menu_settings: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -33,7 +34,7 @@ pub enum Message {
     ToggleContextPage(ContextPage),
     LaunchUrl(String),
     UpdateLogo(usize),
-    ToggleSetting(bool),
+    ToggleShowMenu(bool),
 }
 
 impl cosmic::Application for AppModel {
@@ -62,14 +63,14 @@ impl cosmic::Application for AppModel {
             None => default_logo.to_owned(),
         };
 
-        let selected_logo_name = if logos::IMAGES.contains_key(&config_logo) {
+        let selected_logo_name = if IMAGES.contains_key(&config_logo) {
             config_logo
         } else {
             default_logo
         };
 
         let mut logo_options = vec![];
-        let images_iter = &logos::IMAGES;
+        let images_iter = &IMAGES;
         for (key, _value) in images_iter {
             logo_options.push(key.to_string());
         }
@@ -85,6 +86,7 @@ impl cosmic::Application for AppModel {
             logo_options,
             selected_logo_idx,
             selected_logo_name,
+            show_menu_settings: true,
         };
 
         let command = app.update_title();
@@ -144,7 +146,7 @@ impl cosmic::Application for AppModel {
         page_content = page_content.push(Space::with_height(padding));
 
         // Currently selected logo
-        let logo_bytes = logos::IMAGES[&self.selected_logo_name];
+        let logo_bytes = IMAGES[&self.selected_logo_name];
         page_content = page_content.push(
             widget::row().push(
                 widget::column()
@@ -163,7 +165,7 @@ impl cosmic::Application for AppModel {
             cosmic::Element::from(
                 settings::item::builder("Selected logo")
                     .description(
-                        "Changes will appear when you next interact with the Logo Menu applet",
+                        "Changes will appear when you next interact with the Logo Menu applet.",
                     )
                     .control(dropdown(
                         &self.logo_options,
@@ -175,33 +177,16 @@ impl cosmic::Application for AppModel {
         page_content = page_content.push(Space::with_height(25));
 
         // Menu items
+        let _menu_items = get_menu_items();
 
         // General settings
-        page_content = page_content.push(
-            settings::section()
-                .title("General settings")
-                .add({
-                    cosmic::Element::from(
-                        settings::item::builder("Toggle option 1'")
-                            .description("This will make a toggle happen!")
-                            .toggler(true, Message::ToggleSetting),
-                    )
-                })
-                .add({
-                    cosmic::Element::from(
-                        settings::item::builder("Toggle option 1'")
-                            .description("This will make a toggle happen!")
-                            .toggler(true, Message::ToggleSetting),
-                    )
-                })
-                .add({
-                    cosmic::Element::from(
-                        settings::item::builder("Toggle option 1'")
-                            .description("This will make a toggle happen!")
-                            .toggler(true, Message::ToggleSetting),
-                    )
-                }),
-        );
+        page_content = page_content.push(settings::section().title("General settings").add({
+            cosmic::Element::from(
+                settings::item::builder("Show settings option in menu")
+                    .description("Hiding this will mean you will need to access the settings application directly.")
+                    .toggler(self.show_menu_settings, Message::ToggleShowMenu),
+            )
+        }));
 
         // Combine all elements to finished page
         let page_container = scrollable(
@@ -247,13 +232,16 @@ impl cosmic::Application for AppModel {
                 self.selected_logo_name = self.logo_options[logo].clone();
                 self.selected_logo_idx = Some(logo);
 
-                if logo > 0 {
-                    let _ = update_config(self.config.clone(), "logo", &self.selected_logo_name);
-                }
+                let _ = update_config(self.config.clone(), "logo", &self.selected_logo_name);
             }
 
-            Message::ToggleSetting(toggle) => {
-                println!("{:?}", toggle);
+            Message::ToggleShowMenu(toggle) => {
+                self.show_menu_settings = toggle;
+                let _ = update_config(
+                    self.config.clone(),
+                    "show_menu_settings",
+                    &self.show_menu_settings,
+                );
             }
         }
         Task::none()
@@ -320,4 +308,24 @@ impl menu::action::MenuAction for MenuAction {
             MenuAction::About => Message::ToggleContextPage(ContextPage::About),
         }
     }
+}
+
+pub fn get_menu_items() -> Vec<MenuItem> {
+    let mut display_items = Vec::new();
+
+    let config_menuitems: MenuItems = match load_config("menu_items", CONFIG_VER) {
+        Some(val) => val,
+        None => MenuItems::default(),
+    };
+
+    for menuitem in config_menuitems.items {
+        match menuitem.active() {
+            true => {
+                display_items.push(menuitem);
+            }
+            _ => {}
+        }
+    }
+
+    display_items
 }

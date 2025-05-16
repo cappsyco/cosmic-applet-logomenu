@@ -1,8 +1,9 @@
 [package]
 name = "cosmic-logomenu-settings"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 license = "MPL-2.0"
+rust-version = "1.86.0"
 description = "Settings application for COSMIC Logo Menu applet"
 repository = "https://github.com/cappsyco/cosmic-applet-logomenu"
 
@@ -16,7 +17,7 @@ open = "5.3.0"
 rust-embed = "8.5.0"
 tokio = { version = "1.41.0", features = ["full"] }
 serde = "1.0.219"
-phf = "0.11"
+liblog = { path = "../liblog" }
 
 [dependencies.i18n-embed]
 version = "0.15"

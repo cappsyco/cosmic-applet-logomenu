@@ -2,8 +2,8 @@
 
 use crate::config::load_config;
 use crate::fl;
-use crate::logos;
 use crate::power;
+use crate::power::PowerAction;
 use cosmic::app::{Core, Task};
 use cosmic::applet::{menu_button, padded_control};
 use cosmic::cosmic_theme::Spacing;
@@ -13,6 +13,7 @@ use cosmic::iced_widget::row;
 use cosmic::iced_winit::commands::popup::{destroy_popup, get_popup};
 use cosmic::widget::{self};
 use cosmic::{Application, Element};
+use liblog::{IMAGES, MenuItemType, MenuItems};
 use std::process::Command;
 
 const ID: &'static str = "co.uk.cappsy.CosmicAppletLogoMenu";
@@ -56,20 +57,18 @@ impl Application for LogoMenu {
     }
 
     fn view(&self) -> Element<Self::Message> {
+        // Get the current logo with appropriate fallbacks
         let default_logo = String::from("Cosmic (Symbolic)");
-
         let config_logo = match load_config("logo", CONFIG_VER) {
             Some(val) => val,
             None => default_logo.to_owned(),
         };
-
-        let selected_logo_name = if logos::IMAGES.contains_key(&config_logo) {
+        let selected_logo_name = if IMAGES.contains_key(&config_logo) {
             config_logo
         } else {
             default_logo
         };
-
-        let logo_bytes = logos::IMAGES[&selected_logo_name];
+        let logo_bytes = IMAGES[&selected_logo_name];
 
         self.core
             .applet
@@ -85,51 +84,84 @@ impl Application for LogoMenu {
             space_xxs, space_s, ..
         } = cosmic::theme::active().cosmic().spacing;
 
-        let menu_items = get_menu_items();
-        let mut content_list = widget::column().padding([8, 0]).spacing(0);
+        // Get the menu with a fallback to default if invalid or missing
+        let config_menuitems: MenuItems = match load_config("menu_items", CONFIG_VER) {
+            Some(val) => val,
+            None => MenuItems::default(),
+        };
 
-        for item in menu_items {
-            match item.item_type() {
-                MenuItemType::TermAction => {
-                    content_list = content_list.push(
-                        menu_button(widget::text::body(match item.label() {
-                            Some(label) => label,
-                            None => String::from(""),
-                        }))
-                        .on_press(Message::Run(match item.exec() {
-                            Some(exec) => exec,
-                            None => String::from(""),
-                        })),
-                    )
+        // Will the settings option appear at the bottom of the menu?
+        let config_show_settings = match load_config("show_menu_settings", CONFIG_VER) {
+            Some(val) => val,
+            None => true,
+        };
+
+        let mut content_list = widget::column().padding([8, 0]).spacing(0);
+        for item in config_menuitems.items {
+            match item.active() {
+                true => {
+                    match item.item_type() {
+                        MenuItemType::LaunchAction => {
+                            content_list = content_list.push(
+                                menu_button(widget::text::body(match item.label() {
+                                    Some(label) => label,
+                                    None => String::from(""),
+                                }))
+                                .on_press(Message::Run(
+                                    match item.command() {
+                                        Some(command) => command,
+                                        None => String::from(""),
+                                    },
+                                )),
+                            )
+                        }
+                        MenuItemType::PowerAction => {
+                            content_list = content_list.push(
+                                menu_button(widget::text::body(match item.label() {
+                                    Some(label) => label,
+                                    None => String::from(""),
+                                }))
+                                .on_press(Message::Action(
+                                    match item.command() {
+                                        Some(command) => match command.as_ref() {
+                                            "Lock" => PowerAction::Lock,
+                                            "LogOut" => PowerAction::LogOut,
+                                            "Suspend" => PowerAction::Suspend,
+                                            "Restart" => PowerAction::Restart,
+                                            "Shutdown" => PowerAction::Shutdown,
+                                            _ => PowerAction::Shutdown,
+                                        },
+                                        _ => PowerAction::Shutdown,
+                                    },
+                                )),
+                            )
+                        }
+                        MenuItemType::Divider => {
+                            content_list = content_list.push(
+                                padded_control(widget::divider::horizontal::default())
+                                    .padding([space_xxs, space_s]),
+                            )
+                        }
+                    };
                 }
-                MenuItemType::PowerAction => {
-                    content_list = content_list.push(
-                        menu_button(widget::text::body(match item.label() {
-                            Some(label) => label,
-                            None => String::from(""),
-                        }))
-                        .on_press(Message::Action(item.action().unwrap())),
-                    )
-                }
-                MenuItemType::Divider => {
-                    content_list = content_list.push(
-                        padded_control(widget::divider::horizontal::default())
-                            .padding([space_xxs, space_s]),
-                    )
-                }
-            };
+                _ => {}
+            }
         }
 
-        content_list = content_list.push(
-            padded_control(widget::divider::horizontal::default()).padding([space_xxs, space_s]),
-        );
-
-        let menu_settings_btn = menu_button(row![widget::text::body(fl!("menu-settings"))
-            .width(Length::Fill)
-            .height(Length::Fixed(24.0))
-            .align_y(Alignment::Center)])
-        .on_press(Message::Run(String::from("cosmic-logomenu-settings")));
-        content_list = content_list.push(menu_settings_btn);
+        if config_show_settings {
+            content_list = content_list.push(
+                padded_control(widget::divider::horizontal::default())
+                    .padding([space_xxs, space_s]),
+            );
+            let menu_settings_btn = menu_button(row![
+                widget::text::body(fl!("menu-settings"))
+                    .width(Length::Fill)
+                    .height(Length::Fixed(24.0))
+                    .align_y(Alignment::Center)
+            ])
+            .on_press(Message::Run(String::from("cosmic-logomenu-settings")));
+            content_list = content_list.push(menu_settings_btn);
+        }
 
         self.core.applet.popup_container(content_list).into()
     }
@@ -155,7 +187,7 @@ impl Application for LogoMenu {
                         .min_height(200.0)
                         .max_height(1080.0);
                     get_popup(popup_settings)
-                }
+                };
             }
             Message::Action(action) => {
                 match action {
@@ -211,121 +243,4 @@ fn close_popup(mut popup: Option<Id>) -> Task<Message> {
     } else {
         Task::none()
     };
-}
-
-// TODO: Break out the rest of this file into its own module, with:
-// * hide / show toggles for default actions
-// * renaming for default actions
-// * custom options / dividers
-// * reording of option
-#[derive(Clone)]
-pub enum MenuItemType {
-    TermAction,
-    PowerAction,
-    Divider,
-}
-pub struct MenuItem {
-    item_type: MenuItemType,
-    label: Option<String>,
-    exec: Option<String>,
-    action: Option<power::PowerAction>,
-}
-impl MenuItem {
-    pub fn item_type(&self) -> MenuItemType {
-        self.item_type.clone()
-    }
-    pub fn label(&self) -> Option<String> {
-        self.label.clone()
-    }
-    pub fn exec(&self) -> Option<String> {
-        self.exec.clone()
-    }
-    pub fn action(&self) -> Option<power::PowerAction> {
-        self.action.clone()
-    }
-}
-
-pub fn get_menu_items() -> Vec<MenuItem> {
-    let mut items = Vec::new();
-
-    items.push(MenuItem {
-        item_type: MenuItemType::TermAction,
-        label: Some(fl!("applications")),
-        exec: Some(String::from("cosmic-app-library")),
-        action: None,
-    });
-    items.push(MenuItem {
-        item_type: MenuItemType::TermAction,
-        label: Some(fl!("launcher")),
-        exec: Some(String::from("cosmic-launcher")),
-        action: None,
-    });
-    items.push(MenuItem {
-        item_type: MenuItemType::TermAction,
-        label: Some(fl!("workspaces")),
-        exec: Some(String::from("cosmic-workspaces")),
-        action: None,
-    });
-    items.push(MenuItem {
-        item_type: MenuItemType::Divider,
-        label: None,
-        exec: None,
-        action: None,
-    });
-    items.push(MenuItem {
-        item_type: MenuItemType::TermAction,
-        label: Some(fl!("terminal")),
-        exec: Some(String::from("cosmic-term")),
-        action: None,
-    });
-    items.push(MenuItem {
-        item_type: MenuItemType::TermAction,
-        label: Some(fl!("files")),
-        exec: Some(String::from("cosmic-files")),
-        action: None,
-    });
-    items.push(MenuItem {
-        item_type: MenuItemType::TermAction,
-        label: Some(fl!("software")),
-        exec: Some(String::from("cosmic-store")),
-        action: None,
-    });
-    items.push(MenuItem {
-        item_type: MenuItemType::Divider,
-        label: None,
-        exec: None,
-        action: None,
-    });
-    items.push(MenuItem {
-        item_type: MenuItemType::PowerAction,
-        label: Some(fl!("lock-screen")),
-        exec: None,
-        action: Some(power::PowerAction::Lock),
-    });
-    items.push(MenuItem {
-        item_type: MenuItemType::PowerAction,
-        label: Some(fl!("log-out")),
-        exec: None,
-        action: Some(power::PowerAction::LogOut),
-    });
-    items.push(MenuItem {
-        item_type: MenuItemType::PowerAction,
-        label: Some(fl!("suspend")),
-        exec: None,
-        action: Some(power::PowerAction::Suspend),
-    });
-    items.push(MenuItem {
-        item_type: MenuItemType::PowerAction,
-        label: Some(fl!("restart")),
-        exec: None,
-        action: Some(power::PowerAction::Restart),
-    });
-    items.push(MenuItem {
-        item_type: MenuItemType::PowerAction,
-        label: Some(fl!("shutdown")),
-        exec: None,
-        action: Some(power::PowerAction::Shutdown),
-    });
-
-    items
 }

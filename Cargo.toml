@@ -1,2 +1,3 @@
 [workspace]
-members = ['applet', 'settings']
+resolver = "3"
+members = ['applet', "liblog", 'settings']
