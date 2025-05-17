@@ -84,7 +84,7 @@ impl MenuItems {
                 MenuItem {
                     item_type: MenuItemType::LaunchAction,
                     label: Some(String::from("Workspaces")),
-                    command: Some(String::from("cosmic-launcher")),
+                    command: Some(String::from("cosmic-workspaces")),
                     active: true,
                 },
                 MenuItem {

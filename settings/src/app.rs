@@ -12,7 +12,6 @@ use cosmic::{cosmic_theme, theme};
 use liblog::{IMAGES, MenuItem, MenuItemType, MenuItems};
 use std::collections::HashMap;
 
-const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 const APP_ICON: &[u8] = include_bytes!("../resources/icons/hicolor/scalable/apps/icon.svg");
 const CONFIG_VER: u64 = 1;
 const CONFIG_ID: &'static str = "co.uk.cappsy.CosmicAppletLogoMenu";
@@ -35,7 +34,8 @@ pub enum Message {
     UpdateLogo(usize),
     ToggleShowMenu(bool),
     AddItem(MenuItemType),
-    RemoveItem,
+    EditItem(usize),
+    RemoveItem(usize),
     MoveItem(OrderDirection, usize),
 }
 
@@ -197,28 +197,45 @@ impl cosmic::Application for AppModel {
 
         for (i, menu_item) in menu_items.iter().enumerate() {
             menu_item_controls = menu_item_controls.add(cosmic::Element::from(
-                settings::item::builder(match menu_item.label() {
-                    Some(label) => label,
-                    _ => match menu_item.item_type() {
-                        MenuItemType::Divider => String::from("--- DIVIDER ---"),
-                        _ => String::from("No label"),
-                    },
-                })
-                .control(
-                    widget::row::with_capacity(3)
-                        .push(
-                            widget::button::icon(widget::icon::from_name("pan-up-symbolic"))
-                                .on_press(Message::MoveItem(OrderDirection::Up, i)),
-                        )
-                        .push(
-                            widget::button::icon(widget::icon::from_name("pan-down-symbolic"))
-                                .on_press(Message::MoveItem(OrderDirection::Down, i)),
-                        )
-                        .push(
-                            widget::button::icon(widget::icon::from_name("edit-symbolic"))
-                                .on_press(Message::RemoveItem),
+                widget::row::with_capacity(3)
+                    .push(
+                        widget::column::with_capacity(2)
+                            .push(
+                                widget::button::icon(widget::icon::from_name("pan-up-symbolic"))
+                                    .on_press(Message::MoveItem(OrderDirection::Up, i)),
+                            )
+                            .push(
+                                widget::button::icon(widget::icon::from_name("pan-down-symbolic"))
+                                    .on_press(Message::MoveItem(OrderDirection::Down, i)),
+                            ),
+                    )
+                    .push(Space::new(20, 0))
+                    .push(
+                        settings::item::builder(match menu_item.label() {
+                            Some(label) => label,
+                            _ => match menu_item.item_type() {
+                                MenuItemType::Divider => String::from("--- DIVIDER ---"),
+                                _ => String::from("No label"),
+                            },
+                        })
+                        .description(match menu_item.command() {
+                            Some(command) => command,
+                            _ => String::from(""),
+                        })
+                        .control(
+                            widget::column::with_capacity(2)
+                                .push(
+                                    widget::button::icon(widget::icon::from_name("edit-symbolic"))
+                                        .on_press(Message::EditItem(i)),
+                                )
+                                .push(
+                                    widget::button::icon(widget::icon::from_name(
+                                        "edit-delete-symbolic",
+                                    ))
+                                    .on_press(Message::RemoveItem(i)),
+                                ),
                         ),
-                ),
+                    ),
             ));
         }
         page_content = page_content.push(menu_item_controls);
@@ -318,7 +335,13 @@ impl cosmic::Application for AppModel {
                 active: true,
             }),
 
-            Message::RemoveItem => println!("Remove item"),
+            Message::EditItem(i) => {
+                println!("Edit item {}", i);
+            }
+
+            Message::RemoveItem(i) => {
+                self.menu_items.remove(i);
+            }
 
             Message::MoveItem(dir, i) => {
                 let j = match dir {
