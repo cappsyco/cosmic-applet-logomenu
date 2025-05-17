@@ -225,7 +225,10 @@ impl Application for LogoMenu {
                 }
             }
             Message::Run(action) => {
-                let _ = Command::new("sh").arg("-c").arg(action).spawn().unwrap();
+                let _ = match Command::new("sh").arg("-c").arg(action).spawn() {
+                    Ok(_) => {}
+                    Err(e) => eprintln!("Error executing command: {}", e),
+                };
                 return close_popup(self.popup);
             }
         }

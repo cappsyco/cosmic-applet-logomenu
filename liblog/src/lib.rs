@@ -21,6 +21,14 @@ pub struct MenuItem {
     pub active: bool,
 }
 impl MenuItem {
+    pub fn new() -> Self {
+        Self {
+            item_type: MenuItemType::Divider,
+            label: None,
+            command: None,
+            active: true,
+        }
+    }
     pub fn item_type(&self) -> MenuItemType {
         self.item_type.clone()
     }
@@ -52,7 +60,7 @@ impl MenuItems {
                 MenuItem {
                     item_type: MenuItemType::LaunchAction,
                     label: Some(String::from("About your system")),
-                    command: Some(String::from("cosmic-settings")),
+                    command: Some(String::from("cosmic-settings about")),
                     active: true,
                 },
                 MenuItem {
@@ -128,6 +136,12 @@ impl MenuItems {
                     active: true,
                 },
                 MenuItem {
+                    item_type: MenuItemType::Divider,
+                    label: None,
+                    command: None,
+                    active: true,
+                },
+                MenuItem {
                     item_type: MenuItemType::PowerAction,
                     label: Some(String::from("Restart")),
                     command: Some(String::from("Restart")),
@@ -153,6 +167,8 @@ pub static IMAGES: phf::Map<&'static str, (&[u8], bool)> = phf_map! {
     "Asahi" => (include_bytes!("../../res/icons/asahilinux-logo.svg"), false),
     "Asahi (Symbolic)" => (include_bytes!("../../res/icons/asahilinux-logo-symbolic.svg"), true),
     "Bazzite" => (include_bytes!("../../res/icons/bazzite-logo.svg"), false),
+    "Cachy" => (include_bytes!("../../res/icons/cachy-logo.svg"), false),
+    "Cachy (Symbolic)" => (include_bytes!("../../res/icons/cachy-logo-symbolic.svg"), true),
     "Clear" => (include_bytes!("../../res/icons/clear-linux-logo.svg"), false),
     "Cosmic (Black)" => (include_bytes!("../../res/icons/cosmic-logo-black.svg"), false),
     "Cosmic" => (include_bytes!("../../res/icons/cosmic-logo.svg"), false),

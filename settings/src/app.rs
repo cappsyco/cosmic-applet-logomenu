@@ -25,16 +25,24 @@ pub struct AppModel {
     logo_options: Vec<String>,
     selected_logo_idx: Option<usize>,
     selected_logo_name: String,
+    menu_items: Vec<MenuItem>,
     show_menu_settings: bool,
 }
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    OpenRepositoryUrl,
     ToggleContextPage(ContextPage),
-    LaunchUrl(String),
     UpdateLogo(usize),
     ToggleShowMenu(bool),
+    AddItem(MenuItemType),
+    RemoveItem,
+    MoveItem(OrderDirection, usize),
+}
+
+#[derive(Debug, Clone)]
+pub enum OrderDirection {
+    Up,
+    Down,
 }
 
 impl cosmic::Application for AppModel {
@@ -56,27 +64,29 @@ impl cosmic::Application for AppModel {
         core: cosmic::Core,
         _flags: Self::Flags,
     ) -> (Self, Task<cosmic::Action<Self::Message>>) {
+        // Get the current logo, with fallbacks to the default
         let default_logo = String::from("Cosmic (Symbolic)");
-
         let config_logo = match load_config("logo", CONFIG_VER) {
             Some(val) => val,
             None => default_logo.to_owned(),
         };
-
         let selected_logo_name = if IMAGES.contains_key(&config_logo) {
             config_logo
         } else {
             default_logo
         };
 
+        // Break out logos into options for setting
         let mut logo_options = vec![];
         let images_iter = &IMAGES;
         for (key, _value) in images_iter {
             logo_options.push(key.to_string());
         }
         logo_options.sort();
-
         let selected_logo_idx = logo_options.iter().position(|n| n == &selected_logo_name);
+
+        // Load in menu items from settings
+        let menu_items = get_menu_items();
 
         let mut app = AppModel {
             core,
@@ -86,6 +96,7 @@ impl cosmic::Application for AppModel {
             logo_options,
             selected_logo_idx,
             selected_logo_name,
+            menu_items,
             show_menu_settings: true,
         };
 
@@ -160,33 +171,96 @@ impl cosmic::Application for AppModel {
             ),
         );
 
-        // Logo selector
-        page_content = page_content.push(settings::section().title("Logo").add({
-            cosmic::Element::from(
-                settings::item::builder("Selected logo")
-                    .description(
-                        "Changes will appear when you next interact with the Logo Menu applet.",
-                    )
-                    .control(dropdown(
+        // Menu settings
+        page_content = page_content.push(
+            settings::section()
+                .title("Menu settings")
+                .add({
+                    cosmic::Element::from(settings::item::builder("Logo").control(dropdown(
                         &self.logo_options,
                         self.selected_logo_idx,
                         Message::UpdateLogo,
-                    )),
-            )
-        }));
+                    )))
+                })
+                .add({
+                    cosmic::Element::from(
+                        settings::item::builder("Show settings option in menu")
+                            .toggler(self.show_menu_settings, Message::ToggleShowMenu),
+                    )
+                }),
+        );
         page_content = page_content.push(Space::with_height(25));
 
-        // Menu items
-        let _menu_items = get_menu_items();
+        // Menu builder
+        let mut menu_item_controls = settings::section().title("Menu builder");
+        let menu_items = &self.menu_items;
 
-        // General settings
-        page_content = page_content.push(settings::section().title("General settings").add({
-            cosmic::Element::from(
-                settings::item::builder("Show settings option in menu")
-                    .description("Hiding this will mean you will need to access the settings application directly.")
-                    .toggler(self.show_menu_settings, Message::ToggleShowMenu),
-            )
-        }));
+        for (i, menu_item) in menu_items.iter().enumerate() {
+            menu_item_controls = menu_item_controls.add(cosmic::Element::from(
+                settings::item::builder(match menu_item.label() {
+                    Some(label) => label,
+                    _ => match menu_item.item_type() {
+                        MenuItemType::Divider => String::from("--- DIVIDER ---"),
+                        _ => String::from("No label"),
+                    },
+                })
+                .control(
+                    widget::row::with_capacity(3)
+                        .push(
+                            widget::button::icon(widget::icon::from_name("pan-up-symbolic"))
+                                .on_press(Message::MoveItem(OrderDirection::Up, i)),
+                        )
+                        .push(
+                            widget::button::icon(widget::icon::from_name("pan-down-symbolic"))
+                                .on_press(Message::MoveItem(OrderDirection::Down, i)),
+                        )
+                        .push(
+                            widget::button::icon(widget::icon::from_name("edit-symbolic"))
+                                .on_press(Message::RemoveItem),
+                        ),
+                ),
+            ));
+        }
+        page_content = page_content.push(menu_item_controls);
+        page_content = page_content.push(Space::with_height(15));
+
+        // Add buttons
+        page_content = page_content.push(
+            widget::column::with_capacity(1)
+                .push(
+                    widget::row::with_capacity(3)
+                        .push(
+                            widget::button::standard("Launcher...")
+                                .on_press(Message::AddItem(MenuItemType::LaunchAction))
+                                .apply(Element::from),
+                        )
+                        .push(
+                            widget::button::standard("Power action...")
+                                .on_press(Message::AddItem(MenuItemType::PowerAction))
+                                .apply(Element::from),
+                        )
+                        .push(
+                            widget::button::standard("Divider...")
+                                .on_press(Message::AddItem(MenuItemType::Divider))
+                                .apply(Element::from),
+                        )
+                        .spacing(10)
+                        .apply(Element::from),
+                )
+                .width(Length::Fill)
+                .align_x(Alignment::Center),
+        );
+        page_content = page_content.push(Space::with_height(25));
+
+        // TODO: This works for now but it needs to be moved away
+        // from the view function so it only triggers when needed.
+        let _ = update_config(
+            self.config.clone(),
+            "menu_items",
+            MenuItems {
+                items: self.menu_items.clone(),
+            },
+        );
 
         // Combine all elements to finished page
         let page_container = scrollable(
@@ -208,10 +282,6 @@ impl cosmic::Application for AppModel {
 
     fn update(&mut self, message: Self::Message) -> Task<cosmic::Action<Self::Message>> {
         match message {
-            Message::OpenRepositoryUrl => {
-                _ = open::that_detached(REPOSITORY);
-            }
-
             Message::ToggleContextPage(context_page) => {
                 if self.context_page == context_page {
                     self.core.window.show_context = !self.core.window.show_context;
@@ -220,13 +290,6 @@ impl cosmic::Application for AppModel {
                     self.core.window.show_context = true;
                 }
             }
-
-            Message::LaunchUrl(url) => match open::that_detached(&url) {
-                Ok(()) => {}
-                Err(err) => {
-                    eprintln!("failed to open {url:?}: {err}");
-                }
-            },
 
             Message::UpdateLogo(logo) => {
                 self.selected_logo_name = self.logo_options[logo].clone();
@@ -243,6 +306,45 @@ impl cosmic::Application for AppModel {
                     &self.show_menu_settings,
                 );
             }
+
+            Message::AddItem(item_type) => self.menu_items.push(MenuItem {
+                item_type: item_type.clone(),
+                label: match &item_type {
+                    MenuItemType::LaunchAction => Some(String::from("New launcher")),
+                    MenuItemType::PowerAction => Some(String::from("New power action")),
+                    MenuItemType::Divider => None,
+                },
+                command: None,
+                active: true,
+            }),
+
+            Message::RemoveItem => println!("Remove item"),
+
+            Message::MoveItem(dir, i) => {
+                let j = match dir {
+                    OrderDirection::Up => {
+                        if i == 0 {
+                            i
+                        } else {
+                            i - 1
+                        }
+                    }
+                    OrderDirection::Down => {
+                        if i == self.menu_items.len() - 1 {
+                            i
+                        } else {
+                            i + 1
+                        }
+                    }
+                };
+
+                if i != j {
+                    let a = self.menu_items[i].clone();
+                    let b = self.menu_items[j].clone();
+                    self.menu_items[j] = a;
+                    self.menu_items[i] = b;
+                }
+            }
         }
         Task::none()
     }
@@ -254,27 +356,9 @@ impl AppModel {
         let icon = widget::svg(widget::svg::Handle::from_memory(APP_ICON));
         let title = widget::text::title3(fl!("app-title"));
 
-        let hash = env!("VERGEN_GIT_SHA");
-        let short_hash: String = hash.chars().take(7).collect();
-        let date = env!("VERGEN_GIT_COMMIT_DATE");
-
-        let link = widget::button::link(REPOSITORY)
-            .on_press(Message::OpenRepositoryUrl)
-            .padding(0);
-
         widget::column()
             .push(icon)
             .push(title)
-            .push(link)
-            .push(
-                widget::button::link(fl!(
-                    "git-description",
-                    hash = short_hash.as_str(),
-                    date = date
-                ))
-                .on_press(Message::LaunchUrl(format!("{REPOSITORY}/commits/{hash}")))
-                .padding(0),
-            )
             .align_x(Alignment::Center)
             .spacing(space_xxs)
             .into()
