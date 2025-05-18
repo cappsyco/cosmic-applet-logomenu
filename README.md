@@ -2,7 +2,7 @@
 
 A simple logo menu (in the style of the popular [GNOME extension](https://github.com/Aryan20/Logomenu)) to combine your launcher options in a nice menu.
 
-![image](https://github.com/user-attachments/assets/ff260556-33d6-4618-bf73-64e3bd4500db)
+![Screenshot_2025-05-18_15-52-01](https://github.com/user-attachments/assets/ca1ccc8d-6705-4cad-ba1a-7b0e01ce7ec0)
 
 ## Install
 
