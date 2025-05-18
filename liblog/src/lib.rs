@@ -18,17 +18,8 @@ pub struct MenuItem {
     pub item_type: MenuItemType,
     pub label: Option<String>,
     pub command: Option<String>,
-    pub active: bool,
 }
 impl MenuItem {
-    pub fn new() -> Self {
-        Self {
-            item_type: MenuItemType::Divider,
-            label: None,
-            command: None,
-            active: true,
-        }
-    }
     pub fn item_type(&self) -> MenuItemType {
         self.item_type.clone()
     }
@@ -37,9 +28,6 @@ impl MenuItem {
     }
     pub fn command(&self) -> Option<String> {
         self.command.clone()
-    }
-    pub fn active(&self) -> bool {
-        self.active.clone()
     }
 }
 
@@ -53,117 +41,99 @@ impl Display for MenuItems {
         write!(f, "{:?}", self)
     }
 }
-impl MenuItems {
-    pub fn default() -> Self {
+impl Default for MenuItems {
+    fn default() -> Self {
         Self {
             items: vec![
                 MenuItem {
                     item_type: MenuItemType::LaunchAction,
                     label: Some(String::from("About your system")),
                     command: Some(String::from("cosmic-settings about")),
-                    active: true,
                 },
                 MenuItem {
                     item_type: MenuItemType::Divider,
                     label: None,
                     command: None,
-                    active: true,
                 },
                 MenuItem {
                     item_type: MenuItemType::LaunchAction,
                     label: Some(String::from("Applications")),
                     command: Some(String::from("applications")),
-                    active: true,
                 },
                 MenuItem {
                     item_type: MenuItemType::LaunchAction,
                     label: Some(String::from("Launcher")),
                     command: Some(String::from("cosmic-launcher")),
-                    active: true,
                 },
                 MenuItem {
                     item_type: MenuItemType::LaunchAction,
                     label: Some(String::from("Workspaces")),
                     command: Some(String::from("cosmic-workspaces")),
-                    active: true,
                 },
                 MenuItem {
                     item_type: MenuItemType::Divider,
                     label: None,
                     command: None,
-                    active: true,
                 },
                 MenuItem {
                     item_type: MenuItemType::LaunchAction,
                     label: Some(String::from("Terminal")),
                     command: Some(String::from("cosmic-term")),
-                    active: true,
                 },
                 MenuItem {
                     item_type: MenuItemType::LaunchAction,
                     label: Some(String::from("Files")),
                     command: Some(String::from("cosmic-files")),
-                    active: true,
                 },
                 MenuItem {
                     item_type: MenuItemType::LaunchAction,
                     label: Some(String::from("Software")),
                     command: Some(String::from("cosmic-store")),
-                    active: true,
                 },
                 MenuItem {
                     item_type: MenuItemType::Divider,
                     label: None,
                     command: None,
-                    active: true,
                 },
                 MenuItem {
                     item_type: MenuItemType::PowerAction,
                     label: Some(String::from("Lock")),
                     command: Some(String::from("Lock")),
-                    active: true,
                 },
                 MenuItem {
                     item_type: MenuItemType::PowerAction,
                     label: Some(String::from("Log out")),
                     command: Some(String::from("LogOut")),
-                    active: true,
                 },
                 MenuItem {
                     item_type: MenuItemType::PowerAction,
                     label: Some(String::from("Suspend")),
                     command: Some(String::from("Suspend")),
-                    active: true,
                 },
                 MenuItem {
                     item_type: MenuItemType::Divider,
                     label: None,
                     command: None,
-                    active: true,
                 },
                 MenuItem {
                     item_type: MenuItemType::PowerAction,
                     label: Some(String::from("Restart")),
                     command: Some(String::from("Restart")),
-                    active: true,
                 },
                 MenuItem {
                     item_type: MenuItemType::PowerAction,
                     label: Some(String::from("Shutdown")),
                     command: Some(String::from("Shutdown")),
-                    active: true,
                 },
                 MenuItem {
                     item_type: MenuItemType::Divider,
                     label: None,
                     command: None,
-                    active: true,
                 },
                 MenuItem {
                     item_type: MenuItemType::LaunchAction,
                     label: Some(String::from("Menu settings...")),
                     command: Some(String::from("cosmic-logomenu-settings")),
-                    active: true,
                 },
             ],
         }

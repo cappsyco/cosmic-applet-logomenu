@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 use crate::config::load_config;
-use crate::fl;
 use crate::power;
 use crate::power::PowerAction;
 use cosmic::app::{Core, Task};
@@ -15,7 +14,7 @@ use cosmic::{Application, Element};
 use liblog::{IMAGES, MenuItemType, MenuItems};
 use std::process::Command;
 
-const ID: &'static str = "co.uk.cappsy.CosmicAppletLogoMenu";
+const ID: &str = "co.uk.cappsy.CosmicAppletLogoMenu";
 const CONFIG_VER: u64 = 1;
 
 pub struct LogoMenu {
@@ -36,7 +35,7 @@ impl Application for LogoMenu {
     type Executor = cosmic::executor::Default;
     type Flags = ();
     type Message = Message;
-    const APP_ID: &'static str = ID;
+    const APP_ID: &str = ID;
 
     fn core(&self) -> &Core {
         &self.core
@@ -84,61 +83,41 @@ impl Application for LogoMenu {
         } = cosmic::theme::active().cosmic().spacing;
 
         // Get the menu with a fallback to default if invalid or missing
-        let config_menuitems: MenuItems = match load_config("menu_items", CONFIG_VER) {
-            Some(val) => val,
-            None => MenuItems::default(),
-        };
+        let config_menuitems: MenuItems = load_config("menu_items", CONFIG_VER).unwrap_or_default();
 
         let mut content_list = widget::column().padding([8, 0]).spacing(0);
         for item in config_menuitems.items {
-            match item.active() {
-                true => {
-                    match item.item_type() {
-                        MenuItemType::LaunchAction => {
-                            content_list = content_list.push(
-                                menu_button(widget::text::body(match item.label() {
-                                    Some(label) => label,
-                                    None => String::from(""),
-                                }))
-                                .on_press(Message::Run(
-                                    match item.command() {
-                                        Some(command) => command,
-                                        None => String::from(""),
-                                    },
-                                )),
-                            )
-                        }
-                        MenuItemType::PowerAction => {
-                            content_list = content_list.push(
-                                menu_button(widget::text::body(match item.label() {
-                                    Some(label) => label,
-                                    None => String::from(""),
-                                }))
-                                .on_press(Message::Action(
-                                    match item.command() {
-                                        Some(command) => match command.as_ref() {
-                                            "Lock" => PowerAction::Lock,
-                                            "LogOut" => PowerAction::LogOut,
-                                            "Suspend" => PowerAction::Suspend,
-                                            "Restart" => PowerAction::Restart,
-                                            "Shutdown" => PowerAction::Shutdown,
-                                            _ => PowerAction::Shutdown,
-                                        },
-                                        _ => PowerAction::Shutdown,
-                                    },
-                                )),
-                            )
-                        }
-                        MenuItemType::Divider => {
-                            content_list = content_list.push(
-                                padded_control(widget::divider::horizontal::default())
-                                    .padding([space_xxs, space_s]),
-                            )
-                        }
-                    };
+            match item.item_type() {
+                MenuItemType::LaunchAction => {
+                    content_list = content_list.push(
+                        menu_button(widget::text::body(item.label().unwrap_or_default()))
+                            .on_press(Message::Run(item.command().unwrap_or_default())),
+                    )
                 }
-                _ => {}
-            }
+                MenuItemType::PowerAction => {
+                    content_list = content_list.push(
+                        menu_button(widget::text::body(item.label().unwrap_or_default())).on_press(
+                            Message::Action(match item.command() {
+                                Some(command) => match command.as_ref() {
+                                    "Lock" => PowerAction::Lock,
+                                    "LogOut" => PowerAction::LogOut,
+                                    "Suspend" => PowerAction::Suspend,
+                                    "Restart" => PowerAction::Restart,
+                                    "Shutdown" => PowerAction::Shutdown,
+                                    _ => PowerAction::Shutdown,
+                                },
+                                _ => PowerAction::Shutdown,
+                            }),
+                        ),
+                    )
+                }
+                MenuItemType::Divider => {
+                    content_list = content_list.push(
+                        padded_control(widget::divider::horizontal::default())
+                            .padding([space_xxs, space_s]),
+                    )
+                }
+            };
         }
 
         self.core.applet.popup_container(content_list).into()
@@ -203,7 +182,7 @@ impl Application for LogoMenu {
                 }
             }
             Message::Run(action) => {
-                let _ = match Command::new("sh").arg("-c").arg(action).spawn() {
+                match Command::new("sh").arg("-c").arg(action).spawn() {
                     Ok(_) => {}
                     Err(e) => eprintln!("Error executing command: {}", e),
                 };
@@ -219,9 +198,9 @@ impl Application for LogoMenu {
 }
 
 fn close_popup(mut popup: Option<Id>) -> Task<Message> {
-    return if let Some(p) = popup.take() {
+    if let Some(p) = popup.take() {
         destroy_popup(p)
     } else {
         Task::none()
-    };
+    }
 }

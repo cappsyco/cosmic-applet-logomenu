@@ -1,5 +1,5 @@
 use cosmic::cosmic_config::{Config, ConfigGet, ConfigSet};
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{Serialize, de::DeserializeOwned};
 use std::fmt::Display;
 
 pub fn update_config<T>(config: Config, key: &str, value: T)
@@ -20,8 +20,5 @@ where
         Err(_e) => Config::system("co.uk.cappsy.CosmicAppletLogoMenu", 1).unwrap(),
     };
 
-    match config.get(key) {
-        Ok(value) => Some(value),
-        Err(_e) => None,
-    }
+    config.get(key).ok()
 }
