@@ -3,7 +3,6 @@
 use app::LogoMenu;
 mod app;
 mod config;
-mod core;
 mod power;
 
 fn main() -> cosmic::iced::Result {

@@ -10,8 +10,5 @@ where
         Err(_e) => Config::system("co.uk.cappsy.CosmicAppletLogoMenu", 1).unwrap(),
     };
 
-    match config.get(key) {
-        Ok(value) => Some(value),
-        Err(_e) => None,
-    }
+    config.get(key).ok()
 }

@@ -14,7 +14,7 @@ use std::collections::{HashMap, VecDeque};
 
 const APP_ICON: &[u8] = include_bytes!("../resources/icons/hicolor/scalable/apps/icon.svg");
 const CONFIG_VER: u64 = 1;
-const CONFIG_ID: &'static str = "co.uk.cappsy.CosmicAppletLogoMenu";
+const CONFIG_ID: &str = "co.uk.cappsy.CosmicAppletLogoMenu";
 
 #[derive(Clone, Debug)]
 pub enum DialogPage {
@@ -215,13 +215,10 @@ impl cosmic::Application for AppModel {
                             Some(label) => label,
                             _ => match menu_item.item_type() {
                                 MenuItemType::Divider => String::from(""),
-                                _ => String::from(fl!("no-label")),
+                                _ => fl!("no-label"),
                             },
                         })
-                        .description(match menu_item.command() {
-                            Some(command) => command,
-                            _ => String::from(""),
-                        })
+                        .description(menu_item.command().unwrap_or_default())
                         .control(
                             widget::row::with_capacity(2)
                                 .push(
@@ -275,7 +272,7 @@ impl cosmic::Application for AppModel {
 
         // TODO: This works for now but it needs to be moved away
         // from the view function so it only triggers when needed.
-        let _ = update_config(
+        update_config(
             self.config.clone(),
             "menu_items",
             MenuItems {
@@ -298,28 +295,19 @@ impl cosmic::Application for AppModel {
     }
 
     fn dialog(&self) -> Option<Element<Message>> {
-        let dialog_page = match self.dialog_pages.front() {
-            Some(some) => some,
-            None => return None,
-        };
+        let dialog_page = self.dialog_pages.front()?;
 
         let dialog = match dialog_page {
             DialogPage::EditItem(i, menu_item) => {
-                let label_unwrapped = match menu_item.label() {
-                    Some(label) => label,
-                    None => String::from(""),
-                };
-                let command_unwrapped = match menu_item.command() {
-                    Some(command) => command,
-                    None => String::from(""),
-                };
+                let label_unwrapped = menu_item.label().unwrap_or_default();
+                let command_unwrapped = menu_item.command().unwrap_or_default();
 
                 let label_input = widget::container(
                     widget::text_input("", label_unwrapped.clone())
                         .label(fl!("label"))
                         .on_input(move |value| {
                             Message::DialogUpdate(DialogPage::EditItem(
-                                i.clone(),
+                                *i,
                                 MenuItem {
                                     label: Some(value),
                                     ..menu_item.clone()
@@ -333,7 +321,7 @@ impl cosmic::Application for AppModel {
                         .label(fl!("command"))
                         .on_input(|value| {
                             Message::DialogUpdate(DialogPage::EditItem(
-                                i.clone(),
+                                *i,
                                 MenuItem {
                                     command: Some(value),
                                     ..menu_item.clone()
@@ -347,7 +335,7 @@ impl cosmic::Application for AppModel {
                     None
                 } else {
                     Some(Message::SaveItem(
-                        i.clone(),
+                        *i,
                         label_unwrapped.clone(),
                         command_unwrapped.clone(),
                     ))
@@ -376,8 +364,7 @@ impl cosmic::Application for AppModel {
             DialogPage::RemoveItem(i) => widget::dialog()
                 .title(fl!("remove-item"))
                 .primary_action(
-                    widget::button::suggested(fl!("remove"))
-                        .on_press(Message::RemoveItem(i.clone())),
+                    widget::button::suggested(fl!("remove")).on_press(Message::RemoveItem(*i)),
                 )
                 .secondary_action(
                     widget::button::standard(fl!("cancel")).on_press(Message::DialogCancel),
@@ -385,7 +372,7 @@ impl cosmic::Application for AppModel {
                 .apply(Element::from),
         };
 
-        Some(dialog.into())
+        Some(dialog)
     }
 
     fn update(&mut self, message: Self::Message) -> Task<cosmic::Action<Self::Message>> {
@@ -403,20 +390,19 @@ impl cosmic::Application for AppModel {
                 self.selected_logo_name = self.logo_options[logo].clone();
                 self.selected_logo_idx = Some(logo);
 
-                let _ = update_config(self.config.clone(), "logo", &self.selected_logo_name);
+                update_config(self.config.clone(), "logo", &self.selected_logo_name);
             }
 
             Message::AddItem(item_type) => self.menu_items.push(MenuItem {
                 item_type: item_type.clone(),
                 label: match &item_type {
-                    MenuItemType::LaunchAction => Some(String::from(fl!("new-launcher"))),
+                    MenuItemType::LaunchAction => Some(fl!("new-launcher")),
                     _ => None,
                 },
                 command: match &item_type {
                     MenuItemType::LaunchAction => Some(String::from("cosmic-logomenu-settings")),
                     _ => None,
                 },
-                active: true,
             }),
 
             Message::DialogUpdate(dialog_page) => {
@@ -454,7 +440,6 @@ impl cosmic::Application for AppModel {
                     item_type: new_item_type,
                     label: Some(label),
                     command: Some(command),
-                    active: true,
                 };
                 self.dialog_pages.pop_front();
             }
@@ -545,18 +530,11 @@ impl menu::action::MenuAction for MenuAction {
 pub fn get_menu_items() -> Vec<MenuItem> {
     let mut display_items = Vec::new();
 
-    let config_menuitems: MenuItems = match load_config("menu_items", CONFIG_VER) {
-        Some(val) => val,
-        None => MenuItems::default(),
-    };
+    // Get the menu with a fallback to default if invalid or missing
+    let config_menuitems: MenuItems = load_config("menu_items", CONFIG_VER).unwrap_or_default();
 
     for menuitem in config_menuitems.items {
-        match menuitem.active() {
-            true => {
-                display_items.push(menuitem);
-            }
-            _ => {}
-        }
+        display_items.push(menuitem);
     }
 
     display_items
