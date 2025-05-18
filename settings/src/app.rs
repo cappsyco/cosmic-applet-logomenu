@@ -10,11 +10,17 @@ use cosmic::prelude::*;
 use cosmic::widget::{self, Space, container, dropdown, menu, settings};
 use cosmic::{cosmic_theme, theme};
 use liblog::{IMAGES, MenuItem, MenuItemType, MenuItems};
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 
 const APP_ICON: &[u8] = include_bytes!("../resources/icons/hicolor/scalable/apps/icon.svg");
 const CONFIG_VER: u64 = 1;
 const CONFIG_ID: &'static str = "co.uk.cappsy.CosmicAppletLogoMenu";
+
+#[derive(Clone, Debug)]
+pub enum DialogPage {
+    EditItem(usize, MenuItem),
+    RemoveItem(usize),
+}
 
 pub struct AppModel {
     core: cosmic::Core,
@@ -25,18 +31,22 @@ pub struct AppModel {
     selected_logo_idx: Option<usize>,
     selected_logo_name: String,
     menu_items: Vec<MenuItem>,
-    show_menu_settings: bool,
+    dialog_pages: VecDeque<DialogPage>,
 }
 
 #[derive(Debug, Clone)]
 pub enum Message {
     ToggleContextPage(ContextPage),
     UpdateLogo(usize),
-    ToggleShowMenu(bool),
     AddItem(MenuItemType),
-    EditItem(usize),
+    SaveItem(usize, String, String),
     RemoveItem(usize),
     MoveItem(OrderDirection, usize),
+    ResetMenu,
+    DialogUpdate(DialogPage),
+    DialogCancel,
+    DialogEditItem(usize, MenuItem),
+    DialogRemoveItem(usize),
 }
 
 #[derive(Debug, Clone)]
@@ -93,11 +103,11 @@ impl cosmic::Application for AppModel {
             context_page: ContextPage::default(),
             key_binds: HashMap::new(),
             config: Config::new(CONFIG_ID, CONFIG_VER).unwrap(),
+            dialog_pages: VecDeque::new(),
             logo_options,
             selected_logo_idx,
             selected_logo_name,
             menu_items,
-            show_menu_settings: true,
         };
 
         let command = app.update_title();
@@ -172,23 +182,13 @@ impl cosmic::Application for AppModel {
         );
 
         // Menu settings
-        page_content = page_content.push(
-            settings::section()
-                .title("Menu settings")
-                .add({
-                    cosmic::Element::from(settings::item::builder("Logo").control(dropdown(
-                        &self.logo_options,
-                        self.selected_logo_idx,
-                        Message::UpdateLogo,
-                    )))
-                })
-                .add({
-                    cosmic::Element::from(
-                        settings::item::builder("Show settings option in menu")
-                            .toggler(self.show_menu_settings, Message::ToggleShowMenu),
-                    )
-                }),
-        );
+        page_content = page_content.push(settings::section().title("Menu settings").add({
+            cosmic::Element::from(settings::item::builder("Logo").control(dropdown(
+                &self.logo_options,
+                self.selected_logo_idx,
+                Message::UpdateLogo,
+            )))
+        }));
         page_content = page_content.push(Space::with_height(25));
 
         // Menu builder
@@ -199,7 +199,7 @@ impl cosmic::Application for AppModel {
             menu_item_controls = menu_item_controls.add(cosmic::Element::from(
                 widget::row::with_capacity(3)
                     .push(
-                        widget::column::with_capacity(2)
+                        widget::row::with_capacity(2)
                             .push(
                                 widget::button::icon(widget::icon::from_name("pan-up-symbolic"))
                                     .on_press(Message::MoveItem(OrderDirection::Up, i)),
@@ -214,7 +214,7 @@ impl cosmic::Application for AppModel {
                         settings::item::builder(match menu_item.label() {
                             Some(label) => label,
                             _ => match menu_item.item_type() {
-                                MenuItemType::Divider => String::from("--- DIVIDER ---"),
+                                MenuItemType::Divider => String::from(""),
                                 _ => String::from("No label"),
                             },
                         })
@@ -223,16 +223,21 @@ impl cosmic::Application for AppModel {
                             _ => String::from(""),
                         })
                         .control(
-                            widget::column::with_capacity(2)
+                            widget::row::with_capacity(2)
                                 .push(
                                     widget::button::icon(widget::icon::from_name("edit-symbolic"))
-                                        .on_press(Message::EditItem(i)),
+                                        .on_press_maybe(match menu_item.item_type() {
+                                            MenuItemType::Divider => None,
+                                            _ => {
+                                                Some(Message::DialogEditItem(i, menu_item.clone()))
+                                            }
+                                        }),
                                 )
                                 .push(
                                     widget::button::icon(widget::icon::from_name(
                                         "edit-delete-symbolic",
                                     ))
-                                    .on_press(Message::RemoveItem(i)),
+                                    .on_press(Message::DialogRemoveItem(i)),
                                 ),
                         ),
                     ),
@@ -243,29 +248,28 @@ impl cosmic::Application for AppModel {
 
         // Add buttons
         page_content = page_content.push(
-            widget::column::with_capacity(1)
-                .push(
-                    widget::row::with_capacity(3)
-                        .push(
-                            widget::button::standard("Launcher...")
-                                .on_press(Message::AddItem(MenuItemType::LaunchAction))
-                                .apply(Element::from),
-                        )
-                        .push(
-                            widget::button::standard("Power action...")
-                                .on_press(Message::AddItem(MenuItemType::PowerAction))
-                                .apply(Element::from),
-                        )
-                        .push(
-                            widget::button::standard("Divider...")
-                                .on_press(Message::AddItem(MenuItemType::Divider))
-                                .apply(Element::from),
-                        )
-                        .spacing(10)
-                        .apply(Element::from),
-                )
-                .width(Length::Fill)
-                .align_x(Alignment::Center),
+            container(
+                widget::row::with_capacity(2)
+                    .push(
+                        widget::button::standard("Reset to default")
+                            .on_press(Message::ResetMenu)
+                            .apply(Element::from),
+                    )
+                    .push(
+                        widget::button::standard("Add divider")
+                            .on_press(Message::AddItem(MenuItemType::Divider))
+                            .apply(Element::from),
+                    )
+                    .push(
+                        widget::button::suggested("Add menu item")
+                            .on_press(Message::AddItem(MenuItemType::LaunchAction))
+                            .apply(Element::from),
+                    )
+                    .spacing(10)
+                    .apply(Element::from),
+            )
+            .width(Length::Fill)
+            .align_x(Alignment::End),
         );
         page_content = page_content.push(Space::with_height(25));
 
@@ -280,21 +284,107 @@ impl cosmic::Application for AppModel {
         );
 
         // Combine all elements to finished page
-        let page_container = scrollable(
-            container(page_content)
-                .max_width(600)
-                .width(Length::Fill)
-                .apply(container)
-                .center_x(Length::Fill)
-                .padding([0, padding]),
-        );
+        let page_container = container(page_content)
+            .max_width(600)
+            .width(Length::Fill)
+            .apply(container)
+            .center_x(Length::Fill)
+            .padding([0, padding]);
 
         // Display
-        let content: Element<_> = container(page_container)
-            .padding([cosmic::theme::active().cosmic().space_xxs(), 0])
-            .into();
+        let content: Element<_> = scrollable(page_container).into();
 
         content
+    }
+
+    fn dialog(&self) -> Option<Element<Message>> {
+        let dialog_page = match self.dialog_pages.front() {
+            Some(some) => some,
+            None => return None,
+        };
+
+        let dialog = match dialog_page {
+            DialogPage::EditItem(i, menu_item) => {
+                let label_unwrapped = match menu_item.label() {
+                    Some(label) => label,
+                    None => String::from(""),
+                };
+                let command_unwrapped = match menu_item.command() {
+                    Some(command) => command,
+                    None => String::from(""),
+                };
+
+                let label_input = widget::container(
+                    widget::text_input("", label_unwrapped.clone())
+                        .label("Label")
+                        .on_input(move |value| {
+                            Message::DialogUpdate(DialogPage::EditItem(
+                                i.clone(),
+                                MenuItem {
+                                    label: Some(value),
+                                    ..menu_item.clone()
+                                },
+                            ))
+                        }),
+                );
+
+                let command_input = widget::container(
+                    widget::text_input("", command_unwrapped.clone())
+                        .label("Command")
+                        .on_input(|value| {
+                            Message::DialogUpdate(DialogPage::EditItem(
+                                i.clone(),
+                                MenuItem {
+                                    command: Some(value),
+                                    ..menu_item.clone()
+                                },
+                            ))
+                        }),
+                );
+
+                // validation
+                let complete_maybe = if label_unwrapped.is_empty() || command_unwrapped.is_empty() {
+                    None
+                } else {
+                    Some(Message::SaveItem(
+                        i.clone(),
+                        label_unwrapped.clone(),
+                        command_unwrapped.clone(),
+                    ))
+                };
+
+                let save_button = widget::button::suggested("Save")
+                    .on_press_maybe(complete_maybe)
+                    .apply(Element::from);
+
+                let cancel_button =
+                    widget::button::standard("Cancel").on_press(Message::DialogCancel);
+
+                widget::dialog()
+                    .title("Edit menu item")
+                    .control(
+                        widget::ListColumn::default()
+                            .add(label_input)
+                            .add(command_input)
+                            .add(widget::text("Enter one of the following commands for the corresponding power action: Lock, LogOut, Suspend, Restart or Shutdown"))
+                    )
+                    .primary_action(save_button)
+                    .secondary_action(cancel_button)
+                    .apply(Element::from)
+            }
+
+            DialogPage::RemoveItem(i) => widget::dialog()
+                .title("Remove item")
+                .primary_action(
+                    widget::button::suggested("Remove...").on_press(Message::RemoveItem(i.clone())),
+                )
+                .secondary_action(
+                    widget::button::standard("Cancel").on_press(Message::DialogCancel),
+                )
+                .apply(Element::from),
+        };
+
+        Some(dialog.into())
     }
 
     fn update(&mut self, message: Self::Message) -> Task<cosmic::Action<Self::Message>> {
@@ -315,32 +405,62 @@ impl cosmic::Application for AppModel {
                 let _ = update_config(self.config.clone(), "logo", &self.selected_logo_name);
             }
 
-            Message::ToggleShowMenu(toggle) => {
-                self.show_menu_settings = toggle;
-                let _ = update_config(
-                    self.config.clone(),
-                    "show_menu_settings",
-                    &self.show_menu_settings,
-                );
-            }
-
             Message::AddItem(item_type) => self.menu_items.push(MenuItem {
                 item_type: item_type.clone(),
                 label: match &item_type {
                     MenuItemType::LaunchAction => Some(String::from("New launcher")),
-                    MenuItemType::PowerAction => Some(String::from("New power action")),
-                    MenuItemType::Divider => None,
+                    _ => None,
                 },
-                command: None,
+                command: match &item_type {
+                    MenuItemType::LaunchAction => Some(String::from("cosmic-logomenu-settings")),
+                    _ => None,
+                },
                 active: true,
             }),
 
-            Message::EditItem(i) => {
-                println!("Edit item {}", i);
+            Message::DialogUpdate(dialog_page) => {
+                if !self.dialog_pages.is_empty() {
+                    self.dialog_pages[0] = dialog_page;
+                }
+            }
+
+            Message::DialogCancel => {
+                self.dialog_pages.pop_front();
+            }
+
+            Message::DialogEditItem(i, menu_item) => {
+                self.dialog_pages
+                    .push_front(DialogPage::EditItem(i, menu_item));
+            }
+
+            Message::DialogRemoveItem(i) => {
+                self.dialog_pages.push_front(DialogPage::RemoveItem(i));
+            }
+
+            Message::SaveItem(i, label, command) => {
+                // Check for power command
+                let mut new_item_type = MenuItemType::LaunchAction;
+                if command == "Lock"
+                    || command == "LogOut"
+                    || command == "Suspend"
+                    || command == "Restart"
+                    || command == "Shutdown"
+                {
+                    new_item_type = MenuItemType::PowerAction;
+                }
+
+                self.menu_items[i] = MenuItem {
+                    item_type: new_item_type,
+                    label: Some(label),
+                    command: Some(command),
+                    active: true,
+                };
+                self.dialog_pages.pop_front();
             }
 
             Message::RemoveItem(i) => {
                 self.menu_items.remove(i);
+                self.dialog_pages.pop_front();
             }
 
             Message::MoveItem(dir, i) => {
@@ -367,6 +487,10 @@ impl cosmic::Application for AppModel {
                     self.menu_items[j] = a;
                     self.menu_items[i] = b;
                 }
+            }
+
+            Message::ResetMenu => {
+                self.menu_items = MenuItems::default().items;
             }
         }
         Task::none()

@@ -153,6 +153,18 @@ impl MenuItems {
                     command: Some(String::from("Shutdown")),
                     active: true,
                 },
+                MenuItem {
+                    item_type: MenuItemType::Divider,
+                    label: None,
+                    command: None,
+                    active: true,
+                },
+                MenuItem {
+                    item_type: MenuItemType::LaunchAction,
+                    label: Some(String::from("Menu settings...")),
+                    command: Some(String::from("cosmic-logomenu-settings")),
+                    active: true,
+                },
             ],
         }
     }

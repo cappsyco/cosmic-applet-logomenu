@@ -7,9 +7,8 @@ use crate::power::PowerAction;
 use cosmic::app::{Core, Task};
 use cosmic::applet::{menu_button, padded_control};
 use cosmic::cosmic_theme::Spacing;
+use cosmic::iced::Limits;
 use cosmic::iced::window::Id;
-use cosmic::iced::{Alignment, Length, Limits};
-use cosmic::iced_widget::row;
 use cosmic::iced_winit::commands::popup::{destroy_popup, get_popup};
 use cosmic::widget::{self};
 use cosmic::{Application, Element};
@@ -90,12 +89,6 @@ impl Application for LogoMenu {
             None => MenuItems::default(),
         };
 
-        // Will the settings option appear at the bottom of the menu?
-        let config_show_settings = match load_config("show_menu_settings", CONFIG_VER) {
-            Some(val) => val,
-            None => true,
-        };
-
         let mut content_list = widget::column().padding([8, 0]).spacing(0);
         for item in config_menuitems.items {
             match item.active() {
@@ -146,21 +139,6 @@ impl Application for LogoMenu {
                 }
                 _ => {}
             }
-        }
-
-        if config_show_settings {
-            content_list = content_list.push(
-                padded_control(widget::divider::horizontal::default())
-                    .padding([space_xxs, space_s]),
-            );
-            let menu_settings_btn = menu_button(row![
-                widget::text::body(fl!("menu-settings"))
-                    .width(Length::Fill)
-                    .height(Length::Fixed(24.0))
-                    .align_y(Alignment::Center)
-            ])
-            .on_press(Message::Run(String::from("cosmic-logomenu-settings")));
-            content_list = content_list.push(menu_settings_btn);
         }
 
         self.core.applet.popup_container(content_list).into()
