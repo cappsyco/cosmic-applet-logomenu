@@ -142,6 +142,8 @@ impl Default for MenuItems {
 
 // Preload all logos
 pub static IMAGES: phf::Map<&'static str, (&[u8], bool)> = phf_map! {
+    "Aeryn" => (include_bytes!("../../res/icons/aeryn-logo.svg"), false),
+    "Aeryn (Symbolic)" => (include_bytes!("../../res/icons/aeryn-logo-symbolic.svg"), true),
     "Alma" => (include_bytes!("../../res/icons/almalinux-logo.svg"), false),
     "Alma (Symbolic)" => (include_bytes!("../../res/icons/almalinux-logo-symbolic.svg"), true),
     "Arch" => (include_bytes!("../../res/icons/arch-logo.svg"), false),
