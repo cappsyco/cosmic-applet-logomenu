@@ -159,7 +159,7 @@ impl cosmic::Application for AppModel {
         page_content = page_content.push(
             widget::row().push(
                 widget::column()
-                    .push(widget::text::title3("COSMIC Logo Menu - Settings"))
+                    .push(widget::text::title3(fl!("app-title")))
                     .width(Length::Fill)
                     .align_x(Alignment::Center),
             ),
@@ -182,8 +182,8 @@ impl cosmic::Application for AppModel {
         );
 
         // Menu settings
-        page_content = page_content.push(settings::section().title("Menu settings").add({
-            cosmic::Element::from(settings::item::builder("Logo").control(dropdown(
+        page_content = page_content.push(settings::section().title(fl!("menu-settings")).add({
+            cosmic::Element::from(settings::item::builder(fl!("logo")).control(dropdown(
                 &self.logo_options,
                 self.selected_logo_idx,
                 Message::UpdateLogo,
@@ -192,7 +192,7 @@ impl cosmic::Application for AppModel {
         page_content = page_content.push(Space::with_height(25));
 
         // Menu builder
-        let mut menu_item_controls = settings::section().title("Menu builder");
+        let mut menu_item_controls = settings::section().title(fl!("menu-builder"));
         let menu_items = &self.menu_items;
 
         for (i, menu_item) in menu_items.iter().enumerate() {
@@ -215,7 +215,7 @@ impl cosmic::Application for AppModel {
                             Some(label) => label,
                             _ => match menu_item.item_type() {
                                 MenuItemType::Divider => String::from(""),
-                                _ => String::from("No label"),
+                                _ => String::from(fl!("no-label")),
                             },
                         })
                         .description(match menu_item.command() {
@@ -251,17 +251,17 @@ impl cosmic::Application for AppModel {
             container(
                 widget::row::with_capacity(2)
                     .push(
-                        widget::button::standard("Reset to default")
+                        widget::button::standard(fl!("reset-to-default"))
                             .on_press(Message::ResetMenu)
                             .apply(Element::from),
                     )
                     .push(
-                        widget::button::standard("Add divider")
+                        widget::button::standard(fl!("add-divider"))
                             .on_press(Message::AddItem(MenuItemType::Divider))
                             .apply(Element::from),
                     )
                     .push(
-                        widget::button::suggested("Add menu item")
+                        widget::button::suggested(fl!("add-menu-item"))
                             .on_press(Message::AddItem(MenuItemType::LaunchAction))
                             .apply(Element::from),
                     )
@@ -316,7 +316,7 @@ impl cosmic::Application for AppModel {
 
                 let label_input = widget::container(
                     widget::text_input("", label_unwrapped.clone())
-                        .label("Label")
+                        .label(fl!("label"))
                         .on_input(move |value| {
                             Message::DialogUpdate(DialogPage::EditItem(
                                 i.clone(),
@@ -330,7 +330,7 @@ impl cosmic::Application for AppModel {
 
                 let command_input = widget::container(
                     widget::text_input("", command_unwrapped.clone())
-                        .label("Command")
+                        .label(fl!("command"))
                         .on_input(|value| {
                             Message::DialogUpdate(DialogPage::EditItem(
                                 i.clone(),
@@ -353,20 +353,20 @@ impl cosmic::Application for AppModel {
                     ))
                 };
 
-                let save_button = widget::button::suggested("Save")
+                let save_button = widget::button::suggested(fl!("save"))
                     .on_press_maybe(complete_maybe)
                     .apply(Element::from);
 
                 let cancel_button =
-                    widget::button::standard("Cancel").on_press(Message::DialogCancel);
+                    widget::button::standard(fl!("cancel")).on_press(Message::DialogCancel);
 
                 widget::dialog()
-                    .title("Edit menu item")
+                    .title(fl!("edit-menu-item"))
                     .control(
                         widget::ListColumn::default()
                             .add(label_input)
                             .add(command_input)
-                            .add(widget::text("Enter one of the following commands for the corresponding power action: Lock, LogOut, Suspend, Restart or Shutdown"))
+                            .add(widget::text(fl!("power-help-text"))),
                     )
                     .primary_action(save_button)
                     .secondary_action(cancel_button)
@@ -374,12 +374,13 @@ impl cosmic::Application for AppModel {
             }
 
             DialogPage::RemoveItem(i) => widget::dialog()
-                .title("Remove item")
+                .title(fl!("remove-item"))
                 .primary_action(
-                    widget::button::suggested("Remove...").on_press(Message::RemoveItem(i.clone())),
+                    widget::button::suggested(fl!("remove"))
+                        .on_press(Message::RemoveItem(i.clone())),
                 )
                 .secondary_action(
-                    widget::button::standard("Cancel").on_press(Message::DialogCancel),
+                    widget::button::standard(fl!("cancel")).on_press(Message::DialogCancel),
                 )
                 .apply(Element::from),
         };
@@ -408,7 +409,7 @@ impl cosmic::Application for AppModel {
             Message::AddItem(item_type) => self.menu_items.push(MenuItem {
                 item_type: item_type.clone(),
                 label: match &item_type {
-                    MenuItemType::LaunchAction => Some(String::from("New launcher")),
+                    MenuItemType::LaunchAction => Some(String::from(fl!("new-launcher"))),
                     _ => None,
                 },
                 command: match &item_type {
