@@ -1,25 +1,25 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-use crate::config::load_config;
 use crate::power;
 use crate::power::PowerAction;
 use cosmic::app::{Core, Task};
 use cosmic::applet::{menu_button, padded_control};
+use cosmic::cosmic_config::{Config, CosmicConfigEntry};
 use cosmic::cosmic_theme::Spacing;
-use cosmic::iced::Limits;
 use cosmic::iced::window::Id;
+use cosmic::iced::{Limits, Subscription};
 use cosmic::iced_winit::commands::popup::{destroy_popup, get_popup};
 use cosmic::widget::{self};
 use cosmic::{Application, Element};
-use liblog::{IMAGES, MenuItemType, MenuItems};
+use liblog::{IMAGES, LogoMenuConfig, MenuItemType};
 use std::process::Command;
 
 const ID: &str = "co.uk.cappsy.CosmicAppletLogoMenu";
-const CONFIG_VER: u64 = 1;
 
 pub struct LogoMenu {
     core: Core,
     popup: Option<Id>,
+    config: LogoMenuConfig,
 }
 
 #[derive(Debug, Clone)]
@@ -29,6 +29,7 @@ pub enum Message {
     Run(String),
     Action(power::PowerAction),
     Zbus(Result<(), zbus::Error>),
+    ConfigUpdate(LogoMenuConfig),
 }
 
 impl Application for LogoMenu {
@@ -46,7 +47,20 @@ impl Application for LogoMenu {
     }
 
     fn init(core: Core, _flags: Self::Flags) -> (Self, Task<Self::Message>) {
-        let app = LogoMenu { core, popup: None };
+        // Load config
+        let helper = Config::new(ID, LogoMenuConfig::VERSION).ok();
+        let config: LogoMenuConfig = helper
+            .as_ref()
+            .map(|helper| {
+                LogoMenuConfig::get_entry(helper).unwrap_or_else(|(_errors, config)| config)
+            })
+            .unwrap_or_default();
+
+        let app = LogoMenu {
+            core,
+            popup: None,
+            config,
+        };
         (app, Task::none())
     }
 
@@ -55,18 +69,13 @@ impl Application for LogoMenu {
     }
 
     fn view(&self) -> Element<Self::Message> {
-        // Get the current logo with appropriate fallbacks
-        let default_logo = String::from("Cosmic (Symbolic)");
-        let config_logo = match load_config("logo", CONFIG_VER) {
-            Some(val) => val,
-            None => default_logo.to_owned(),
-        };
-        let selected_logo_name = if IMAGES.contains_key(&config_logo) {
-            config_logo
+        // Get the current logo with appropriate fallback
+        let selected_logo_name = if IMAGES.contains_key(&self.config.logo) {
+            &self.config.logo
         } else {
-            default_logo
+            &LogoMenuConfig::default().logo
         };
-        let logo_bytes = IMAGES[&selected_logo_name];
+        let logo_bytes = IMAGES[selected_logo_name];
 
         self.core
             .applet
@@ -82,11 +91,11 @@ impl Application for LogoMenu {
             space_xxs, space_s, ..
         } = cosmic::theme::active().cosmic().spacing;
 
-        // Get the menu with a fallback to default if invalid or missing
-        let config_menuitems: MenuItems = load_config("menu_items", CONFIG_VER).unwrap_or_default();
+        // Get the menu from config
+        let config_menuitems = &self.config.menu_items;
 
         let mut content_list = widget::column().padding([8, 0]).spacing(0);
-        for item in config_menuitems.items {
+        for item in &config_menuitems.items {
             match item.item_type() {
                 MenuItemType::LaunchAction => {
                     content_list = content_list.push(
@@ -121,6 +130,14 @@ impl Application for LogoMenu {
         }
 
         self.core.applet.popup_container(content_list).into()
+    }
+
+    fn subscription(&self) -> Subscription<Message> {
+        Subscription::batch(vec![
+            self.core
+                .watch_config(ID)
+                .map(|res| Message::ConfigUpdate(res.config)),
+        ])
     }
 
     fn update(&mut self, message: Self::Message) -> Task<Self::Message> {
@@ -187,6 +204,9 @@ impl Application for LogoMenu {
                     Err(e) => eprintln!("Error executing command: {}", e),
                 };
                 return close_popup(self.popup);
+            }
+            Message::ConfigUpdate(config) => {
+                self.config = config;
             }
         }
         Task::none()

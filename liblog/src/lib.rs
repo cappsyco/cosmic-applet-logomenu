@@ -1,11 +1,28 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+use cosmic_config::{CosmicConfigEntry, cosmic_config_derive::CosmicConfigEntry};
 use phf::phf_map;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
+// Config
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, CosmicConfigEntry)]
+#[version = 1]
+pub struct LogoMenuConfig {
+    pub logo: String,
+    pub menu_items: MenuItems,
+}
+impl Default for LogoMenuConfig {
+    fn default() -> Self {
+        Self {
+            logo: String::from("Cosmic (Symbolic)"),
+            menu_items: MenuItems::default(),
+        }
+    }
+}
+
 // Menu item types
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum MenuItemType {
     LaunchAction,
     PowerAction,
@@ -13,7 +30,7 @@ pub enum MenuItemType {
 }
 
 // Individual menu item struct
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct MenuItem {
     pub item_type: MenuItemType,
     pub label: Option<String>,
@@ -32,7 +49,7 @@ impl MenuItem {
 }
 
 // Top lebel menu items struct
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct MenuItems {
     pub items: Vec<MenuItem>,
 }
