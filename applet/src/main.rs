@@ -2,7 +2,6 @@
 
 use app::LogoMenu;
 mod app;
-mod config;
 mod power;
 
 fn main() -> cosmic::iced::Result {

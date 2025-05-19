@@ -174,7 +174,7 @@ impl cosmic::Application for AppModel {
                     .push(
                         widget::svg(widget::svg::Handle::from_memory(logo_bytes.0))
                             .symbolic(logo_bytes.1)
-                            .width(75),
+                            .width(80),
                     )
                     .width(Length::Fill)
                     .align_x(Alignment::Center),

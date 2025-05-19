@@ -7,3 +7,4 @@ rust-version = "1.86.0"
 [dependencies]
 phf = "0.11"
 serde = "1.0.219"
+cosmic-config = { git = "https://github.com/pop-os/libcosmic" }
