@@ -1,0 +1,39 @@
+{
+  "id": "co.uk.cappsy.CosmicAppletLogoMenu",
+  "runtime": "org.freedesktop.Platform",
+  "runtime-version": "24.08",
+  "base": "com.system76.Cosmic.BaseApp",
+  "base-version": "stable",
+  "sdk": "org.freedesktop.Sdk",
+  "sdk-extensions": ["org.freedesktop.Sdk.Extension.rust-stable"],
+  "command": "cosmic-ext-applet-clipboard-manager",
+  "finish-args": [
+    "--share=ipc",
+    "--socket=wayland",
+    "--talk-name=com.system76.CosmicSettingsDaemon"
+  ],
+  "modules": [
+    {
+      "name": "cosmic-applet-logomenu",
+      "buildsystem": "simple",
+      "build-options": {
+        "env": {
+          "CARGO_HOME": "/run/build/cosmic-applet-logomenu/cargo"
+        },
+        "append-path": "/usr/lib/sdk/rust-stable/bin"
+      },
+      "build-commands": [
+        "just build-release --offline --verbose",
+        "just flatpak"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/cappsyco/cosmic-applet-logomenu.git",
+          "commit": "26f797e8b782f73936c4994c58629a622278905a"
+        },
+        "./cargo-sources.json"
+      ]
+    }
+  ]
+}
