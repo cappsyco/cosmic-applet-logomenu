@@ -4,20 +4,34 @@ A simple logo menu (in the style of the popular [GNOME extension](https://github
 
 ![Screenshot_2025-05-18_15-52-01](https://github.com/user-attachments/assets/ca1ccc8d-6705-4cad-ba1a-7b0e01ce7ec0)
 
-## Install
+## Installing
 
-To install, you will need [just](https://github.com/casey/just), if you're on Pop!\_OS, you can install it with the following command:
+Two binaries are currently required for the Logo Menu to be fully functional (one for the applet itself and a separate settings app). You can get these binaries from the latest release and install using the following instructions.
+
+### .deb distros (Pop!\_OS, Debian etc.)
 
 ```sh
-sudo apt install just
+sudo dpkg -i cosmic-applet-logomenu_0.3.0_amd64.deb
+sudo dpkg -i cosmic-logomenu-settings_0.3.0_amd64.deb
 ```
 
-After you install it, you can run the following commands to build and install the applet:
+### .rpm distros (Fedora etc.)
 
 ```sh
-just build-release
-sudo just install
+sudo dnf install cosmic-applet-logomenu-0.3.0-1.fc42.x86_64.rpm
+sudo dnf install cosmic-logomenu-settings-0.3.0-1.fc42.x86_64.rpm
+```
+
+### Arch based distros
+
+The applet and settings app can be installed directly from one package in the AUR. You will need `base-devel` and `git` if you don't have them already.
+
+```sh
+sudo pacman -S base-devel git
+git clone https://aur.archlinux.org/cosmic-applet-logomenu && cd cosmic-applet-logomenu && makepkg -si
 ```
 
 ## With thanks
+* [System76 and their COSMIC desktop environment](https://system76.com/cosmic/)
+* [COSMIC Utilities](https://github.com/cosmic-utils/) - Organization containing third party utilities for COSMIC™
 * [Logo Menu](https://github.com/Aryan20/Logomenu) by Aryan20 - For the inspiration and being a fantastic resource for the logos used here
