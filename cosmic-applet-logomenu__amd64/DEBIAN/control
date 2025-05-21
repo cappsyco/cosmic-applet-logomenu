@@ -1,0 +1,5 @@
+Package: cosmic-applet-logomenu
+Version: 
+Architecture: amd64
+Maintainer: Jonathan Capps <cappsy@gmail.com>
+Description: A customisable menu applet for the COSMIC desktop.

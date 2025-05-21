@@ -1,7 +1,11 @@
-name1 := 'cosmic-applet-logomenu'
-name2 := 'cosmic-logomenu-settings'
 export APPID1 := 'co.uk.cappsy.CosmicAppletLogoMenu'
 export APPID2 := 'co.uk.cappsy.CosmicLogoMenuSettings'
+
+name1 := 'cosmic-applet-logomenu'
+name2 := 'cosmic-logomenu-settings'
+summary := 'A customisable menu applet for the COSMIC desktop.'
+dev_name := 'Jonathan Capps'
+email := 'cappsy@gmail.com'
 
 version := `sed -En 's/version[[:space:]]*=[[:space:]]*"([^"]+)"/\1/p' Cargo.toml | head -1`
 
@@ -126,9 +130,9 @@ vendor-extract:
     tar pxf vendor.tar
 
 # Deb install
-deb_arch := if rpm_arch == "x86_64" { "amd64" } else { arch() }
-debname1 := name1+'_'+version+'_'+architecture
-debname2 := name2+'_'+version+'_'+architecture
+deb_arch := if arch() == "x86_64" { "amd64" } else { arch() }
+debname1 := name1+'_'+version+'_'+deb_arch
+debname2 := name2+'_'+version+'_'+deb_arch
 debdir1 := debname1 / 'DEBIAN'
 debdir2 := debname2 / 'DEBIAN'
 debcontrol1 := debdir1 / 'control'
