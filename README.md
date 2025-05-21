@@ -1,4 +1,4 @@
-# COSMIC Logo Menu
+# COSMIC™ Logo Menu
 
 A simple logo menu (in the style of the popular [GNOME extension](https://github.com/Aryan20/Logomenu)) to collect your launcher options in a nice menu.
 
