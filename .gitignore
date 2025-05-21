@@ -15,3 +15,5 @@ Cargo.lock
 
 # Packaging assets
 cargo-sources.json
+*.deb
+*.rpm

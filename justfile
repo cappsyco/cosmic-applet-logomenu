@@ -7,7 +7,7 @@ summary := 'A customisable menu applet for the COSMIC desktop.'
 dev_name := 'Jonathan Capps'
 email := 'cappsy@gmail.com'
 
-version := `sed -En 's/version[[:space:]]*=[[:space:]]*"([^"]+)"/\1/p' Cargo.toml | head -1`
+version := `sed -En 's/version[[:space:]]*=[[:space:]]*"([^"]+)"/\1/p' applet/Cargo.toml | head -1`
 
 rootdir := ''
 prefix := '/usr'
@@ -176,7 +176,7 @@ rpmdir2 := rpmname2 / 'BUILDROOT'
 rpminstall1 := rpmdir1 / prefix
 rpminstall2 := rpmdir2 / prefix
 rpm_bin_dst1 := rpminstall1 / 'bin' / name1
-rpm_bin_dst2 := rpminstall2 / 'bin' / name1
+rpm_bin_dst2 := rpminstall2 / 'bin' / name2
 rpm_desktop_dst1 := rpminstall1 / 'share' / 'applications' / desktop1
 rpm_desktop_dst2 := rpminstall2 / 'share' / 'applications' / desktop2
 rpm_metainfo_dst1 := rpminstall1 / 'share' / 'metainfo' / metainfo1
@@ -189,7 +189,7 @@ rpm:
     install -D {{bin-src1}} {{rpm_bin_dst1}}
     install -D {{desktop-src1}} {{rpm_desktop_dst1}}
     install -D {{metainfo-src1}} {{rpm_metainfo_dst1}}
-    install -D "{{icons-src}}/scalable/apps/{{APPID1}}.svg" "{{rpm_icons_dst1}}/apps/{{APPID1}}.svg"; \
+    install -D "{{icons-src}}/scalable/apps/{{APPID1}}.svg" "{{rpm_icons_dst1}}/{{APPID1}}.svg"; \
 
     mkdir -p {{rpmname1}}
     echo "Name: {{name1}}" > {{rpmname1}}/spec.spec
@@ -222,7 +222,7 @@ rpm:
     install -D {{bin-src2}} {{rpm_bin_dst2}}
     install -D {{desktop-src2}} {{rpm_desktop_dst2}}
     install -D {{metainfo-src2}} {{rpm_metainfo_dst2}}
-    install -D "{{icons-src}}/scalable/apps/{{APPID2}}.svg" "{{rpm_icons_dst2}}/apps/{{APPID2}}.svg"; \
+    install -D "{{icons-src}}/scalable/apps/{{APPID2}}.svg" "{{rpm_icons_dst2}}/{{APPID2}}.svg"; \
 
     mkdir -p {{rpmname2}}
     echo "Name: {{name2}}" > {{rpmname2}}/spec.spec
