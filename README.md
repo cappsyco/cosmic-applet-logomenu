@@ -6,7 +6,7 @@ A simple logo menu (in the style of the popular [GNOME extension](https://github
 
 ## Installing
 
-Two binaries are currently required for the Logo Menu to be fully functional (one for the applet itself and a separate settings app). You can get these binaries from the latest release and install using the following instructions.
+Two binaries are currently required for the Logo Menu to be fully functional (one for the applet itself and a separate settings app). You can get these binaries from the [latest release](https://github.com/cappsyco/cosmic-applet-logomenu/releases/latest) and install using the following instructions.
 
 ### .deb distros (Pop!\_OS, Debian etc.)
 
@@ -24,11 +24,12 @@ sudo dnf install cosmic-logomenu-settings-0.3.0-1.fc42.x86_64.rpm
 
 ### Arch based distros
 
-The applet and settings app can be installed directly from one package in the AUR. You will need `base-devel` and `git` if you don't have them already.
+The applet and settings app can be installed directly from [one package in the AUR](https://aur.archlinux.org/packages/cosmic-applet-logomenu). You will need `base-devel` and `git` if you don't have them already.
 
 ```sh
 sudo pacman -S base-devel git
-git clone https://aur.archlinux.org/cosmic-applet-logomenu && cd cosmic-applet-logomenu && makepkg -si
+git clone https://aur.archlinux.org/cosmic-applet-logomenu.git
+cd cosmic-applet-logomenu && makepkg -si
 ```
 
 ## With thanks
