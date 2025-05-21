@@ -3,8 +3,6 @@ name2 := 'cosmic-logomenu-settings'
 export APPID1 := 'co.uk.cappsy.CosmicAppletLogoMenu'
 export APPID2 := 'co.uk.cappsy.CosmicLogoMenuSettings'
 
-rpm_arch := arch()
-deb_arch := if rpm_arch == "x86_64" { "amd64" } else { rpm_arch }
 version := `sed -En 's/version[[:space:]]*=[[:space:]]*"([^"]+)"/\1/p' Cargo.toml | head -1`
 
 rootdir := ''
@@ -128,6 +126,7 @@ vendor-extract:
     tar pxf vendor.tar
 
 # Deb install
+deb_arch := if rpm_arch == "x86_64" { "amd64" } else { arch() }
 debname1 := name1+'_'+version+'_'+architecture
 debname2 := name2+'_'+version+'_'+architecture
 debdir1 := debname1 / 'DEBIAN'
@@ -143,7 +142,7 @@ deb:
     mkdir -p {{debdir1}}
     echo "Package: {{name1}}" > {{debcontrol1}}
     echo "Version: {{version}}" >> {{debcontrol1}}
-    echo "Architecture: {{architecture}}" >> {{debcontrol1}}
+    echo "Architecture: {{deb_arch}}" >> {{debcontrol1}}
     echo "Maintainer: {{dev_name}} <{{email}}>" >> {{debcontrol1}}
     echo "Description: {{summary}}" >> {{debcontrol1}}
     dpkg-deb --build --root-owner-group {{debname1}}
@@ -156,58 +155,94 @@ deb:
     mkdir -p {{debdir2}}
     echo "Package: {{name2}}" > {{debcontrol2}}
     echo "Version: {{version}}" >> {{debcontrol2}}
-    echo "Architecture: {{architecture}}" >> {{debcontrol2}}
+    echo "Architecture: {{deb_arch}}" >> {{debcontrol2}}
     echo "Maintainer: {{dev_name}} <{{email}}>" >> {{debcontrol2}}
     echo "Description: {{summary}}" >> {{debcontrol2}}
     dpkg-deb --build --root-owner-group {{debname2}}
     rm -Rf {{debname2}}/
 
 
-
-
 # RPM install
 
 rpmarch := arch()
-rpmname := name + '-' + version + '-1.' + rpmarch
-rpmdir := rpmname / 'BUILDROOT'
-rpminstall := rpmdir / prefix
-rpm_bin_dst := rpminstall / 'bin' / name
-rpm_desktop_dst := rpminstall / 'share' / 'applications' / desktop
-rpm_metainfo_dst := rpminstall / 'share' / 'metainfo' / metainfo
-rpm_icons_dst := rpminstall / 'share' / 'icons' / 'hicolor' / 'scalable' / 'apps'
+rpmname1 := name1 + '-' + version + '-1.' + rpmarch
+rpmname2 := name2 + '-' + version + '-1.' + rpmarch
+rpmdir1 := rpmname1 / 'BUILDROOT'
+rpmdir2 := rpmname2 / 'BUILDROOT'
+rpminstall1 := rpmdir1 / prefix
+rpminstall2 := rpmdir2 / prefix
+rpm_bin_dst1 := rpminstall1 / 'bin' / name1
+rpm_bin_dst2 := rpminstall2 / 'bin' / name1
+rpm_desktop_dst1 := rpminstall1 / 'share' / 'applications' / desktop1
+rpm_desktop_dst2 := rpminstall2 / 'share' / 'applications' / desktop2
+rpm_metainfo_dst1 := rpminstall1 / 'share' / 'metainfo' / metainfo1
+rpm_metainfo_dst2 := rpminstall2 / 'share' / 'metainfo' / metainfo2
+rpm_icons_dst1 := rpminstall1 / 'share' / 'icons' / 'hicolor' / 'scalable' / 'apps'
+rpm_icons_dst2 := rpminstall2 / 'share' / 'icons' / 'hicolor' / 'scalable' / 'apps'
 
 rpm:
-    strip {{bin-src}}
-    install -D {{bin-src}} {{rpm_bin_dst}}
-    install -D {{desktop-src}} {{rpm_desktop_dst}}
-    install -D {{metainfo-src}} {{rpm_metainfo_dst}}
-    for svg in {{icons-src}}/apps/*.svg; do \
-        install -D "$svg" "{{rpm_icons_dst}}/$(basename $svg)"; \
-    done
+    strip {{bin-src1}}
+    install -D {{bin-src1}} {{rpm_bin_dst1}}
+    install -D {{desktop-src1}} {{rpm_desktop_dst1}}
+    install -D {{metainfo-src1}} {{rpm_metainfo_dst1}}
+    install -D "{{icons-src}}/scalable/apps/{{APPID1}}.svg" "{{rpm_icons_dst1}}/apps/{{APPID1}}.svg"; \
 
-    mkdir -p {{rpmname}}
-    echo "Name: {{name}}" > {{rpmname}}/spec.spec
-    echo "Version: {{version}}" >> {{rpmname}}/spec.spec
-    echo "Release: 1%{?dist}" >> {{rpmname}}/spec.spec
-    echo "Summary: {{summary}}" >> {{rpmname}}/spec.spec
-    echo "" >> {{rpmname}}/spec.spec
-    echo "License: GPLv3" >> {{rpmname}}/spec.spec
-    echo "Group: Applications/Utilities" >> {{rpmname}}/spec.spec
-    echo "%description" >> {{rpmname}}/spec.spec
-    echo "{{summary}}" >> {{rpmname}}/spec.spec
-    echo "" >> {{rpmname}}/spec.spec
-    echo "%files" >> {{rpmname}}/spec.spec
-    echo "%defattr(-,root,root,-)" >> {{rpmname}}/spec.spec
-    echo "{{prefix}}/bin/{{name}}" >> {{rpmname}}/spec.spec
-    echo "{{prefix}}/share/applications/{{desktop}}" >> {{rpmname}}/spec.spec
-    echo "{{prefix}}/share/metainfo/{{metainfo}}" >> {{rpmname}}/spec.spec
-    echo "{{prefix}}/share/icons/hicolor/scalable/apps/*.svg" >> {{rpmname}}/spec.spec
+    mkdir -p {{rpmname1}}
+    echo "Name: {{name1}}" > {{rpmname1}}/spec.spec
+    echo "Version: {{version}}" >> {{rpmname1}}/spec.spec
+    echo "Release: 1%{?dist}" >> {{rpmname1}}/spec.spec
+    echo "Summary: {{summary}}" >> {{rpmname1}}/spec.spec
+    echo "" >> {{rpmname1}}/spec.spec
+    echo "License: GPLv3" >> {{rpmname1}}/spec.spec
+    echo "Group: Applications/Utilities" >> {{rpmname1}}/spec.spec
+    echo "%description" >> {{rpmname1}}/spec.spec
+    echo "{{summary}}" >> {{rpmname1}}/spec.spec
+    echo "" >> {{rpmname1}}/spec.spec
+    echo "%files" >> {{rpmname1}}/spec.spec
+    echo "%defattr(-,root,root,-)" >> {{rpmname1}}/spec.spec
+    echo "{{prefix}}/bin/{{name1}}" >> {{rpmname1}}/spec.spec
+    echo "{{prefix}}/share/applications/{{desktop1}}" >> {{rpmname1}}/spec.spec
+    echo "{{prefix}}/share/metainfo/{{metainfo1}}" >> {{rpmname1}}/spec.spec
+    echo "{{prefix}}/share/icons/hicolor/scalable/apps/*.svg" >> {{rpmname1}}/spec.spec
 
-    rpmbuild -bb --buildroot="$(pwd)/{{rpmdir}}" {{rpmname}}/spec.spec \
+    rpmbuild -bb --buildroot="$(pwd)/{{rpmdir1}}" {{rpmname1}}/spec.spec \
         --define "_rpmdir $(pwd)" \
-        --define "_topdir $(pwd)/{{rpmname}}" \
-        --define "_buildrootdir $(pwd)/{{rpmdir}}"
+        --define "_topdir $(pwd)/{{rpmname1}}" \
+        --define "_buildrootdir $(pwd)/{{rpmdir1}}"
 
-    rm -rf {{rpmname}} {{rpmdir}}
+    rm -rf {{rpmname1}} {{rpmdir1}}
+    mv x86_64/* .
+    rmdir x86_64
+
+    strip {{bin-src2}}
+    install -D {{bin-src2}} {{rpm_bin_dst2}}
+    install -D {{desktop-src2}} {{rpm_desktop_dst2}}
+    install -D {{metainfo-src2}} {{rpm_metainfo_dst2}}
+    install -D "{{icons-src}}/scalable/apps/{{APPID2}}.svg" "{{rpm_icons_dst2}}/apps/{{APPID2}}.svg"; \
+
+    mkdir -p {{rpmname2}}
+    echo "Name: {{name2}}" > {{rpmname2}}/spec.spec
+    echo "Version: {{version}}" >> {{rpmname2}}/spec.spec
+    echo "Release: 1%{?dist}" >> {{rpmname2}}/spec.spec
+    echo "Summary: {{summary}}" >> {{rpmname2}}/spec.spec
+    echo "" >> {{rpmname2}}/spec.spec
+    echo "License: GPLv3" >> {{rpmname2}}/spec.spec
+    echo "Group: Applications/Utilities" >> {{rpmname2}}/spec.spec
+    echo "%description" >> {{rpmname2}}/spec.spec
+    echo "{{summary}}" >> {{rpmname2}}/spec.spec
+    echo "" >> {{rpmname2}}/spec.spec
+    echo "%files" >> {{rpmname2}}/spec.spec
+    echo "%defattr(-,root,root,-)" >> {{rpmname2}}/spec.spec
+    echo "{{prefix}}/bin/{{name2}}" >> {{rpmname2}}/spec.spec
+    echo "{{prefix}}/share/applications/{{desktop2}}" >> {{rpmname2}}/spec.spec
+    echo "{{prefix}}/share/metainfo/{{metainfo2}}" >> {{rpmname2}}/spec.spec
+    echo "{{prefix}}/share/icons/hicolor/scalable/apps/*.svg" >> {{rpmname2}}/spec.spec
+
+    rpmbuild -bb --buildroot="$(pwd)/{{rpmdir2}}" {{rpmname2}}/spec.spec \
+        --define "_rpmdir $(pwd)" \
+        --define "_topdir $(pwd)/{{rpmname2}}" \
+        --define "_buildrootdir $(pwd)/{{rpmdir2}}"
+
+    rm -rf {{rpmname2}} {{rpmdir2}}
     mv x86_64/* .
     rmdir x86_64
