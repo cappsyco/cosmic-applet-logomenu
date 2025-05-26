@@ -12,7 +12,8 @@ use cosmic::{cosmic_theme, theme};
 use liblog::{IMAGES, MenuItem, MenuItemType, MenuItems};
 use std::collections::{HashMap, VecDeque};
 
-const APP_ICON: &[u8] = include_bytes!("../resources/icons/hicolor/scalable/apps/icon.svg");
+const APP_ICON: &[u8] =
+    include_bytes!("../../res/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicLogoMenuSettings.svg");
 const CONFIG_VER: u64 = 1;
 const CONFIG_ID: &str = "co.uk.cappsy.CosmicAppletLogoMenu";
 

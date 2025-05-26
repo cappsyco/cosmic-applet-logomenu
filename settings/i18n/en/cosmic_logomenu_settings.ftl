@@ -1,7 +1,7 @@
 about = About
 add-divider = Add divider
 add-menu-item = Add menu item
-app-title = COSMIC Logo Menu - Settings
+app-title = COSMIC™ Logo Menu - Settings
 cancel = Cancel
 command = Command
 edit-menu-item = Edit menu item

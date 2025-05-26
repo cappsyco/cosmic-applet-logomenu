@@ -78,10 +78,6 @@ dev *args:
     cargo fmt
     just run {{args}}
 
-# Run with debug logs
-run *args:
-    env RUST_LOG=cosmic_tasks=info RUST_BACKTRACE=full cargo run --release {{args}}
-
 # Installs files
 install:
     install -Dm0755 {{bin-src1}} {{bin-dst1}}

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <component type="desktop-application">
   <id>co.uk.cappsy.CosmicLogoMenuSettings</id>
   <metadata_license>CC0-1.0</metadata_license>
@@ -6,10 +6,14 @@
   <name>Cosmic Logomenu Settings</name>
   <summary>Settings application for COSMIC Logo Menu applet</summary>
   <icon type="remote" width="64" height="64" scale="1">
-    https://github.com/cappsyco/cosmic-applet-logomenu/raw/main/resources/icons/hicolor/scalable/apps/icon.svg
+  https://raw.githubusercontent.com/cappsyco/cosmic-applet-logomenu/main/res/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicLogoMenuSettings.svg
   </icon>
-  <url type="vcs-browser">https://github.com/cappsyco/cosmic-applet-logomenu</url>
-  <launchable type="desktop-id">co.uk.cappsy.CosmicLogoMenuSettings.desktop</launchable>
+  <url
+        type="vcs-browser"
+    >https://github.com/cappsyco/cosmic-applet-logomenu</url>
+  <launchable
+        type="desktop-id"
+    >co.uk.cappsy.CosmicLogoMenuSettings.desktop</launchable>
   <provides>
     <id>co.uk.cappsy.CosmicLogoMenuSettings</id>
     <binaries>
@@ -32,4 +36,3 @@
   </keywords>
   <content_rating type="oars-1.1" />
 </component>
-
