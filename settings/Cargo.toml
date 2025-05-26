@@ -38,7 +38,6 @@ features = [
     "wayland",
     # GPU-accelerated rendering
     "wgpu",
-    "tokio",
 ]
 
 # Uncomment to test a locally-cloned libcosmic
