@@ -11,15 +11,15 @@ Two binaries are currently required for the Logo Menu to be fully functional (on
 ### .deb distros (Pop!\_OS, Debian etc.)
 
 ```sh
-sudo dpkg -i cosmic-applet-logomenu_0.3.0_amd64.deb
-sudo dpkg -i cosmic-logomenu-settings_0.3.0_amd64.deb
+sudo dpkg -i cosmic-applet-logomenu_0.4.0_amd64.deb
+sudo dpkg -i cosmic-logomenu-settings_0.4.0_amd64.deb
 ```
 
 ### .rpm distros (Fedora etc.)
 
 ```sh
-sudo dnf install cosmic-applet-logomenu-0.3.0-1.fc42.x86_64.rpm
-sudo dnf install cosmic-logomenu-settings-0.3.0-1.fc42.x86_64.rpm
+sudo dnf install cosmic-applet-logomenu-0.4.0-1.fc42.x86_64.rpm
+sudo dnf install cosmic-logomenu-settings-0.4.0-1.fc42.x86_64.rpm
 ```
 
 ### Arch based distros
