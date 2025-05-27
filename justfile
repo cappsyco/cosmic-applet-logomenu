@@ -151,7 +151,7 @@ deb:
     strip {{bin-src2}}
     install -D {{bin-src2}} {{debname2}}{{bin-dst2}}
     install -D {{desktop-src2}} {{debname2}}{{desktop-dst2}}
-    install -D "{{icons-src}}/scalable/apps/{{APPID2}}.svg" "{{debname1}}{{icons-dst}}/scalable/apps/{{APPID2}}.svg"; \
+    install -D "{{icons-src}}/scalable/apps/{{APPID2}}.svg" "{{debname2}}{{icons-dst}}/scalable/apps/{{APPID2}}.svg"; \
     mkdir -p {{debdir2}}
     echo "Package: {{name2}}" > {{debcontrol2}}
     echo "Version: {{version}}" >> {{debcontrol2}}
