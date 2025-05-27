@@ -3,7 +3,7 @@ name = "cosmic-logomenu-settings"
 version = "0.4.0"
 edition = "2024"
 license = "MPL-2.0"
-rust-version = "1.86.0"
+#rust-version = "1.86.0"
 description = "Settings application for COSMIC Logo Menu applet"
 repository = "https://github.com/cappsyco/cosmic-applet-logomenu"
 
