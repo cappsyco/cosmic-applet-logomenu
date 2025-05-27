@@ -1,5 +1,5 @@
 [workspace]
-resolver = "3"
+resolver = "2"
 members = ['applet', "liblog", 'settings']
 
 # This patch simple removes the logic that sets a different size for the icon if it's symbolic.
