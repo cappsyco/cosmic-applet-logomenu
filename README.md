@@ -32,7 +32,8 @@ git clone https://aur.archlinux.org/cosmic-applet-logomenu.git
 cd cosmic-applet-logomenu && makepkg -si
 ```
 
-## With thanks
+## With thanks & Credit
 * [System76 and their COSMIC desktop environment](https://system76.com/cosmic/)
 * [COSMIC Utilities](https://github.com/cosmic-utils/) - Organization containing third party utilities for COSMIC™
 * [Logo Menu](https://github.com/Aryan20/Logomenu) by Aryan20 - For the inspiration and being a fantastic resource for the logos used here
+* [Hand Pointer icon used in the logo](https://www.svgrepo.com/svg/430337/line-hand-pointer-event) by [Liny Tiny Icons](https://www.svgrepo.com/collection/liny-tiny-line-icons/)
