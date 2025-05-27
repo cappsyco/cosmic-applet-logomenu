@@ -213,13 +213,22 @@ impl cosmic::Application for AppModel {
                     .push(Space::new(20, 0))
                     .push(
                         settings::item::builder(match menu_item.label() {
-                            Some(label) => label,
+                            Some(label) => {
+                                let mut label_string = label;
+                                let command_string = menu_item.command().unwrap_or_default();
+
+                                if command_string != "" {
+                                    label_string.push_str(" :: ");
+                                    label_string.push_str(&command_string);
+                                }
+
+                                label_string
+                            }
                             _ => match menu_item.item_type() {
                                 MenuItemType::Divider => String::from(""),
                                 _ => fl!("no-label"),
                             },
                         })
-                        .description(menu_item.command().unwrap_or_default())
                         .control(
                             widget::row::with_capacity(2)
                                 .push(
