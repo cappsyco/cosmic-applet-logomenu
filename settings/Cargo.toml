@@ -24,10 +24,11 @@ features = ["fluent-system", "desktop-requester"]
 git = "https://github.com/pop-os/libcosmic.git"
 features = [
     "a11y",
-    "dbus-config",
+    #"dbus-config",
     "multi-window",
     "single-instance",
     "winit",
     "wayland",
     "wgpu",
+    "tokio",
 ]

@@ -8,5 +8,5 @@ members = ['applet', "liblog", 'settings']
 [patch.'https://github.com/pop-os/libcosmic']
 libcosmic = { git = "https://github.com/cappsyco/libcosmic", branch = "logomenu-patch" }
 cosmic-config = { git = "https://github.com/cappsyco/libcosmic", branch = "logomenu-patch" }
-cosmic-config-derive = { git = "https://github.com/cappsyco/libcosmic", branch = "logomenu-patch" }
-cosmic-theme = { git = "https://github.com/cappsyco/libcosmic", branch = "logomenu-patch" }
+#cosmic-config-derive = { git = "https://github.com/cappsyco/libcosmic", branch = "logomenu-patch" }
+#cosmic-theme = { git = "https://github.com/cappsyco/libcosmic", branch = "logomenu-patch" }
