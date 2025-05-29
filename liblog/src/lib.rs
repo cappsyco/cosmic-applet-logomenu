@@ -75,7 +75,7 @@ impl Default for MenuItems {
                 MenuItem {
                     item_type: MenuItemType::LaunchAction,
                     label: Some(String::from("Applications")),
-                    command: Some(String::from("applications")),
+                    command: Some(String::from("cosmic-app-library")),
                 },
                 MenuItem {
                     item_type: MenuItemType::LaunchAction,
