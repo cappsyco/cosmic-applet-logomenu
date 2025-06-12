@@ -22,7 +22,7 @@ impl Default for LogoMenuConfig {
 }
 
 // Menu item types
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Copy)]
 pub enum MenuItemType {
     LaunchAction,
     PowerAction,

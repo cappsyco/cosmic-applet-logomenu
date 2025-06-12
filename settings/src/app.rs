@@ -7,6 +7,7 @@ use cosmic::cosmic_config::Config;
 use cosmic::iced::{Alignment, Length};
 use cosmic::iced_widget::scrollable;
 use cosmic::prelude::*;
+use cosmic::widget::row::with_capacity;
 use cosmic::widget::{self, Space, container, dropdown, menu, settings};
 use cosmic::{cosmic_theme, theme};
 use liblog::{IMAGES, MenuItem, MenuItemType, MenuItems};
@@ -33,6 +34,8 @@ pub struct AppModel {
     selected_logo_name: String,
     menu_items: Vec<MenuItem>,
     dialog_pages: VecDeque<DialogPage>,
+    type_options: Vec<String>,
+    power_options: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -48,6 +51,7 @@ pub enum Message {
     DialogCancel,
     DialogEditItem(usize, MenuItem),
     DialogRemoveItem(usize),
+    TypeSelected(MenuItemType),
 }
 
 #[derive(Debug, Clone)]
@@ -109,6 +113,18 @@ impl cosmic::Application for AppModel {
             selected_logo_idx,
             selected_logo_name,
             menu_items,
+            type_options: vec![
+                "Launcher".to_owned(),
+                "Power".to_owned(),
+                "Divider".to_owned(),
+            ],
+            power_options: vec![
+                "Lock".to_owned(),
+                "LogOut".to_owned(),
+                "Suspend".to_owned(),
+                "Restart".to_owned(),
+                "Shutdown".to_owned(),
+            ],
         };
 
         let command = app.update_title();
@@ -312,6 +328,17 @@ impl cosmic::Application for AppModel {
                 let label_unwrapped = menu_item.label().unwrap_or_default();
                 let command_unwrapped = menu_item.command().unwrap_or_default();
 
+                let type_dropdown = widget::container(widget::column::with_capacity(2).push(
+                    //widget::dropdown(&self.type_options, Some(0), Message::TypeSelected)
+                    //.width(Length::Fill),
+                    widget::radio(
+                        "Launcher",
+                        MenuItemType::LaunchAction,
+                        None,
+                        Message::TypeSelected,
+                    ),
+                ));
+
                 let label_input = widget::container(
                     widget::text_input("", label_unwrapped.clone())
                         .label(fl!("label"))
@@ -362,6 +389,7 @@ impl cosmic::Application for AppModel {
                     .title(fl!("edit-menu-item"))
                     .control(
                         widget::ListColumn::default()
+                            .add(type_dropdown)
                             .add(label_input)
                             .add(command_input)
                             .add(widget::text(fl!("power-help-text"))),
@@ -487,6 +515,10 @@ impl cosmic::Application for AppModel {
 
             Message::ResetMenu => {
                 self.menu_items = MenuItems::default().items;
+            }
+
+            Message::TypeSelected(selected_type) => {
+                println!("Selected");
             }
         }
         Task::none()
