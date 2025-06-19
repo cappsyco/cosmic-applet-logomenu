@@ -31,6 +31,8 @@ desktop-src1 := 'res' / desktop1
 desktop-src2 := 'res' / desktop2
 desktop-dst1 := clean(rootdir / prefix) / 'share' / 'applications' / desktop1
 desktop-dst2 := clean(rootdir / prefix) / 'share' / 'applications' / desktop2
+flatpak-desktop-dst1 := flatpak-base-dir / 'share' / 'applications' / desktop1
+flatpak-desktop-dst2 := flatpak-base-dir / 'share' / 'applications' / desktop2
 
 metainfo1 := APPID1 + '.metainfo.xml'
 metainfo2 := APPID2 + '.metainfo.xml'
@@ -38,9 +40,12 @@ metainfo-src1 := 'res' / metainfo1
 metainfo-src2 := 'res' / metainfo2
 metainfo-dst1 := clean(rootdir / prefix) / 'share' / 'metainfo' / metainfo1
 metainfo-dst2 := clean(rootdir / prefix) / 'share' / 'metainfo' / metainfo2
+flatpak-metainfo-dst1 := flatpak-base-dir / 'share' / 'metainfo' / metainfo1
+flatpak-metainfo-dst2 := flatpak-base-dir / 'share' / 'metainfo' / metainfo2
 
 icons-src := 'res' / 'icons' / 'hicolor'
 icons-dst := clean(rootdir / prefix) / 'share' / 'icons' / 'hicolor'
+flatpak-icons-dst := flatpak-base-dir / 'share' / 'icons' / 'hicolor' / 'scalable'
 
 # Default recipe which runs `just build-release`
 default: build-release
@@ -88,6 +93,30 @@ install:
     install -Dm0644 {{metainfo-src2}} {{metainfo-dst2}}
     install -Dm0644 "{{icons-src}}/scalable/apps/{{APPID1}}.svg" "{{icons-dst}}/scalable/apps/{{APPID1}}.svg"; \
     install -Dm0644 "{{icons-src}}/scalable/apps/{{APPID2}}.svg" "{{icons-dst}}/scalable/apps/{{APPID2}}.svg"; \
+
+# Build flatpak locally
+flatpak-builder:
+    flatpak-builder \
+        --force-clean \
+        --verbose \
+        --ccache \
+        --user \
+        --install \
+        --install-deps-from=flathub \
+        --repo=repo \
+        flatpak-out \
+        co.uk.cappsy.CosmicAppletLogoMenu.json
+
+# Update flatpak cargo-sources.json
+flatpak-cargo-sources:
+    python3 ./flatpak/flatpak-cargo-generator.py ./Cargo.lock -o ./flatpak/cargo-sources.json
+
+# Installs files for flatpak
+flatpak-install:
+    install -Dm0755 {{bin-src1}} {{flatpak-bin-dst1}}
+    install -Dm0644 {{desktop-src1}} {{flatpak-desktop-dst1}}
+    install -Dm0644 {{metainfo-src1}} {{flatpak-metainfo-dst1}}
+    install -Dm0644 "{{icons-src}}/scalable/apps/{{APPID1}}.svg" "{{flatpak-icons-dst}}/apps/{{APPID1}}.svg"; \
 
 # Uninstalls installed files
 uninstall:

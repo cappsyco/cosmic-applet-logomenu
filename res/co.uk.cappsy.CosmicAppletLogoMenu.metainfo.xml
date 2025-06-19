@@ -14,11 +14,7 @@
     <p>A customisable menu applet for the COSMIC desktop.</p>
   </description>
   <launchable type="desktop-id">co.uk.cappsy.CosmicAppletLogoMenu</launchable>
-  <icon
-        type="remote"
-        height="256"
-        width="256"
-    >https://raw.githubusercontent.com/cappsyco/cosmic-applet-logomenu/main/res/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.svg</icon>
+  <icon type="stock">co.uk.cappsy.CosmicAppletLogoMenu.svg</icon>
   <screenshots>
   </screenshots>
   <provides>
