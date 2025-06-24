@@ -55,10 +55,15 @@
       ],
       "sources": [
         {
-          "type": "dir",
-          "path": "."
+          "type": "git",
+          "url": "https://github.com/cappsyco/cosmic-applet-logomenu.git",
+          "branch": "flatpak"
         }
       ]
     }
+  ],
+  "binaries": [
+    { "name": "cosmic-applet-logomenu" },
+    { "name": "cosmic-logomenu-settings" }
   ]
 }

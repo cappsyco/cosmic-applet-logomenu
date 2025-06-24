@@ -114,9 +114,13 @@ flatpak-cargo-sources:
 # Installs files for flatpak
 flatpak-install:
     install -Dm0755 {{bin-src1}} {{flatpak-bin-dst1}}
+    install -Dm0755 {{bin-src2}} {{flatpak-bin-dst2}}
     install -Dm0644 {{desktop-src1}} {{flatpak-desktop-dst1}}
+    install -Dm0644 {{desktop-src2}} {{flatpak-desktop-dst2}}
     install -Dm0644 {{metainfo-src1}} {{flatpak-metainfo-dst1}}
+    install -Dm0644 {{metainfo-src2}} {{flatpak-metainfo-dst2}}
     install -Dm0644 "{{icons-src}}/scalable/apps/{{APPID1}}.svg" "{{flatpak-icons-dst}}/apps/{{APPID1}}.svg"; \
+    install -Dm0644 "{{icons-src}}/scalable/apps/{{APPID2}}.svg" "{{flatpak-icons-dst}}/apps/{{APPID2}}.svg"; \
 
 # Uninstalls installed files
 uninstall:
