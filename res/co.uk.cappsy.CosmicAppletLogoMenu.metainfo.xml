@@ -25,4 +25,7 @@
       <binary>cosmic-applet-logomenu</binary>
     </binaries>
   </provides>
+  <categories>
+    <category>Utility</category>
+  </categories>
 </component>

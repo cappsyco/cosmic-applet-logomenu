@@ -6,6 +6,6 @@ Icon=co.uk.cappsy.CosmicLogoMenuSettings
 Exec=cosmic-logomenu-settings %F
 Terminal=false
 StartupNotify=true
-Categories=COSMIC
+Categories=COSMIC;
 Keywords=COSMIC
 MimeType=

@@ -117,7 +117,7 @@ impl cosmic::Application for AppModel {
 
     fn header_start(&self) -> Vec<Element<Self::Message>> {
         let menu_bar = menu::bar(vec![menu::Tree::with_children(
-            menu::root(fl!("view")),
+            menu::root(fl!("view")).apply(Element::from),
             menu::items(
                 &self.key_binds,
                 vec![menu::Item::Button(fl!("about"), None, MenuAction::About)],
