@@ -4,7 +4,6 @@
   "runtime-version": "24.08",
   "sdk": "org.freedesktop.Sdk",
   "sdk-extensions": ["org.freedesktop.Sdk.Extension.rust-stable"],
-  "command": "cosmic-applet-logomenu",
   "finish-args": [
     "--socket=wayland",
     "--filesystem=xdg-config/cosmic:ro",
@@ -23,47 +22,54 @@
   },
   "modules": [
     {
-      "name": "just",
-      "buildsystem": "simple",
-      "build-commands": ["install -Dm0755 just /app/bin/just"],
-      "sources": [
-        {
-          "type": "archive",
-          "strip-components": 0,
-          "dest-filename": "just.tar.gz",
-          "url": "https://github.com/casey/just/releases/download/1.25.2/just-1.25.2-x86_64-unknown-linux-musl.tar.gz",
-          "sha256": "ad56bf1a804243b51ef2c2eec4b3a8177f970ccc414cbbee219c2e5c06f7bcc9",
-          "only_arches": ["x86_64"]
-        },
-        {
-          "type": "archive",
-          "strip-components": 0,
-          "dest-filename": "just.tar.gz",
-          "url": "https://github.com/casey/just/releases/download/1.25.2/just-1.25.2-aarch64-unknown-linux-musl.tar.gz",
-          "sha256": "049d624255d150f18b0f3a1257a163366b0dc22e16526214773903125145e515",
-          "only_arches": ["aarch64"]
-        }
-      ]
-    },
-    {
       "name": "cosmic-applet-logomenu",
       "buildsystem": "simple",
       "build-commands": [
-        "just vendor",
-        "just build-vendored",
-        "just flatpak-install"
+        "cd applet && cargo build --release --locked && cd ..",
+        "cd settings && cargo build --release --locked && cd ..",
+
+        "install -Dm755 target/release/cosmic-applet-logomenu -t /app/bin",
+        "install -Dm755 target/release/cosmic-logomenu-settings -t /app/bin",
+
+        "install -Dm644 res/co.uk.cappsy.CosmicAppletLogoMenu.desktop -t /app/share/applications",
+        "install -Dm644 res/co.uk.cappsy.CosmicLogoMenuSettings.desktop /app/share/applications/co.uk.cappsy.CosmicAppletLogoMenu.Settings.desktop",
+
+        "install -Dm644 res/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.svg /app/share/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.svg",
+        "install -Dm644 res/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicLogoMenuSettings.svg /app/share/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.Settings.svg"
       ],
       "sources": [
         {
-          "type": "git",
-          "url": "https://github.com/cappsyco/cosmic-applet-logomenu.git",
-          "branch": "flatpak"
+          "type": "dir",
+          "path": "."
+        },
+        {
+          "type": "script",
+          "dest-filename": "cargo-vendor.tar.gz",
+          "commands": [
+            "cd cosmic-applet-logomenu && cargo vendor && tar czf ../cargo-vendor.tar.gz vendor"
+          ]
         }
       ]
     }
   ],
+  "apps": [
+    {
+      "name": "cosmic-applet-logomenu",
+      "command": "cosmic-applet-logomenu",
+      "desktop": "co.uk.cappsy.CosmicAppletLogoMenu.desktop"
+    },
+    {
+      "name": "cosmic-logomenu-settings",
+      "command": "cosmic-logomenu-settings",
+      "desktop": "co.uk.cappsy.CosmicAppletLogoMenu.Settings.desktop"
+    }
+  ],
   "binaries": [
-    { "name": "cosmic-applet-logomenu" },
-    { "name": "cosmic-logomenu-settings" }
+    {
+      "name": "cosmic-applet-logomenu"
+    },
+    {
+      "name": "cosmic-logomenu-settings"
+    }
   ]
 }

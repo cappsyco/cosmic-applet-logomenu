@@ -2,7 +2,7 @@
 Name=Cosmic Logo Menu Settings
 Comment=Settings application for COSMIC Logo Menu applet
 Type=Application
-Icon=co.uk.cappsy.CosmicLogoMenuSettings
+Icon=co.uk.cappsy.CosmicAppletLogoMenu.Settings
 Exec=cosmic-logomenu-settings %F
 Terminal=false
 StartupNotify=true

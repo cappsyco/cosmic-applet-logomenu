@@ -1,0 +1,66 @@
+{
+  "id": "co.uk.cappsy.CosmicAppletLogoMenu",
+  "runtime": "org.freedesktop.Platform",
+  "runtime-version": "24.08",
+  "sdk": "org.freedesktop.Sdk",
+  "sdk-extensions": ["org.freedesktop.Sdk.Extension.rust-stable"],
+  "command": "cosmic-applet-logomenu",
+  "finish-args": [
+    "--socket=wayland",
+    "--filesystem=xdg-config/cosmic:ro",
+    "--talk-name=com.system76.CosmicSettingsDaemon",
+    "--filesystem=/sys/class/hwmon:ro",
+    "--filesystem=/sys/class/drm:ro",
+    "--filesystem=/sys/devices:ro",
+    "--device=all"
+  ],
+  "build-options": {
+    "append-path": "/usr/lib/sdk/rust-stable/bin",
+    "build-args": ["--share=network"],
+    "env": {
+      "CARGO_HOME": "/run/build/cosmic-applet-logomenu/cargo"
+    }
+  },
+  "modules": [
+    {
+      "name": "cosmic-applet-logomenu",
+      "buildsystem": "simple",
+      "build-commands": [
+        "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal",
+        "export PATH=\"$PATH:$HOME/.cargo/bin\"",
+
+        "cargo build --release --locked --all-features",
+
+        "install -Dm755 target/release/cosmic-applet-logomenu -t /app/bin",
+        "install -Dm755 target/release/cosmic-settings-logomenu -t /app/bin",
+
+        "install -Dm644 assets/cosmic-applet-logomenu.desktop -t /app/share/applications",
+        "install -Dm644 assets/cosmic-settings-logomenu.desktop -t /app/share/applications",
+        "for size in 16 22 24 32 48 64 128 256; do",
+        "  install -Dm644 assets/icons/${size}x${size}/apps/cosmic-applet-logomenu.png /app/share/icons/hicolor/${size}x${size}/apps/com.github.cappsyco.cosmic-applet-logomenu.png",
+        "done"
+      ],
+      "sources": [
+        {
+          "type": "dir",
+          "path": "."
+        },
+        {
+          "type": "script",
+          "dest-filename": "cargo-vendor.tar.gz",
+          "commands": [
+            "cd cosmic-applet-logomenu && cargo vendor && tar czf ../cargo-vendor.tar.gz vendor"
+          ]
+        }
+      ]
+    }
+  ],
+  "binaries": [
+    {
+      "name": "cosmic-applet-logomenu"
+    },
+    {
+      "name": "cosmic-settings-logomenu"
+    }
+  ]
+}
