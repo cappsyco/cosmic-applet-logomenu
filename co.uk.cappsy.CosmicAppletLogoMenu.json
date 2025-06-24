@@ -41,13 +41,6 @@
         {
           "type": "dir",
           "path": "."
-        },
-        {
-          "type": "script",
-          "dest-filename": "cargo-vendor.tar.gz",
-          "commands": [
-            "cd cosmic-applet-logomenu && cargo vendor && tar czf ../cargo-vendor.tar.gz vendor"
-          ]
         }
       ]
     }
