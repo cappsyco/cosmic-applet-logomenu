@@ -9,13 +9,18 @@
   "finish-args": [
     "--socket=wayland",
     "--socket=fallback-x11",
-    "--filesystem=xdg-config/cosmic:rw",
+    "--socket=system-bus",
+    "--socket=session-bus",
     "--talk-name=com.system76.CosmicSettingsDaemon",
+    "--talk-name=org.freedesktop.Flatpak",
+    "--talk-name=org.freedesktop.login1",
+    "--talk-name=org.freedesktop.ScreenSaver",
+    "--talk-name=org.freedesktop.DisplayManager",
+    "--filesystem=xdg-config/cosmic:rw",
     "--filesystem=/sys/class/hwmon:ro",
     "--filesystem=/sys/class/drm:ro",
     "--filesystem=/sys/devices:ro",
-    "--share=ipc",
-    "--device=all"
+    "--share=ipc"
   ],
   "build-options": {
     "append-path": "/usr/lib/sdk/rust-stable/bin",
@@ -29,8 +34,8 @@
       "name": "cosmic-applet-logomenu",
       "buildsystem": "simple",
       "build-commands": [
-        "cd applet && cargo build --release --locked && cd ..",
-        "cd settings && cargo build --release --locked && cd ..",
+        "cd applet && cargo build --release && cd ..",
+        "cd settings && cargo build --release && cd ..",
 
         "install -Dm755 target/release/cosmic-applet-logomenu -t /app/bin",
         "install -Dm755 target/release/cosmic-logomenu-settings -t /app/bin",
@@ -47,26 +52,6 @@
           "path": "."
         }
       ]
-    }
-  ],
-  "apps": [
-    {
-      "name": "cosmic-applet-logomenu",
-      "command": "cosmic-applet-logomenu",
-      "desktop": "co.uk.cappsy.CosmicAppletLogoMenu.desktop"
-    },
-    {
-      "name": "cosmic-logomenu-settings",
-      "command": "cosmic-logomenu-settings",
-      "desktop": "co.uk.cappsy.CosmicAppletLogoMenu.Settings.desktop"
-    }
-  ],
-  "binaries": [
-    {
-      "name": "cosmic-applet-logomenu"
-    },
-    {
-      "name": "cosmic-logomenu-settings"
     }
   ]
 }
