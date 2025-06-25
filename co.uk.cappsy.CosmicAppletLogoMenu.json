@@ -4,13 +4,17 @@
   "runtime-version": "24.08",
   "sdk": "org.freedesktop.Sdk",
   "sdk-extensions": ["org.freedesktop.Sdk.Extension.rust-stable"],
+  "base": "com.system76.Cosmic.BaseApp",
+  "base-version": "stable",
   "finish-args": [
     "--socket=wayland",
-    "--filesystem=xdg-config/cosmic:ro",
+    "--socket=fallback-x11",
+    "--filesystem=xdg-config/cosmic:rw",
     "--talk-name=com.system76.CosmicSettingsDaemon",
     "--filesystem=/sys/class/hwmon:ro",
     "--filesystem=/sys/class/drm:ro",
     "--filesystem=/sys/devices:ro",
+    "--share=ipc",
     "--device=all"
   ],
   "build-options": {
@@ -35,7 +39,7 @@
         "install -Dm644 res/co.uk.cappsy.CosmicLogoMenuSettings.desktop /app/share/applications/co.uk.cappsy.CosmicAppletLogoMenu.Settings.desktop",
 
         "install -Dm644 res/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.svg /app/share/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.svg",
-        "install -Dm644 res/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicLogoMenuSettings.svg /app/share/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.Settings.svg"
+        "install -Dm644 res/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.svg /app/share/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.Settings.svg"
       ],
       "sources": [
         {
