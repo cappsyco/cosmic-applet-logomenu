@@ -34,23 +34,24 @@
       "name": "cosmic-applet-logomenu",
       "buildsystem": "simple",
       "build-commands": [
-        "cd applet && cargo build --release && cd ..",
-        "cd settings && cargo build --release && cd ..",
+        "cargo --offline fetch --manifest-path Cargo.toml --verbose",
+        "cd ./applet && cargo --offline build --release --verbose",
+        "cd ./settings && cargo --offline build --release --verbose",
 
-        "install -Dm755 target/release/cosmic-applet-logomenu -t /app/bin",
-        "install -Dm755 target/release/cosmic-logomenu-settings -t /app/bin",
-
-        "install -Dm644 res/co.uk.cappsy.CosmicAppletLogoMenu.desktop -t /app/share/applications",
-        "install -Dm644 res/co.uk.cappsy.CosmicLogoMenuSettings.desktop /app/share/applications/co.uk.cappsy.CosmicAppletLogoMenu.Settings.desktop",
-
-        "install -Dm644 res/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.svg /app/share/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.svg",
-        "install -Dm644 res/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.svg /app/share/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.Settings.svg"
+        "install -Dm755 ./target/release/cosmic-applet-logomenu -t /app/bin",
+        "install -Dm755 ./target/release/cosmic-logomenu-settings -t /app/bin",
+        "install -Dm644 ./res/co.uk.cappsy.CosmicAppletLogoMenu.desktop -t /app/share/applications",
+        "install -Dm644 ./res/co.uk.cappsy.CosmicLogoMenuSettings.desktop /app/share/applications/co.uk.cappsy.CosmicAppletLogoMenu.Settings.desktop",
+        "install -Dm644 ./res/co.uk.cappsy.CosmicLogoMenuSettings.metainfo.xml /app/share/metainfo/co.uk.cappsy.CosmicLogoMenuSettings.metainfo.xml",
+        "install -Dm644 ./res/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.svg /app/share/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.svg",
+        "install -Dm644 ./res/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.svg /app/share/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.Settings.svg"
       ],
       "sources": [
         {
           "type": "dir",
-          "path": "."
-        }
+          "path": "./"
+        },
+        "./flatpak/cargo-sources.json"
       ]
     }
   ]
