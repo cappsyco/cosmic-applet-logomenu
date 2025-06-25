@@ -1,13 +1,15 @@
 [Desktop Entry]
 Name=Logo Menu
-Exec=cosmic-applet-logomenu %F
+Exec=cosmic-applet-logomenu
 Terminal=false
 Type=Application
 StartupNotify=true
+NotShowIn=COSMIC
 Icon=co.uk.cappsy.CosmicAppletLogoMenu
 Categories=COSMIC;Utility;
 Keywords=Folder;Manager;
 MimeType=inode/directory;
 NoDisplay=true
+StartupWMClass=cosmic-applet-logomenu
 X-CosmicApplet=true
 X-CosmicHoverPopup=Auto

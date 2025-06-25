@@ -12,6 +12,8 @@ use cosmic::iced_winit::commands::popup::{destroy_popup, get_popup};
 use cosmic::widget::{self};
 use cosmic::{Application, Element};
 use liblog::{IMAGES, LogoMenuConfig, MenuItemType};
+use std::env;
+use std::path::Path;
 use std::process::Command;
 
 const ID: &str = "co.uk.cappsy.CosmicAppletLogoMenu";
@@ -164,33 +166,34 @@ impl Application for LogoMenu {
                 };
             }
             Message::Action(action) => {
-                match action {
-                    power::PowerAction::LogOut => {
-                        if let Err(_err) = Command::new("cosmic-osd").arg("log-out").spawn() {
-                            //tracing::error!("Failed to spawn cosmic-osd. {err:?}");
-                            return power::PowerAction::LogOut.perform();
-                        }
-                    }
-                    power::PowerAction::Restart => {
-                        if let Err(_err) = Command::new("cosmic-osd").arg("restart").spawn() {
-                            //tracing::error!("Failed to spawn cosmic-osd. {err:?}");
-                            return power::PowerAction::Restart.perform();
-                        }
-                    }
-                    power::PowerAction::Shutdown => {
-                        if let Err(_err) = Command::new("cosmic-osd").arg("shutdown").spawn() {
-                            //tracing::error!("Failed to spawn cosmic-osd. {err:?}");
-                            return power::PowerAction::Shutdown.perform();
-                        }
-                    }
-                    a => return a.perform(),
+                let osd_arg = match action {
+                    power::PowerAction::LogOut => "log-out",
+                    power::PowerAction::Restart => "restart",
+                    power::PowerAction::Shutdown => "shutdown",
+                    _ => return action.perform(),
                 };
+                let is_flatpak = is_flatpak();
+
+                if is_flatpak {
+                    if let Err(_err) = Command::new("flatpak-spawn")
+                        .arg("--host")
+                        .arg("cosmic-osd")
+                        .arg(osd_arg)
+                        .spawn()
+                    {
+                        return action.perform();
+                    }
+                } else {
+                    if let Err(_err) = Command::new("cosmic-osd").arg(osd_arg).spawn() {
+                        return action.perform();
+                    }
+                }
 
                 return close_popup(self.popup);
             }
             Message::Zbus(result) => {
                 if let Err(e) = result {
-                    eprintln!("cosmic-applet-power ERROR: '{}'", e);
+                    eprintln!("cosmic-applet-logomenu ERROR: '{}'", e);
                 }
             }
             Message::PopupClosed(id) => {
@@ -199,10 +202,24 @@ impl Application for LogoMenu {
                 }
             }
             Message::Run(action) => {
-                match Command::new("sh").arg("-c").arg(action).spawn() {
-                    Ok(_) => {}
-                    Err(e) => eprintln!("Error executing command: {}", e),
-                };
+                // TODO: Refactor to avoid code duplication
+                if is_flatpak() && action != "cosmic-logomenu-settings" {
+                    let action_parts = action.split_whitespace();
+                    match Command::new("flatpak-spawn")
+                        .arg("--host")
+                        .args(action_parts)
+                        .spawn()
+                    {
+                        Ok(_) => {}
+                        Err(e) => eprintln!("Error executing command: {}", e),
+                    }
+                } else {
+                    match Command::new("sh").arg("-c").arg(action).spawn() {
+                        Ok(_) => {}
+                        Err(e) => eprintln!("Error executing command: {}", e),
+                    };
+                }
+
                 return close_popup(self.popup);
             }
             Message::ConfigUpdate(config) => {
@@ -217,10 +234,24 @@ impl Application for LogoMenu {
     }
 }
 
+/*
+fn run_command(action: &str) -> Result<(),Err> {
+
+}
+*/
+
 fn close_popup(mut popup: Option<Id>) -> Task<Message> {
     if let Some(p) = popup.take() {
         destroy_popup(p)
     } else {
         Task::none()
     }
+}
+
+fn is_flatpak() -> bool {
+    env::var("FLATPAK_ID").is_ok()
+        || Path::new("/.flatpak-info").exists()
+        || env::var("container")
+            .map(|v| v == "flatpak")
+            .unwrap_or(false)
 }

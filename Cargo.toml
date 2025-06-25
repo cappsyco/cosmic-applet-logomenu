@@ -8,3 +8,6 @@ members = ['applet', "liblog", 'settings']
 [patch.'https://github.com/pop-os/libcosmic']
 libcosmic = { git = "https://github.com/cappsyco/libcosmic", branch = "logomenu-patch" }
 cosmic-config = { git = "https://github.com/cappsyco/libcosmic", branch = "logomenu-patch" }
+
+[patch."https://github.com/smithay/client-toolkit.git"]
+sctk = { package = "smithay-client-toolkit", version = "=0.19.2" }

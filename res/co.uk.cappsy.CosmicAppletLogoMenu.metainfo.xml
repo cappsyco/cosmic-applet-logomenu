@@ -6,27 +6,37 @@
   <project_group>COSMIC</project_group>
   <developer_name>Jonathan Capps</developer_name>
   <update_contact>cappsy@gmail.com</update_contact>
-  <url type="homepage" />
-  <url type="bugtracker" />
+  <url type="homepage">https://github.com/cappsyco/cosmic-applet-logomenu</url>
+  <url
+        type="bugtracker"
+    >https://github.com/cappsyco/cosmic-applet-logomenu/issues</url>
+  <url
+        type="contribute"
+    >https://github.com/cappsyco/cosmic-applet-logomenu</url>
   <name>Logo Menu</name>
-  <summary>A customisable menu applet for the COSMIC desktop.</summary>
+  <summary>A customisable menu applet for the COSMIC™ desktop.</summary>
   <description>
-    <p>A customisable menu applet for the COSMIC desktop.</p>
+    <p
+        >Pick your distro logo of choice and fully customise the menu as you please, bringing all your common applications and actions into one, neat place.</p>
   </description>
   <launchable type="desktop-id">co.uk.cappsy.CosmicAppletLogoMenu</launchable>
-  <icon
-        type="remote"
-        height="256"
-        width="256"
-    >https://raw.githubusercontent.com/cappsyco/cosmic-applet-logomenu/main/res/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.svg</icon>
+  <icon type="stock">co.uk.cappsy.CosmicAppletLogoMenu.svg</icon>
   <screenshots>
+    <screenshot type="default">
+      <image
+            >https://raw.githubusercontent.com/cappsyco/cosmic-applet-logomenu/main/res/screenshots/cosmic-applet-logomenu.png</image>
+      <caption
+            >A view of the open applet with the default menu items, alongside the included settings application.</caption>
+    </screenshot>
   </screenshots>
   <provides>
-    <mimetypes>
-      <mimetype>text/plain</mimetype>
-    </mimetypes>
+    <id>com.system76.CosmicApplet</id>
     <binaries>
       <binary>cosmic-applet-logomenu</binary>
+      <binary>cosmic-logomenu-settings</binary>
     </binaries>
   </provides>
+  <categories>
+    <category>Utility</category>
+  </categories>
 </component>

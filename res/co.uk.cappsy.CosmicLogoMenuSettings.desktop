@@ -1,11 +1,11 @@
 [Desktop Entry]
-Name=Cosmic Logo Menu Settings
-Comment=Settings application for COSMIC Logo Menu applet
+Name=Logo Menu Settings
+Comment=Settings application for COSMIC™ Logo Menu applet
 Type=Application
-Icon=co.uk.cappsy.CosmicLogoMenuSettings
-Exec=cosmic-logomenu-settings %F
+Icon=co.uk.cappsy.CosmicAppletLogoMenu.Settings
+Exec=cosmic-logomenu-settings
 Terminal=false
 StartupNotify=true
-Categories=COSMIC
+StartupWMClass=cosmic-logomenu-settings
+Categories=COSMIC;
 Keywords=COSMIC
-MimeType=
