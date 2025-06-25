@@ -9,5 +9,7 @@ Categories=COSMIC;Utility;
 Keywords=Folder;Manager;
 MimeType=inode/directory;
 NoDisplay=true
+StartupWMClass=cosmic-applet-logomenu
 X-CosmicApplet=true
 X-CosmicHoverPopup=Auto
+X-Flatpak-RenamedFrom=cosmic-applet-logomenu.desktop
