@@ -203,7 +203,7 @@ impl Application for LogoMenu {
             }
             Message::Run(action) => {
                 // TODO: Refactor to avoid code duplication
-                if is_flatpak() {
+                if is_flatpak() && action != "cosmic-logomenu-settings" {
                     let action_parts = action.split_whitespace();
                     match Command::new("flatpak-spawn")
                         .arg("--host")
