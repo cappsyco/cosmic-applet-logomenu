@@ -2,7 +2,7 @@
 
 A simple logo menu (in the style of the popular [GNOME extension](https://github.com/Aryan20/Logomenu)) to collect your launcher options in a nice menu.
 
-![Screenshot_2025-05-18_15-52-01](https://github.com/user-attachments/assets/ca1ccc8d-6705-4cad-ba1a-7b0e01ce7ec0)
+![A view of the open applet with the default menu items, alongside the included settings application.](https://raw.githubusercontent.com/cappsyco/cosmic-applet-logomenu/main/res/screenshots/cosmic-applet-logomenu.png)
 
 ## Installing
 
@@ -11,15 +11,15 @@ Two binaries are currently required for the Logo Menu to be fully functional (on
 ### .deb distros (Pop!\_OS, Debian etc.)
 
 ```sh
-sudo dpkg -i cosmic-applet-logomenu_0.4.0_amd64.deb
-sudo dpkg -i cosmic-logomenu-settings_0.4.0_amd64.deb
+sudo dpkg -i cosmic-applet-logomenu_0.5.0_amd64.deb
+sudo dpkg -i cosmic-logomenu-settings_0.5.0_amd64.deb
 ```
 
 ### .rpm distros (Fedora etc.)
 
 ```sh
-sudo dnf install cosmic-applet-logomenu-0.4.0-1.fc42.x86_64.rpm
-sudo dnf install cosmic-logomenu-settings-0.4.0-1.fc42.x86_64.rpm
+sudo dnf install cosmic-applet-logomenu-0.5.0-1.fc42.x86_64.rpm
+sudo dnf install cosmic-logomenu-settings-0.5.0-1.fc42.x86_64.rpm
 ```
 
 ### Arch based distros
