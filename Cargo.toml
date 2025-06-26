@@ -2,5 +2,12 @@
 resolver = "2"
 members = ['applet', "liblog", 'settings']
 
+# This patch simple removes the logic that sets a different size for the icon if it's symbolic.
+# This ensures symbolic icons are shown at full size.
+# TODO: Fix this issue properly and kill this patch with fire.
+[patch.'https://github.com/pop-os/libcosmic']
+libcosmic = { git = "https://github.com/cappsyco/libcosmic", branch = "logomenu-patch" }
+cosmic-config = { git = "https://github.com/cappsyco/libcosmic", branch = "logomenu-patch" }
+
 [patch."https://github.com/smithay/client-toolkit.git"]
 sctk = { package = "smithay-client-toolkit", version = "=0.19.2" }
