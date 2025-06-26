@@ -7,26 +7,28 @@
   <developer_name>Jonathan Capps</developer_name>
   <update_contact>cappsy@gmail.com</update_contact>
   <url type="homepage">https://github.com/cappsyco/cosmic-applet-logomenu</url>
-  <url
-        type="bugtracker"
-    >https://github.com/cappsyco/cosmic-applet-logomenu/issues</url>
-  <url
-        type="contribute"
-    >https://github.com/cappsyco/cosmic-applet-logomenu</url>
+  <url type="bugtracker">
+    https://github.com/cappsyco/cosmic-applet-logomenu/issues</url>
+  <url type="contribute">
+    https://github.com/cappsyco/cosmic-applet-logomenu
+  </url>
   <name>Logo Menu</name>
   <summary>A customisable menu applet for the COSMIC™ desktop.</summary>
   <description>
-    <p
-        >Pick your distro logo of choice and fully customise the menu as you please, bringing all your common applications and actions into one, neat place.</p>
+    <p>
+      Pick your distro logo of choice and fully customise the menu as you please, bringing all your common applications and actions into one, neat place.
+    </p>
   </description>
   <launchable type="desktop-id">co.uk.cappsy.CosmicAppletLogoMenu</launchable>
   <icon type="stock">co.uk.cappsy.CosmicAppletLogoMenu.svg</icon>
   <screenshots>
     <screenshot type="default">
-      <image
-            >https://raw.githubusercontent.com/cappsyco/cosmic-applet-logomenu/main/screenshots/cosmic-applet-logomenu.png</image>
-      <caption
-            >A view of the open applet with the default menu items, alongside the included settings application.</caption>
+      <image>
+        https://raw.githubusercontent.com/cappsyco/cosmic-applet-logomenu/main/screenshots/cosmic-applet-logomenu.png
+      </image>
+      <caption>
+        A view of the open applet with the default menu items, alongside the included settings application.
+      </caption>
     </screenshot>
   </screenshots>
   <provides>
@@ -39,4 +41,14 @@
   <categories>
     <category>Utility</category>
   </categories>
+  <releases>
+    <release version="0.5.0" date="2025-06-26">
+      <url type="details">
+        https://github.com/cappsyco/cosmic-applet-logomenu/releases/tag/v0.5.0
+      </url>
+      <description>
+        <p>Initial Flatpak release</p>
+      </description>
+    </release>
+  </releases>
 </component>
