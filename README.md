@@ -2,7 +2,7 @@
 
 A simple logo menu (in the style of the popular [GNOME extension](https://github.com/Aryan20/Logomenu)) to collect your launcher options in a nice menu.
 
-![A view of the open applet with the default menu items, alongside the included settings application.](https://raw.githubusercontent.com/cappsyco/cosmic-applet-logomenu/main/res/screenshots/cosmic-applet-logomenu.png)
+![A view of the open applet with the default menu items, alongside the included settings application.](https://raw.githubusercontent.com/cappsyco/cosmic-applet-logomenu/main/screenshots/cosmic-applet-logomenu.png)
 
 ## Installing
 
