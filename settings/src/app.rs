@@ -496,11 +496,12 @@ impl cosmic::Application for AppModel {
 impl AppModel {
     pub fn about(&self) -> Element<Message> {
         let cosmic_theme::Spacing { space_xxs, .. } = theme::active().cosmic().spacing;
-        let icon = widget::svg(widget::svg::Handle::from_memory(APP_ICON)).width(100);
+        let icon = widget::svg(widget::svg::Handle::from_memory(APP_ICON)).width(120);
         let title = widget::text::title3(fl!("app-title"));
 
         widget::column()
             .push(icon)
+            .push(Space::with_height(10))
             .push(title)
             .align_x(Alignment::Center)
             .spacing(space_xxs)
