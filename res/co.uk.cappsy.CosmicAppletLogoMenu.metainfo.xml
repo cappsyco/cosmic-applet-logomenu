@@ -4,6 +4,9 @@
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-only</project_license>
   <project_group>COSMIC</project_group>
+  <developer id="co.uk.cappsy">
+    <name>Jonathan Capps</name>
+  </developer>
   <developer_name>Jonathan Capps</developer_name>
   <update_contact>cappsy@gmail.com</update_contact>
   <url type="homepage">https://github.com/cappsyco/cosmic-applet-logomenu</url>
@@ -12,11 +15,12 @@
   <url type="contribute">
     https://github.com/cappsyco/cosmic-applet-logomenu
   </url>
+  <content_rating type="oars-1.1" />
   <name>Logo Menu</name>
-  <summary>A customisable menu applet for the COSMIC™ desktop.</summary>
+  <summary>A customisable menu applet for the COSMIC™ desktop</summary>
   <description>
     <p>
-      Pick your distro logo of choice and fully customise the menu as you please, bringing all your common applications and actions into one, neat place.
+      Pick your distro logo of choice and fully customise the menu applet as you please, bringing all your common applications and actions into one, neat place.
     </p>
   </description>
   <launchable type="desktop-id">
@@ -35,10 +39,8 @@
   </screenshots>
   <provides>
     <id>com.system76.CosmicApplet</id>
-    <binaries>
-      <binary>cosmic-applet-logomenu</binary>
-      <binary>cosmic-logomenu-settings</binary>
-    </binaries>
+    <binary>cosmic-applet-logomenu</binary>
+    <binary>cosmic-logomenu-settings</binary>
   </provides>
   <categories>
     <category>Utility</category>
