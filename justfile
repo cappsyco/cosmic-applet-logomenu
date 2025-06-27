@@ -87,7 +87,6 @@ install:
     install -Dm0644 {{desktop-src2}} {{desktop-dst2}}
     install -Dm0644 {{metainfo-src}} {{metainfo-dst}}
     install -Dm0644 "{{icons-src}}/scalable/apps/{{APPID1}}.svg" "{{icons-dst}}/scalable/apps/{{APPID1}}.svg"; \
-    install -Dm0644 "{{icons-src}}/scalable/apps/{{APPID1}}.svg" "{{icons-dst}}/scalable/apps/{{APPID1}}.Settings.svg"; \
 
 # Build flatpak locally
 flatpak-builder:
@@ -114,7 +113,6 @@ flatpak-install:
     install -Dm0644 {{desktop-src2}} {{flatpak-desktop-dst2}}
     install -Dm0644 {{metainfo-src}} {{flatpak-metainfo-dst}}
     install -Dm0644 "{{icons-src}}/scalable/apps/{{APPID1}}.svg" "{{flatpak-icons-dst}}/apps/{{APPID1}}.svg"; \
-    install -Dm0644 "{{icons-src}}/scalable/apps/{{APPID1}}.svg" "{{flatpak-icons-dst}}/apps/{{APPID1}}.Settings.svg"; \
 
 # Uninstalls installed files
 uninstall:
@@ -124,7 +122,6 @@ uninstall:
     rm {{desktop-dst2}}
     rm {{metainfo-dst}}
     rm "{{icons-dst}}/scalable/apps/{{APPID1}}.svg"; \
-    rm "{{icons-dst}}/scalable/apps/{{APPID1}}.Settings.svg"; \
 
 # Vendor dependencies locally
 vendor:
@@ -177,7 +174,6 @@ deb:
     strip {{bin-src2}}
     install -D {{bin-src2}} {{debname2}}{{bin-dst2}}
     install -D {{desktop-src2}} {{debname2}}{{desktop-dst2}}
-    install -D "{{icons-src}}/scalable/apps/{{APPID1}}.svg" "{{debname2}}{{icons-dst}}/scalable/apps/{{APPID1}}.Settings.svg"; \
     mkdir -p {{debdir2}}
     echo "Package: {{name2}}" > {{debcontrol2}}
     echo "Version: {{version}}" >> {{debcontrol2}}
@@ -242,7 +238,6 @@ rpm:
     strip {{bin-src2}}
     install -D {{bin-src2}} {{rpm_bin_dst2}}
     install -D {{desktop-src2}} {{rpm_desktop_dst2}}
-    install -D "{{icons-src}}/scalable/apps/{{APPID1}}.svg" "{{rpm_icons_dst2}}/{{APPID1}}.Settings.svg"; \
 
     mkdir -p {{rpmname2}}
     echo "Name: {{name2}}" > {{rpmname2}}/spec.spec
