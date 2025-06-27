@@ -33,7 +33,6 @@
         "cargo --offline fetch --manifest-path Cargo.toml --verbose",
         "cd ./applet && cargo --offline build --release --verbose",
         "cd ./settings && cargo --offline build --release --verbose",
-
         "install -Dm755 ./target/release/cosmic-applet-logomenu -t /app/bin",
         "install -Dm755 ./target/release/cosmic-logomenu-settings -t /app/bin",
         "install -Dm644 ./res/co.uk.cappsy.CosmicAppletLogoMenu.desktop -t /app/share/applications",
