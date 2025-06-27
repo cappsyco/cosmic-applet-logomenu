@@ -19,7 +19,9 @@
       Pick your distro logo of choice and fully customise the menu as you please, bringing all your common applications and actions into one, neat place.
     </p>
   </description>
-  <launchable type="desktop-id">co.uk.cappsy.CosmicAppletLogoMenu</launchable>
+  <launchable type="desktop-id">
+    co.uk.cappsy.CosmicAppletLogoMenu.desktop
+  </launchable>
   <icon type="stock">co.uk.cappsy.CosmicAppletLogoMenu.svg</icon>
   <screenshots>
     <screenshot type="default">

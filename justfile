@@ -34,14 +34,10 @@ desktop-dst2 := clean(rootdir / prefix) / 'share' / 'applications' / desktop2
 flatpak-desktop-dst1 := flatpak-base-dir / 'share' / 'applications' / desktop1
 flatpak-desktop-dst2 := flatpak-base-dir / 'share' / 'applications' / desktop2
 
-metainfo1 := APPID1 + '.metainfo.xml'
-metainfo2 := APPID2 + '.metainfo.xml'
-metainfo-src1 := 'res' / metainfo1
-metainfo-src2 := 'res' / metainfo2
-metainfo-dst1 := clean(rootdir / prefix) / 'share' / 'metainfo' / metainfo1
-metainfo-dst2 := clean(rootdir / prefix) / 'share' / 'metainfo' / metainfo2
-flatpak-metainfo-dst1 := flatpak-base-dir / 'share' / 'metainfo' / metainfo1
-flatpak-metainfo-dst2 := flatpak-base-dir / 'share' / 'metainfo' / metainfo2
+metainfo := APPID1 + '.metainfo.xml'
+metainfo-src := 'res' / metainfo
+metainfo-dst := clean(rootdir / prefix) / 'share' / 'metainfo' / metainfo
+flatpak-metainfo-dst := flatpak-base-dir / 'share' / 'metainfo' / metainfo
 
 icons-src := 'res' / 'icons' / 'hicolor'
 icons-dst := clean(rootdir / prefix) / 'share' / 'icons' / 'hicolor'
@@ -89,10 +85,9 @@ install:
     install -Dm0755 {{bin-src2}} {{bin-dst2}}
     install -Dm0644 {{desktop-src1}} {{desktop-dst1}}
     install -Dm0644 {{desktop-src2}} {{desktop-dst2}}
-    install -Dm0644 {{metainfo-src1}} {{metainfo-dst1}}
-    install -Dm0644 {{metainfo-src2}} {{metainfo-dst2}}
+    install -Dm0644 {{metainfo-src}} {{metainfo-dst}}
     install -Dm0644 "{{icons-src}}/scalable/apps/{{APPID1}}.svg" "{{icons-dst}}/scalable/apps/{{APPID1}}.svg"; \
-    install -Dm0644 "{{icons-src}}/scalable/apps/{{APPID2}}.svg" "{{icons-dst}}/scalable/apps/{{APPID2}}.svg"; \
+    install -Dm0644 "{{icons-src}}/scalable/apps/{{APPID1}}.svg" "{{icons-dst}}/scalable/apps/{{APPID1}}.Settings.svg"; \
 
 # Build flatpak locally
 flatpak-builder:
@@ -117,10 +112,9 @@ flatpak-install:
     install -Dm0755 {{bin-src2}} {{flatpak-bin-dst2}}
     install -Dm0644 {{desktop-src1}} {{flatpak-desktop-dst1}}
     install -Dm0644 {{desktop-src2}} {{flatpak-desktop-dst2}}
-    install -Dm0644 {{metainfo-src1}} {{flatpak-metainfo-dst1}}
-    install -Dm0644 {{metainfo-src2}} {{flatpak-metainfo-dst2}}
+    install -Dm0644 {{metainfo-src}} {{flatpak-metainfo-dst}}
     install -Dm0644 "{{icons-src}}/scalable/apps/{{APPID1}}.svg" "{{flatpak-icons-dst}}/apps/{{APPID1}}.svg"; \
-    install -Dm0644 "{{icons-src}}/scalable/apps/{{APPID2}}.svg" "{{flatpak-icons-dst}}/apps/{{APPID2}}.svg"; \
+    install -Dm0644 "{{icons-src}}/scalable/apps/{{APPID1}}.svg" "{{flatpak-icons-dst}}/apps/{{APPID1}}.Settings.svg"; \
 
 # Uninstalls installed files
 uninstall:
@@ -128,10 +122,9 @@ uninstall:
     rm {{bin-dst2}}
     rm {{desktop-dst1}}
     rm {{desktop-dst2}}
-    rm {{metainfo-dst1}}
-    rm {{metainfo-dst2}}
+    rm {{metainfo-dst}}
     rm "{{icons-dst}}/scalable/apps/{{APPID1}}.svg"; \
-    rm "{{icons-dst}}/scalable/apps/{{APPID2}}.svg"; \
+    rm "{{icons-dst}}/scalable/apps/{{APPID1}}.Settings.svg"; \
 
 # Vendor dependencies locally
 vendor:
@@ -184,7 +177,7 @@ deb:
     strip {{bin-src2}}
     install -D {{bin-src2}} {{debname2}}{{bin-dst2}}
     install -D {{desktop-src2}} {{debname2}}{{desktop-dst2}}
-    install -D "{{icons-src}}/scalable/apps/{{APPID2}}.svg" "{{debname2}}{{icons-dst}}/scalable/apps/{{APPID2}}.svg"; \
+    install -D "{{icons-src}}/scalable/apps/{{APPID1}}.svg" "{{debname2}}{{icons-dst}}/scalable/apps/{{APPID1}}.Settings.svg"; \
     mkdir -p {{debdir2}}
     echo "Package: {{name2}}" > {{debcontrol2}}
     echo "Version: {{version}}" >> {{debcontrol2}}
@@ -208,8 +201,7 @@ rpm_bin_dst1 := rpminstall1 / 'bin' / name1
 rpm_bin_dst2 := rpminstall2 / 'bin' / name2
 rpm_desktop_dst1 := rpminstall1 / 'share' / 'applications' / desktop1
 rpm_desktop_dst2 := rpminstall2 / 'share' / 'applications' / desktop2
-rpm_metainfo_dst1 := rpminstall1 / 'share' / 'metainfo' / metainfo1
-rpm_metainfo_dst2 := rpminstall2 / 'share' / 'metainfo' / metainfo2
+rpm_metainfo_dst := rpminstall1 / 'share' / 'metainfo' / metainfo
 rpm_icons_dst1 := rpminstall1 / 'share' / 'icons' / 'hicolor' / 'scalable' / 'apps'
 rpm_icons_dst2 := rpminstall2 / 'share' / 'icons' / 'hicolor' / 'scalable' / 'apps'
 
@@ -217,7 +209,7 @@ rpm:
     strip {{bin-src1}}
     install -D {{bin-src1}} {{rpm_bin_dst1}}
     install -D {{desktop-src1}} {{rpm_desktop_dst1}}
-    install -D {{metainfo-src1}} {{rpm_metainfo_dst1}}
+    install -D {{metainfo-src}} {{rpm_metainfo_dst}}
     install -D "{{icons-src}}/scalable/apps/{{APPID1}}.svg" "{{rpm_icons_dst1}}/{{APPID1}}.svg"; \
 
     mkdir -p {{rpmname1}}
@@ -235,7 +227,7 @@ rpm:
     echo "%defattr(-,root,root,-)" >> {{rpmname1}}/spec.spec
     echo "{{prefix}}/bin/{{name1}}" >> {{rpmname1}}/spec.spec
     echo "{{prefix}}/share/applications/{{desktop1}}" >> {{rpmname1}}/spec.spec
-    echo "{{prefix}}/share/metainfo/{{metainfo1}}" >> {{rpmname1}}/spec.spec
+    echo "{{prefix}}/share/metainfo/{{metainfo}}" >> {{rpmname1}}/spec.spec
     echo "{{prefix}}/share/icons/hicolor/scalable/apps/*.svg" >> {{rpmname1}}/spec.spec
 
     rpmbuild -bb --buildroot="$(pwd)/{{rpmdir1}}" {{rpmname1}}/spec.spec \
@@ -250,8 +242,7 @@ rpm:
     strip {{bin-src2}}
     install -D {{bin-src2}} {{rpm_bin_dst2}}
     install -D {{desktop-src2}} {{rpm_desktop_dst2}}
-    install -D {{metainfo-src2}} {{rpm_metainfo_dst2}}
-    install -D "{{icons-src}}/scalable/apps/{{APPID2}}.svg" "{{rpm_icons_dst2}}/{{APPID2}}.svg"; \
+    install -D "{{icons-src}}/scalable/apps/{{APPID1}}.svg" "{{rpm_icons_dst2}}/{{APPID1}}.Settings.svg"; \
 
     mkdir -p {{rpmname2}}
     echo "Name: {{name2}}" > {{rpmname2}}/spec.spec
@@ -268,7 +259,6 @@ rpm:
     echo "%defattr(-,root,root,-)" >> {{rpmname2}}/spec.spec
     echo "{{prefix}}/bin/{{name2}}" >> {{rpmname2}}/spec.spec
     echo "{{prefix}}/share/applications/{{desktop2}}" >> {{rpmname2}}/spec.spec
-    echo "{{prefix}}/share/metainfo/{{metainfo2}}" >> {{rpmname2}}/spec.spec
     echo "{{prefix}}/share/icons/hicolor/scalable/apps/*.svg" >> {{rpmname2}}/spec.spec
 
     rpmbuild -bb --buildroot="$(pwd)/{{rpmdir2}}" {{rpmname2}}/spec.spec \

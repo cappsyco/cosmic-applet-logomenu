@@ -7,13 +7,13 @@ use cosmic::cosmic_config::Config;
 use cosmic::iced::{Alignment, Length};
 use cosmic::iced_widget::scrollable;
 use cosmic::prelude::*;
-use cosmic::widget::{self, Space, container, dropdown, menu, settings};
+use cosmic::widget::{self, container, dropdown, menu, settings, Space};
 use cosmic::{cosmic_theme, theme};
-use liblog::{IMAGES, MenuItem, MenuItemType, MenuItems};
+use liblog::{MenuItem, MenuItemType, MenuItems, IMAGES};
 use std::collections::{HashMap, VecDeque};
 
 const APP_ICON: &[u8] =
-    include_bytes!("../../res/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicLogoMenuSettings.svg");
+    include_bytes!("../../res/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.svg");
 const CONFIG_VER: u64 = 1;
 const CONFIG_ID: &str = "co.uk.cappsy.CosmicAppletLogoMenu";
 
