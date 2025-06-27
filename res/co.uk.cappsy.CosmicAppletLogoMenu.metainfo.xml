@@ -26,6 +26,9 @@
   <launchable type="desktop-id">
     co.uk.cappsy.CosmicAppletLogoMenu.desktop
   </launchable>
+  <launchable type="desktop-id">
+    co.uk.cappsy.CosmicAppletLogoMenu.Settings.desktop
+  </launchable>
   <icon type="stock">co.uk.cappsy.CosmicAppletLogoMenu.svg</icon>
   <screenshots>
     <screenshot type="default">
