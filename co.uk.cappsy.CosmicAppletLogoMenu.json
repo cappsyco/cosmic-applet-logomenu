@@ -37,10 +37,9 @@
         "install -Dm755 ./target/release/cosmic-applet-logomenu -t /app/bin",
         "install -Dm755 ./target/release/cosmic-logomenu-settings -t /app/bin",
         "install -Dm644 ./res/co.uk.cappsy.CosmicAppletLogoMenu.desktop -t /app/share/applications",
-        "install -Dm644 ./res/co.uk.cappsy.CosmicLogoMenuSettings.desktop /app/share/applications/co.uk.cappsy.CosmicAppletLogoMenu.Settings.desktop",
-        "install -Dm644 ./res/co.uk.cappsy.CosmicLogoMenuSettings.metainfo.xml /app/share/metainfo/co.uk.cappsy.CosmicLogoMenuSettings.metainfo.xml",
-        "install -Dm644 ./res/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.svg /app/share/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.svg",
-        "install -Dm644 ./res/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.svg /app/share/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.Settings.svg"
+        "install -Dm644 ./res/co.uk.cappsy.CosmicAppletLogoMenu.Settings.desktop /app/share/applications",
+        "install -Dm644 ./res/co.uk.cappsy.CosmicAppletLogoMenu.metainfo.xml -t /app/share/metainfo",
+        "install -Dm644 ./res/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.svg -t /app/share/icons/hicolor/scalable/apps"
       ],
       "sources": [
         {

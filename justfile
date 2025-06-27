@@ -1,5 +1,5 @@
 export APPID1 := 'co.uk.cappsy.CosmicAppletLogoMenu'
-export APPID2 := 'co.uk.cappsy.CosmicLogoMenuSettings'
+export APPID2 := 'co.uk.cappsy.CosmicAppletLogoMenu.Settings'
 
 name1 := 'cosmic-applet-logomenu'
 name2 := 'cosmic-logomenu-settings'
@@ -45,6 +45,11 @@ flatpak-icons-dst := flatpak-base-dir / 'share' / 'icons' / 'hicolor' / 'scalabl
 
 # Default recipe which runs `just build-release`
 default: build-release
+
+# Combines all cleaning
+clean-all:
+    cargo clean
+    rm -rf .cargo vendor vendor.tar *.rpm *.deb .flatpak-builder flatpak-out
 
 # Runs `cargo clean`
 clean:

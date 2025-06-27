@@ -61,7 +61,7 @@ impl cosmic::Application for AppModel {
     type Flags = ();
     type Message = Message;
 
-    const APP_ID: &'static str = "co.uk.cappsy.CosmicLogoMenuSettings";
+    const APP_ID: &'static str = "co.uk.cappsy.CosmicAppletLogoMenu.Settings";
 
     fn core(&self) -> &cosmic::Core {
         &self.core
