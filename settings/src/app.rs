@@ -7,10 +7,11 @@ use cosmic::cosmic_config::Config;
 use cosmic::iced::{Alignment, Length};
 use cosmic::iced_widget::scrollable;
 use cosmic::prelude::*;
-use cosmic::widget::{self, container, dropdown, menu, settings, Space};
+use cosmic::widget::{self, Space, container, dropdown, menu, settings, text_input, toggler};
 use cosmic::{cosmic_theme, theme};
-use liblog::{MenuItem, MenuItemType, MenuItems, IMAGES};
+use liblog::{IMAGES, MenuItem, MenuItemType, MenuItems};
 use std::collections::{HashMap, VecDeque};
+#[cfg(feature = "xdg-portal")]
 
 const APP_ICON: &[u8] =
     include_bytes!("../../res/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.svg");
@@ -28,17 +29,22 @@ pub struct AppModel {
     context_page: ContextPage,
     key_binds: HashMap<menu::KeyBind, MenuAction>,
     config: Config,
+    dialog_pages: VecDeque<DialogPage>,
+
     logo_options: Vec<String>,
     selected_logo_idx: Option<usize>,
     selected_logo_name: String,
+    custom_logo_active: bool,
+    custom_logo_path: String,
     menu_items: Vec<MenuItem>,
-    dialog_pages: VecDeque<DialogPage>,
 }
 
 #[derive(Debug, Clone)]
 pub enum Message {
     ToggleContextPage(ContextPage),
     UpdateLogo(usize),
+    ToggleCustomLogo(bool),
+    UpdateCustomLogo(String),
     AddItem(MenuItemType),
     SaveItem(usize, String, String),
     RemoveItem(usize),
@@ -48,6 +54,7 @@ pub enum Message {
     DialogCancel,
     DialogEditItem(usize, MenuItem),
     DialogRemoveItem(usize),
+    OpenFile,
 }
 
 #[derive(Debug, Clone)]
@@ -99,6 +106,16 @@ impl cosmic::Application for AppModel {
         // Load in menu items from settings
         let menu_items = get_menu_items();
 
+        // get custom logo status and path
+        let custom_logo_active = match load_config("custom_logo_active", CONFIG_VER) {
+            Some(val) => val,
+            None => false,
+        };
+        let custom_logo_path = match load_config("custom_logo_path", CONFIG_VER) {
+            Some(val) => val,
+            None => "".to_owned(),
+        };
+
         let mut app = AppModel {
             core,
             context_page: ContextPage::default(),
@@ -109,6 +126,8 @@ impl cosmic::Application for AppModel {
             selected_logo_idx,
             selected_logo_name,
             menu_items,
+            custom_logo_active,
+            custom_logo_path,
         };
 
         let command = app.update_title();
@@ -175,7 +194,7 @@ impl cosmic::Application for AppModel {
                     .push(
                         widget::svg(widget::svg::Handle::from_memory(logo_bytes.0))
                             .symbolic(logo_bytes.1)
-                            .width(80),
+                            .width(100),
                     )
                     .width(Length::Fill)
                     .align_x(Alignment::Center),
@@ -183,13 +202,33 @@ impl cosmic::Application for AppModel {
         );
 
         // Menu settings
-        page_content = page_content.push(settings::section().title(fl!("menu-settings")).add({
-            cosmic::Element::from(settings::item::builder(fl!("logo")).control(dropdown(
-                &self.logo_options,
-                self.selected_logo_idx,
-                Message::UpdateLogo,
-            )))
-        }));
+        page_content = page_content.push(
+            settings::section()
+                .title(fl!("menu-settings"))
+                .add({
+                    Element::from(settings::item::builder(fl!("logo")).control(dropdown(
+                        &self.logo_options,
+                        self.selected_logo_idx,
+                        Message::UpdateLogo,
+                    )))
+                })
+                .add({
+                    Element::from(
+                        settings::item::builder(fl!("use-custom-logo")).control(
+                            toggler(self.custom_logo_active)
+                                .on_toggle(|value| Message::ToggleCustomLogo(value)),
+                        ),
+                    )
+                })
+                .add({
+                    Element::from(
+                        settings::item::builder(fl!("custom-logo-path")).control(
+                            text_input(fl!("custom-logo-path-desc"), &self.custom_logo_path)
+                                .on_input(|value| Message::UpdateCustomLogo(value)),
+                        ),
+                    )
+                }),
+        );
         page_content = page_content.push(Space::with_height(25));
 
         // Menu builder
@@ -403,6 +442,26 @@ impl cosmic::Application for AppModel {
                 update_config(self.config.clone(), "logo", &self.selected_logo_name);
             }
 
+            Message::ToggleCustomLogo(toggle) => {
+                self.custom_logo_active = toggle;
+
+                update_config(
+                    self.config.clone(),
+                    "custom_logo_active",
+                    &self.custom_logo_active,
+                );
+            }
+
+            Message::UpdateCustomLogo(path) => {
+                self.custom_logo_path = path;
+
+                update_config(
+                    self.config.clone(),
+                    "custom_logo_path",
+                    &self.custom_logo_path,
+                );
+            }
+
             Message::AddItem(item_type) => self.menu_items.push(MenuItem {
                 item_type: item_type.clone(),
                 label: match &item_type {
@@ -487,6 +546,29 @@ impl cosmic::Application for AppModel {
 
             Message::ResetMenu => {
                 self.menu_items = MenuItems::default().items;
+            }
+
+            Message::OpenFile => {
+                /*
+                #[cfg(feature = "xdg-portal")]
+                return Command::perform(
+                    async move {
+                        let dialog = cosmic::dialog::file_chooser::open::Dialog::new()
+                            .title(fl!("select-logo"));
+                        match dialog.open_file().await {
+                            Ok(response) => {
+                                println!("{:?}", response.url());
+                                //message::app(Message::FileLoad(response.url().to_owned()))
+                            }
+                            Err(err) => {
+                                //log::warn!("failed to open file: {}", err);
+                                //message::none()
+                            }
+                        }
+                    },
+                    |x| x,
+                );
+                */
             }
         }
         Task::none()
