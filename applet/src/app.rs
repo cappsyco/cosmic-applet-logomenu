@@ -76,6 +76,7 @@ impl Application for LogoMenu {
         let logo_widget = if self.config.custom_logo_active == true
             && Path::new(&self.config.custom_logo_path).exists()
         {
+            // Load custom logo
             cosmic::widget::icon::from_svg_bytes(fs::read(&self.config.custom_logo_path).unwrap())
         } else {
             // Get the current logo with appropriate fallback
