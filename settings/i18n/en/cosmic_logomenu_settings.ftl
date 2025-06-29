@@ -13,6 +13,7 @@ menu-builder = Menu builder
 menu-settings = Menu settings
 new-launcher = New launcher
 no-label = No label
+no-logo-selected = No logo selected
 power-help-text = Enter one of the following commands for the corresponding power action: Lock, LogOut, Suspend, Restart or Shutdown
 remove = Remove
 remove-item = Remove item?

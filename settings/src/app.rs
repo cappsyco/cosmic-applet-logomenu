@@ -191,12 +191,12 @@ impl cosmic::Application for AppModel {
             if self.custom_logo_active == true && Path::new(&self.custom_logo_path).exists() {
                 widget::svg(widget::svg::Handle::from_path(&self.custom_logo_path))
                     .symbolic(false)
-                    .width(100)
+                    .width(150)
             } else {
                 let logo_bytes = IMAGES[&self.selected_logo_name];
                 widget::svg(widget::svg::Handle::from_memory(logo_bytes.0))
                     .symbolic(logo_bytes.1)
-                    .width(100)
+                    .width(150)
             };
 
         // Display logo header
@@ -211,35 +211,24 @@ impl cosmic::Application for AppModel {
         page_content = page_content.push(Space::with_height(padding));
 
         // Menu settings
-        let mut menu_settings = settings::section().title(fl!("menu-settings"));
-        menu_settings = menu_settings
-            .add({
-                Element::from(settings::item::builder(fl!("logo")).control(dropdown(
-                    &self.logo_options,
-                    self.selected_logo_idx,
-                    Message::UpdateLogo,
-                )))
-            })
-            .add({
-                Element::from(
-                    settings::item::builder(fl!("use-custom-logo")).control(
-                        toggler(self.custom_logo_active)
-                            .on_toggle(|value| Message::ToggleCustomLogo(value)),
-                    ),
-                )
-            });
-
+        let mut menu_settings = settings::section().title(fl!("menu-settings")).add({
+            Element::from(
+                settings::item::builder(fl!("use-custom-logo")).control(
+                    toggler(self.custom_logo_active)
+                        .on_toggle(|value| Message::ToggleCustomLogo(value)),
+                ),
+            )
+        });
         if self.custom_logo_active == true {
             let file_name = if &self.custom_logo_path != "" {
                 Path::new(&self.custom_logo_path)
                     .file_name()
                     .unwrap()
                     .to_str()
-                    .unwrap_or("No logo selected")
+                    .unwrap_or("")
             } else {
-                "No logo selected"
+                ""
             };
-
             menu_settings = menu_settings.add({
                 Element::from(
                     settings::item::builder(file_name).control(
@@ -248,10 +237,18 @@ impl cosmic::Application for AppModel {
                     ),
                 )
             });
+        } else {
+            menu_settings = menu_settings.add({
+                Element::from(settings::item::builder(fl!("logo")).control(dropdown(
+                    &self.logo_options,
+                    self.selected_logo_idx,
+                    Message::UpdateLogo,
+                )))
+            })
         }
 
         page_content = page_content.push(menu_settings);
-        page_content = page_content.push(Space::with_height(25));
+        page_content = page_content.push(Space::with_height(padding));
 
         // Menu builder
         let mut menu_item_controls = settings::section().title(fl!("menu-builder"));
