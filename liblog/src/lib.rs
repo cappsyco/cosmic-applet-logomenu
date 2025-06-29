@@ -11,12 +11,16 @@ use std::fmt::Display;
 pub struct LogoMenuConfig {
     pub logo: String,
     pub menu_items: MenuItems,
+    pub custom_logo_active: bool,
+    pub custom_logo_path: String,
 }
 impl Default for LogoMenuConfig {
     fn default() -> Self {
         Self {
             logo: String::from("Cosmic (Symbolic)"),
             menu_items: MenuItems::default(),
+            custom_logo_active: false,
+            custom_logo_path: String::from(""),
         }
     }
 }

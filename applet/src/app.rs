@@ -9,10 +9,11 @@ use cosmic::cosmic_theme::Spacing;
 use cosmic::iced::window::Id;
 use cosmic::iced::{Limits, Subscription};
 use cosmic::iced_winit::commands::popup::{destroy_popup, get_popup};
-use cosmic::widget::{self};
+use cosmic::widget;
 use cosmic::{Application, Element};
 use liblog::{IMAGES, LogoMenuConfig, MenuItemType};
 use std::env;
+use std::fs;
 use std::path::Path;
 use std::process::Command;
 
@@ -71,19 +72,27 @@ impl Application for LogoMenu {
     }
 
     fn view(&self) -> Element<Self::Message> {
-        // Get the current logo with appropriate fallback
-        let selected_logo_name = if IMAGES.contains_key(&self.config.logo) {
-            &self.config.logo
+        // If custom logo is active and there is a valid one set
+        let logo_widget = if self.config.custom_logo_active == true
+            && Path::new(&self.config.custom_logo_path).exists()
+        {
+            // Load custom logo
+            cosmic::widget::icon::from_svg_bytes(fs::read(&self.config.custom_logo_path).unwrap())
         } else {
-            &LogoMenuConfig::default().logo
+            // Get the current logo with appropriate fallback
+            let selected_logo_name = if IMAGES.contains_key(&self.config.logo) {
+                &self.config.logo
+            } else {
+                &LogoMenuConfig::default().logo
+            };
+            let logo_bytes = IMAGES[selected_logo_name];
+
+            cosmic::widget::icon::from_svg_bytes(logo_bytes.0).symbolic(logo_bytes.1)
         };
-        let logo_bytes = IMAGES[selected_logo_name];
 
         self.core
             .applet
-            .icon_button_from_handle(
-                cosmic::widget::icon::from_svg_bytes(logo_bytes.0).symbolic(logo_bytes.1),
-            )
+            .icon_button_from_handle(logo_widget)
             .on_press(Message::TogglePopup)
             .into()
     }

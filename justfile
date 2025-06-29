@@ -49,7 +49,7 @@ default: build-release
 # Combines all cleaning
 clean-all:
     cargo clean
-    rm -rf .cargo vendor vendor.tar *.rpm *.deb .flatpak-builder flatpak-out
+    rm -rf .cargo vendor vendor.tar *.rpm *.deb .flatpak-builder flatpak-out repo
 
 # Runs `cargo clean`
 clean:
