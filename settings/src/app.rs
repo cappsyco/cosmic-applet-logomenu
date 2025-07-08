@@ -5,6 +5,7 @@ use crate::fl;
 use cosmic::app::context_drawer;
 use cosmic::cosmic_config::Config;
 use cosmic::iced::{Alignment, Length};
+use cosmic::iced_wgpu::graphics::text::cosmic_text::Align;
 use cosmic::iced_widget::scrollable;
 use cosmic::prelude::*;
 use cosmic::widget::{self, Space, container, dropdown, menu, settings, toggler};
@@ -23,6 +24,7 @@ const CONFIG_ID: &str = "co.uk.cappsy.CosmicAppletLogoMenu";
 pub enum DialogPage {
     EditItem(usize, MenuItem),
     RemoveItem(usize),
+    ResetMenu,
 }
 
 pub struct AppModel {
@@ -38,6 +40,8 @@ pub struct AppModel {
     custom_logo_active: bool,
     custom_logo_path: String,
     menu_items: Vec<MenuItem>,
+    menu_types: Vec<MenuItemType>,
+    power_actions: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -47,7 +51,7 @@ pub enum Message {
     ToggleCustomLogo(bool),
     UpdateCustomLogo,
     AddItem(MenuItemType),
-    SaveItem(usize, String, String),
+    SaveItem(usize, MenuItem),
     RemoveItem(usize),
     MoveItem(OrderDirection, usize),
     ResetMenu,
@@ -55,6 +59,7 @@ pub enum Message {
     DialogCancel,
     DialogEditItem(usize, MenuItem),
     DialogRemoveItem(usize),
+    DialogResetMenu,
 }
 
 #[derive(Debug, Clone)]
@@ -116,6 +121,15 @@ impl cosmic::Application for AppModel {
             None => "".to_owned(),
         };
 
+        let menu_types = vec![MenuItemType::LaunchAction, MenuItemType::PowerAction];
+        let power_actions = vec![
+            String::from("Lock"),
+            String::from("Logout"),
+            String::from("Suspend"),
+            String::from("Restart"),
+            String::from("Shutdown"),
+        ];
+
         let mut app = AppModel {
             core,
             context_page: ContextPage::default(),
@@ -128,6 +142,8 @@ impl cosmic::Application for AppModel {
             menu_items,
             custom_logo_active,
             custom_logo_path,
+            menu_types,
+            power_actions,
         };
 
         let command = app.update_title();
@@ -211,7 +227,7 @@ impl cosmic::Application for AppModel {
         page_content = page_content.push(Space::with_height(padding));
 
         // Menu settings
-        let mut menu_settings = settings::section().title(fl!("menu-settings")).add({
+        let mut menu_settings = settings::section().add({
             Element::from(
                 settings::item::builder(fl!("use-custom-logo")).control(
                     toggler(self.custom_logo_active)
@@ -250,8 +266,35 @@ impl cosmic::Application for AppModel {
         page_content = page_content.push(menu_settings);
         page_content = page_content.push(Space::with_height(padding));
 
+        // Add buttons
+        page_content = page_content.push(
+            container(
+                widget::row::with_capacity(3)
+                    .push(
+                        widget::button::suggested(fl!("add-menu-item"))
+                            .on_press(Message::AddItem(MenuItemType::LaunchAction))
+                            .apply(Element::from),
+                    )
+                    .push(
+                        widget::button::standard(fl!("add-divider"))
+                            .on_press(Message::AddItem(MenuItemType::Divider))
+                            .apply(Element::from),
+                    )
+                    .push(
+                        widget::button::destructive(fl!("reset-to-default"))
+                            .on_press(Message::DialogResetMenu)
+                            .apply(Element::from),
+                    )
+                    .spacing(10)
+                    .apply(Element::from),
+            )
+            .width(Length::Fill)
+            .align_x(Alignment::Center),
+        );
+        page_content = page_content.push(Space::with_height(15));
+
         // Menu builder
-        let mut menu_item_controls = settings::section().title(fl!("menu-builder"));
+        let mut menu_item_controls = settings::section();
         let menu_items = &self.menu_items;
 
         for (i, menu_item) in menu_items.iter().enumerate() {
@@ -268,7 +311,16 @@ impl cosmic::Application for AppModel {
                                     .on_press(Message::MoveItem(OrderDirection::Down, i)),
                             ),
                     )
-                    .push(Space::new(20, 0))
+                    .push(Space::new(10, 0))
+                    .push(
+                        container(widget::icon::from_name(match menu_item.item_type() {
+                            MenuItemType::LaunchAction => "utilities-terminal-symbolic",
+                            MenuItemType::PowerAction => "system-shutdown-symbolic",
+                            MenuItemType::Divider => "",
+                        }))
+                        .padding([8, 0, 7, 5]),
+                    )
+                    .push(Space::new(18, 0))
                     .push(
                         settings::item::builder(match menu_item.label() {
                             Some(label) => {
@@ -276,7 +328,7 @@ impl cosmic::Application for AppModel {
                                 let command_string = menu_item.command().unwrap_or_default();
 
                                 if command_string != "" {
-                                    label_string.push_str(" :: ");
+                                    label_string.push_str("   ::   ");
                                     label_string.push_str(&command_string);
                                 }
 
@@ -311,33 +363,6 @@ impl cosmic::Application for AppModel {
         page_content = page_content.push(menu_item_controls);
         page_content = page_content.push(Space::with_height(15));
 
-        // Add buttons
-        page_content = page_content.push(
-            container(
-                widget::row::with_capacity(2)
-                    .push(
-                        widget::button::standard(fl!("reset-to-default"))
-                            .on_press(Message::ResetMenu)
-                            .apply(Element::from),
-                    )
-                    .push(
-                        widget::button::standard(fl!("add-divider"))
-                            .on_press(Message::AddItem(MenuItemType::Divider))
-                            .apply(Element::from),
-                    )
-                    .push(
-                        widget::button::suggested(fl!("add-menu-item"))
-                            .on_press(Message::AddItem(MenuItemType::LaunchAction))
-                            .apply(Element::from),
-                    )
-                    .spacing(10)
-                    .apply(Element::from),
-            )
-            .width(Length::Fill)
-            .align_x(Alignment::End),
-        );
-        page_content = page_content.push(Space::with_height(25));
-
         // TODO: This works for now but it needs to be moved away
         // from the view function so it only triggers when needed.
         update_config(
@@ -367,46 +392,136 @@ impl cosmic::Application for AppModel {
 
         let dialog = match dialog_page {
             DialogPage::EditItem(i, menu_item) => {
-                let label_unwrapped = menu_item.label().unwrap_or_default();
-                let command_unwrapped = menu_item.command().unwrap_or_default();
+                let label = menu_item.label().unwrap_or_default();
+                let command = menu_item.command().unwrap_or_default();
+                let item_type = menu_item.item_type();
+
+                let type_input = {
+                    let menu_types = self.menu_types.clone();
+                    let selected_type = self
+                        .menu_types
+                        .iter()
+                        .position(|&r| r == item_type)
+                        .unwrap_or(0);
+                    let menu_item = menu_item.clone();
+                    let i = *i;
+
+                    widget::container(
+                        widget::row::with_capacity(2)
+                            .push(
+                                widget::text(fl!("type"))
+                                    .align_y(Alignment::Center)
+                                    .height(30)
+                                    .width(120),
+                            )
+                            .push(
+                                dropdown(&self.menu_types, Some(selected_type), move |value| {
+                                    let mut command = None;
+                                    if menu_types[value] == MenuItemType::PowerAction {
+                                        command = Some(String::from("Lock"));
+                                    }
+                                    Message::DialogUpdate(DialogPage::EditItem(
+                                        i,
+                                        MenuItem {
+                                            item_type: menu_types[value],
+                                            command,
+                                            ..menu_item.clone()
+                                        },
+                                    ))
+                                })
+                                .width(Length::Fill),
+                            ),
+                    )
+                };
 
                 let label_input = widget::container(
-                    widget::text_input("", label_unwrapped.clone())
-                        .label(fl!("label"))
-                        .on_input(move |value| {
-                            Message::DialogUpdate(DialogPage::EditItem(
-                                *i,
-                                MenuItem {
-                                    label: Some(value),
-                                    ..menu_item.clone()
-                                },
-                            ))
-                        }),
+                    widget::row::with_capacity(2)
+                        .push(
+                            widget::text(fl!("label"))
+                                .align_y(Alignment::Center)
+                                .height(30)
+                                .width(120),
+                        )
+                        .push(
+                            widget::text_input("", label.clone())
+                                .on_input(move |value| {
+                                    Message::DialogUpdate(DialogPage::EditItem(
+                                        *i,
+                                        MenuItem {
+                                            label: Some(value),
+                                            ..menu_item.clone()
+                                        },
+                                    ))
+                                })
+                                .width(Length::Fill),
+                        ),
                 );
 
-                let command_input = widget::container(
-                    widget::text_input("", command_unwrapped.clone())
-                        .label(fl!("command"))
-                        .on_input(|value| {
-                            Message::DialogUpdate(DialogPage::EditItem(
-                                *i,
-                                MenuItem {
-                                    command: Some(value),
-                                    ..menu_item.clone()
-                                },
-                            ))
-                        }),
-                );
+                let command_input = if item_type == MenuItemType::PowerAction {
+                    let power_actions = self.power_actions.clone();
+                    let selected_power_action = self
+                        .power_actions
+                        .iter()
+                        .position(|r| *r == command)
+                        .unwrap_or(0);
+                    let menu_item = menu_item.clone();
+                    let i = *i;
+
+                    widget::container(
+                        widget::row::with_capacity(2)
+                            .push(
+                                widget::text(fl!("command"))
+                                    .align_y(Alignment::Center)
+                                    .height(30)
+                                    .width(120),
+                            )
+                            .push(
+                                dropdown(
+                                    &self.power_actions,
+                                    Some(selected_power_action),
+                                    move |value| {
+                                        Message::DialogUpdate(DialogPage::EditItem(
+                                            i,
+                                            MenuItem {
+                                                command: Some(power_actions[value].to_owned()),
+                                                ..menu_item.clone()
+                                            },
+                                        ))
+                                    },
+                                )
+                                .width(Length::Fill),
+                            ),
+                    )
+                } else {
+                    widget::container(
+                        widget::row::with_capacity(2)
+                            .push(
+                                widget::text(fl!("command"))
+                                    .align_y(Alignment::Center)
+                                    .height(30)
+                                    .width(120),
+                            )
+                            .push(
+                                widget::text_input("", command.clone())
+                                    .on_input(|value| {
+                                        Message::DialogUpdate(DialogPage::EditItem(
+                                            *i,
+                                            MenuItem {
+                                                command: Some(value),
+                                                ..menu_item.clone()
+                                            },
+                                        ))
+                                    })
+                                    .width(Length::Fill),
+                            ),
+                    )
+                };
 
                 // validation
-                let complete_maybe = if label_unwrapped.is_empty() || command_unwrapped.is_empty() {
+                let complete_maybe = if label.is_empty() {
                     None
                 } else {
-                    Some(Message::SaveItem(
-                        *i,
-                        label_unwrapped.clone(),
-                        command_unwrapped.clone(),
-                    ))
+                    Some(Message::SaveItem(*i, menu_item.clone()))
                 };
 
                 let save_button = widget::button::suggested(fl!("save"))
@@ -420,9 +535,9 @@ impl cosmic::Application for AppModel {
                     .title(fl!("edit-menu-item"))
                     .control(
                         widget::ListColumn::default()
+                            .add(type_input)
                             .add(label_input)
-                            .add(command_input)
-                            .add(widget::text(fl!("power-help-text"))),
+                            .add(command_input),
                     )
                     .primary_action(save_button)
                     .secondary_action(cancel_button)
@@ -433,6 +548,16 @@ impl cosmic::Application for AppModel {
                 .title(fl!("remove-item"))
                 .primary_action(
                     widget::button::suggested(fl!("remove")).on_press(Message::RemoveItem(*i)),
+                )
+                .secondary_action(
+                    widget::button::standard(fl!("cancel")).on_press(Message::DialogCancel),
+                )
+                .apply(Element::from),
+
+            DialogPage::ResetMenu => widget::dialog()
+                .title(fl!("reset-to-default"))
+                .primary_action(
+                    widget::button::destructive(fl!("reset")).on_press(Message::ResetMenu),
                 )
                 .secondary_action(
                     widget::button::standard(fl!("cancel")).on_press(Message::DialogCancel),
@@ -487,17 +612,27 @@ impl cosmic::Application for AppModel {
                 };
             }
 
-            Message::AddItem(item_type) => self.menu_items.push(MenuItem {
-                item_type: item_type.clone(),
-                label: match &item_type {
-                    MenuItemType::LaunchAction => Some(fl!("new-launcher")),
-                    _ => None,
-                },
-                command: match &item_type {
-                    MenuItemType::LaunchAction => Some(String::from("cosmic-logomenu-settings")),
-                    _ => None,
-                },
-            }),
+            Message::AddItem(item_type) => {
+                let new_item = MenuItem {
+                    item_type: item_type.clone(),
+                    label: match &item_type {
+                        MenuItemType::LaunchAction => Some(fl!("new-launcher")),
+                        _ => None,
+                    },
+                    command: match &item_type {
+                        MenuItemType::LaunchAction => {
+                            Some(String::from("cosmic-logomenu-settings"))
+                        }
+                        _ => None,
+                    },
+                };
+                self.menu_items.splice(0..0, vec![new_item.clone()]);
+
+                if item_type == MenuItemType::LaunchAction {
+                    self.dialog_pages
+                        .push_front(DialogPage::EditItem(0, new_item.clone()));
+                }
+            }
 
             Message::DialogUpdate(dialog_page) => {
                 if !self.dialog_pages.is_empty() {
@@ -518,23 +653,8 @@ impl cosmic::Application for AppModel {
                 self.dialog_pages.push_front(DialogPage::RemoveItem(i));
             }
 
-            Message::SaveItem(i, label, command) => {
-                // Check for power command
-                let mut new_item_type = MenuItemType::LaunchAction;
-                if command == "Lock"
-                    || command == "LogOut"
-                    || command == "Suspend"
-                    || command == "Restart"
-                    || command == "Shutdown"
-                {
-                    new_item_type = MenuItemType::PowerAction;
-                }
-
-                self.menu_items[i] = MenuItem {
-                    item_type: new_item_type,
-                    label: Some(label),
-                    command: Some(command),
-                };
+            Message::SaveItem(i, menu_item) => {
+                self.menu_items[i] = menu_item;
                 self.dialog_pages.pop_front();
             }
 
@@ -569,8 +689,13 @@ impl cosmic::Application for AppModel {
                 }
             }
 
+            Message::DialogResetMenu => {
+                self.dialog_pages.push_front(DialogPage::ResetMenu);
+            }
+
             Message::ResetMenu => {
                 self.menu_items = MenuItems::default().items;
+                self.dialog_pages.pop_front();
             }
         }
         Task::none()
