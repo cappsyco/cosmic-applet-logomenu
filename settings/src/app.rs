@@ -5,7 +5,6 @@ use crate::fl;
 use cosmic::app::context_drawer;
 use cosmic::cosmic_config::Config;
 use cosmic::iced::{Alignment, Length};
-use cosmic::iced_wgpu::graphics::text::cosmic_text::Align;
 use cosmic::iced_widget::scrollable;
 use cosmic::prelude::*;
 use cosmic::widget::{self, Space, container, dropdown, menu, settings, toggler};
