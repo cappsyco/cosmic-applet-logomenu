@@ -49,12 +49,13 @@
     <category>Utility</category>
   </categories>
   <releases>
-    <release version="0.5.0" date="2025-06-26">
+    <release version="0.6.0" date="2025-07-08">
       <url type="details">
-        https://github.com/cappsyco/cosmic-applet-logomenu/releases/tag/v0.5.0
+        https://github.com/cappsyco/cosmic-applet-logomenu/releases/tag/v0.6.0
       </url>
       <description>
-        <p>Initial Flatpak release</p>
+        <p>Added the ability to use your own custom logos</p>
+        <p>Improved the adding / editing experience on the Settings app</p>
       </description>
     </release>
   </releases>

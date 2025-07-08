@@ -259,7 +259,6 @@ rpm:
     echo "%defattr(-,root,root,-)" >> {{rpmname2}}/spec.spec
     echo "{{prefix}}/bin/{{name2}}" >> {{rpmname2}}/spec.spec
     echo "{{prefix}}/share/applications/{{desktop2}}" >> {{rpmname2}}/spec.spec
-    echo "{{prefix}}/share/icons/hicolor/scalable/apps/*.svg" >> {{rpmname2}}/spec.spec
 
     rpmbuild -bb --buildroot="$(pwd)/{{rpmdir2}}" {{rpmname2}}/spec.spec \
         --define "_rpmdir $(pwd)" \
