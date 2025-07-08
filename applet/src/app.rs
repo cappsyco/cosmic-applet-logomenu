@@ -120,11 +120,11 @@ impl Application for LogoMenu {
                             Message::Action(match item.command() {
                                 Some(command) => match command.as_ref() {
                                     "Lock" => PowerAction::Lock,
-                                    "LogOut" => PowerAction::LogOut,
+                                    "Logout" => PowerAction::LogOut,
                                     "Suspend" => PowerAction::Suspend,
                                     "Restart" => PowerAction::Restart,
                                     "Shutdown" => PowerAction::Shutdown,
-                                    _ => PowerAction::Shutdown,
+                                    _ => PowerAction::LogOut,
                                 },
                                 _ => PowerAction::Shutdown,
                             }),

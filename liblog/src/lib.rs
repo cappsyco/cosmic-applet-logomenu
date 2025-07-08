@@ -3,7 +3,7 @@
 use cosmic_config::{CosmicConfigEntry, cosmic_config_derive::CosmicConfigEntry};
 use phf::phf_map;
 use serde::{Deserialize, Serialize};
-use std::fmt::Display;
+use std::fmt;
 
 // Config
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, CosmicConfigEntry)]
@@ -26,11 +26,20 @@ impl Default for LogoMenuConfig {
 }
 
 // Menu item types
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Copy)]
 pub enum MenuItemType {
     LaunchAction,
     PowerAction,
     Divider,
+}
+impl AsRef<str> for MenuItemType {
+    fn as_ref(&self) -> &str {
+        match self {
+            MenuItemType::LaunchAction => "Launch Action",
+            MenuItemType::PowerAction => "Power Action",
+            MenuItemType::Divider => "Divider",
+        }
+    }
 }
 
 // Individual menu item struct
@@ -57,7 +66,7 @@ impl MenuItem {
 pub struct MenuItems {
     pub items: Vec<MenuItem>,
 }
-impl Display for MenuItems {
+impl fmt::Display for MenuItems {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self)
     }
@@ -124,7 +133,7 @@ impl Default for MenuItems {
                 MenuItem {
                     item_type: MenuItemType::PowerAction,
                     label: Some(String::from("Log out")),
-                    command: Some(String::from("LogOut")),
+                    command: Some(String::from("Logout")),
                 },
                 MenuItem {
                     item_type: MenuItemType::PowerAction,
