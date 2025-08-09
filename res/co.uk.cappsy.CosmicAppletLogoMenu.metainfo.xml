@@ -49,13 +49,20 @@
     <category>Utility</category>
   </categories>
   <releases>
-    <release version="0.6.0" date="2025-07-08">
+    <release version="0.6.1" date="2025-08-10">
       <url type="details">
-        https://github.com/cappsyco/cosmic-applet-logomenu/releases/tag/v0.6.0
+        https://github.com/cappsyco/cosmic-applet-logomenu/releases/tag/v0.6.1
       </url>
       <description>
-        <p>Added the ability to use your own custom logos</p>
-        <p>Improved the adding / editing experience on the Settings app</p>
+        <p><strong>0.6.1</strong></p>
+        <ul>
+          <li>Corrected some logo errors and removed others</li>
+        </ul>
+        <p><strong>0.6.0</strong></p>
+        <ul>
+          <li>Added the ability to use your own custom logos</li>
+          <li>Improved the adding / editing experience on the Settings app</li>
+        </ul>
       </description>
     </release>
   </releases>
