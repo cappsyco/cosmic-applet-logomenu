@@ -149,7 +149,7 @@ impl cosmic::Application for AppModel {
         (app, command)
     }
 
-    fn header_start(&self) -> Vec<Element<Self::Message>> {
+    fn header_start(&self) -> Vec<Element<'_, Self::Message>> {
         let menu_bar = menu::bar(vec![menu::Tree::with_children(
             menu::root(fl!("view")).apply(Element::from),
             menu::items(
@@ -161,7 +161,7 @@ impl cosmic::Application for AppModel {
         vec![menu_bar.into()]
     }
 
-    fn context_drawer(&self) -> Option<context_drawer::ContextDrawer<Self::Message>> {
+    fn context_drawer(&self) -> Option<context_drawer::ContextDrawer<'_, Self::Message>> {
         if !self.core.window.show_context {
             return None;
         }
@@ -175,7 +175,7 @@ impl cosmic::Application for AppModel {
         })
     }
 
-    fn view(&self) -> Element<Self::Message> {
+    fn view(&self) -> Element<'_, Self::Message> {
         //  Get theme info
         let theme = cosmic::theme::active();
         let padding = if self.core.is_condensed() {
@@ -386,7 +386,7 @@ impl cosmic::Application for AppModel {
         content
     }
 
-    fn dialog(&self) -> Option<Element<Message>> {
+    fn dialog(&self) -> Option<Element<'_, Message>> {
         let dialog_page = self.dialog_pages.front()?;
 
         let dialog = match dialog_page {
@@ -702,7 +702,7 @@ impl cosmic::Application for AppModel {
 }
 
 impl AppModel {
-    pub fn about(&self) -> Element<Message> {
+    pub fn about(&self) -> Element<'_, Message> {
         let cosmic_theme::Spacing { space_xxs, .. } = theme::active().cosmic().spacing;
         let icon = widget::svg(widget::svg::Handle::from_memory(APP_ICON)).width(120);
         let title = widget::text::title3(fl!("app-title"));
