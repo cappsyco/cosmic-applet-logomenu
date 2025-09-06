@@ -297,7 +297,7 @@ impl cosmic::Application for AppModel {
         let menu_items = &self.menu_items;
 
         for (i, menu_item) in menu_items.iter().enumerate() {
-            let mut menu_item_row = widget::row::with_capacity(5).push(
+            let mut menu_item_row = widget::row().push(
                 widget::row::with_capacity(2)
                     .push(
                         widget::button::icon(widget::icon::from_name("pan-up-symbolic"))
