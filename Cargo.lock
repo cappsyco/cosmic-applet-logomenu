@@ -267,6 +267,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "ashpd"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "da0986d5b4f0802160191ad75f8d33ada000558757db3defb70299ca95d9fcbd"
+dependencies = [
+ "enumflags2",
+ "futures-channel",
+ "futures-util",
+ "rand 0.9.2",
+ "serde",
+ "serde_repr",
+ "tokio",
+ "url",
+ "wayland-backend",
+ "wayland-client",
+ "wayland-protocols",
+ "zbus 5.10.0",
+]
+
+[[package]]
 name = "async-broadcast"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1012,22 +1032,10 @@ dependencies = [
 [[package]]
 name = "cosmic-client-toolkit"
 version = "0.1.0"
-source = "git+https://github.com/pop-os/cosmic-protocols?rev=178eb0b#178eb0b14a0e5c192f64f6dee6c40341a8e5ee51"
-dependencies = [
- "cosmic-protocols 0.1.0 (git+https://github.com/pop-os/cosmic-protocols?rev=178eb0b)",
- "libc",
- "smithay-client-toolkit 0.19.2",
- "wayland-client",
- "wayland-protocols",
-]
-
-[[package]]
-name = "cosmic-client-toolkit"
-version = "0.1.0"
 source = "git+https://github.com/pop-os/cosmic-protocols?rev=6254f50#6254f50abc6dbfccadc6939f80e20081ab5f9d51"
 dependencies = [
  "bitflags 2.9.4",
- "cosmic-protocols 0.1.0 (git+https://github.com/pop-os/cosmic-protocols?rev=6254f50)",
+ "cosmic-protocols",
  "libc",
  "smithay-client-toolkit 0.20.0",
  "wayland-client",
@@ -1037,7 +1045,7 @@ dependencies = [
 [[package]]
 name = "cosmic-config"
 version = "0.1.0"
-source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#27a645d67099ab0420f807337759b7334f57584d"
+source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#15b7dfe006079a4d6ac168f51ecec4cbc4b9336c"
 dependencies = [
  "atomicwrites",
  "cosmic-config-derive",
@@ -1047,19 +1055,18 @@ dependencies = [
  "iced_futures",
  "known-folders",
  "notify",
- "once_cell",
  "ron",
  "serde",
  "tokio",
  "tracing",
- "xdg",
+ "xdg 3.0.0",
  "zbus 5.10.0",
 ]
 
 [[package]]
 name = "cosmic-config-derive"
 version = "0.1.0"
-source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#27a645d67099ab0420f807337759b7334f57584d"
+source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#15b7dfe006079a4d6ac168f51ecec4cbc4b9336c"
 dependencies = [
  "quote",
  "syn 2.0.106",
@@ -1075,15 +1082,15 @@ dependencies = [
  "memmap2 0.9.8",
  "thiserror 2.0.16",
  "tracing",
- "xdg",
+ "xdg 2.5.2",
 ]
 
 [[package]]
 name = "cosmic-logomenu-settings"
 version = "0.6.1"
 dependencies = [
- "i18n-embed",
- "i18n-embed-fl",
+ "i18n-embed 0.15.4",
+ "i18n-embed-fl 0.9.4",
  "libcosmic",
  "liblog",
  "rfd",
@@ -1104,20 +1111,6 @@ dependencies = [
  "tracing",
  "wayland-protocols-wlr",
  "xdg-shell-wrapper-config",
-]
-
-[[package]]
-name = "cosmic-protocols"
-version = "0.1.0"
-source = "git+https://github.com/pop-os/cosmic-protocols?rev=178eb0b#178eb0b14a0e5c192f64f6dee6c40341a8e5ee51"
-dependencies = [
- "bitflags 2.9.4",
- "wayland-backend",
- "wayland-client",
- "wayland-protocols",
- "wayland-protocols-wlr",
- "wayland-scanner",
- "wayland-server",
 ]
 
 [[package]]
@@ -1167,13 +1160,12 @@ dependencies = [
 [[package]]
 name = "cosmic-theme"
 version = "0.1.0"
-source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#27a645d67099ab0420f807337759b7334f57584d"
+source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#15b7dfe006079a4d6ac168f51ecec4cbc4b9336c"
 dependencies = [
  "almost",
  "cosmic-config",
  "csscolorparser",
  "dirs 6.0.0",
- "lazy_static",
  "palette",
  "ron",
  "serde",
@@ -1684,7 +1676,17 @@ version = "0.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bb74634707bebd0ce645a981148e8fb8c7bccd4c33c652aeffd28bf2f96d555a"
 dependencies = [
- "fluent-bundle",
+ "fluent-bundle 0.15.3",
+ "unic-langid",
+]
+
+[[package]]
+name = "fluent"
+version = "0.17.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8137a6d5a2c50d6b0ebfcb9aaa91a28154e0a70605f112d30cb0cd4a78670477"
+dependencies = [
+ "fluent-bundle 0.16.0",
  "unic-langid",
 ]
 
@@ -1695,11 +1697,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7fe0a21ee80050c678013f82edf4b705fe2f26f1f9877593d13198612503f493"
 dependencies = [
  "fluent-langneg",
- "fluent-syntax",
+ "fluent-syntax 0.11.1",
  "intl-memoizer",
  "intl_pluralrules",
  "rustc-hash 1.1.0",
  "self_cell 0.10.3",
+ "smallvec",
+ "unic-langid",
+]
+
+[[package]]
+name = "fluent-bundle"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "01203cb8918f5711e73891b347816d932046f95f54207710bda99beaeb423bf4"
+dependencies = [
+ "fluent-langneg",
+ "fluent-syntax 0.12.0",
+ "intl-memoizer",
+ "intl_pluralrules",
+ "rustc-hash 2.1.1",
+ "self_cell 1.2.0",
  "smallvec",
  "unic-langid",
 ]
@@ -1720,6 +1738,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2a530c4694a6a8d528794ee9bbd8ba0122e779629ac908d15ad5a7ae7763a33d"
 dependencies = [
  "thiserror 1.0.69",
+]
+
+[[package]]
+name = "fluent-syntax"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "54f0d287c53ffd184d04d8677f590f4ac5379785529e5e08b1c8083acdd5c198"
+dependencies = [
+ "memchr",
+ "thiserror 2.0.16",
 ]
 
 [[package]]
@@ -2193,9 +2221,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "669ffc2c93f97e6ddf06ddbe999fcd6782e3342978bb85f7d3c087c7978404c4"
 dependencies = [
  "arc-swap",
- "fluent",
+ "fluent 0.16.1",
  "fluent-langneg",
- "fluent-syntax",
+ "fluent-syntax 0.11.1",
  "i18n-embed-impl",
  "intl-memoizer",
  "locale_config",
@@ -2208,16 +2236,56 @@ dependencies = [
 ]
 
 [[package]]
+name = "i18n-embed"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a217bbb075dcaefb292efa78897fc0678245ca67f265d12c351e42268fcb0305"
+dependencies = [
+ "arc-swap",
+ "fluent 0.17.0",
+ "fluent-langneg",
+ "fluent-syntax 0.12.0",
+ "i18n-embed-impl",
+ "intl-memoizer",
+ "log",
+ "parking_lot 0.12.4",
+ "rust-embed",
+ "sys-locale",
+ "thiserror 1.0.69",
+ "unic-langid",
+ "walkdir",
+]
+
+[[package]]
 name = "i18n-embed-fl"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04b2969d0b3fc6143776c535184c19722032b43e6a642d710fa3f88faec53c2d"
 dependencies = [
  "find-crate",
- "fluent",
- "fluent-syntax",
+ "fluent 0.16.1",
+ "fluent-syntax 0.11.1",
  "i18n-config",
- "i18n-embed",
+ "i18n-embed 0.15.4",
+ "proc-macro-error2",
+ "proc-macro2",
+ "quote",
+ "strsim",
+ "syn 2.0.106",
+ "unic-langid",
+]
+
+[[package]]
+name = "i18n-embed-fl"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e598ed73b67db92f61e04672e599eef2991a262a40e1666735b8a86d2e7e9f30"
+dependencies = [
+ "find-crate",
+ "fluent 0.17.0",
+ "fluent-syntax 0.12.0",
+ "i18n-config",
+ "i18n-embed 0.16.0",
  "proc-macro-error2",
  "proc-macro2",
  "quote",
@@ -2266,7 +2334,7 @@ dependencies = [
 [[package]]
 name = "iced"
 version = "0.14.0-dev"
-source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#27a645d67099ab0420f807337759b7334f57584d"
+source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#15b7dfe006079a4d6ac168f51ecec4cbc4b9336c"
 dependencies = [
  "dnd",
  "iced_accessibility",
@@ -2284,7 +2352,7 @@ dependencies = [
 [[package]]
 name = "iced_accessibility"
 version = "0.1.0"
-source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#27a645d67099ab0420f807337759b7334f57584d"
+source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#15b7dfe006079a4d6ac168f51ecec4cbc4b9336c"
 dependencies = [
  "accesskit",
  "accesskit_winit",
@@ -2293,11 +2361,11 @@ dependencies = [
 [[package]]
 name = "iced_core"
 version = "0.14.0-dev"
-source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#27a645d67099ab0420f807337759b7334f57584d"
+source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#15b7dfe006079a4d6ac168f51ecec4cbc4b9336c"
 dependencies = [
  "bitflags 2.9.4",
  "bytes",
- "cosmic-client-toolkit 0.1.0 (git+https://github.com/pop-os/cosmic-protocols?rev=6254f50)",
+ "cosmic-client-toolkit",
  "dnd",
  "glam",
  "iced_accessibility",
@@ -2318,7 +2386,7 @@ dependencies = [
 [[package]]
 name = "iced_futures"
 version = "0.14.0-dev"
-source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#27a645d67099ab0420f807337759b7334f57584d"
+source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#15b7dfe006079a4d6ac168f51ecec4cbc4b9336c"
 dependencies = [
  "futures",
  "iced_core",
@@ -2344,7 +2412,7 @@ dependencies = [
 [[package]]
 name = "iced_graphics"
 version = "0.14.0-dev"
-source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#27a645d67099ab0420f807337759b7334f57584d"
+source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#15b7dfe006079a4d6ac168f51ecec4cbc4b9336c"
 dependencies = [
  "bitflags 2.9.4",
  "bytemuck",
@@ -2366,7 +2434,7 @@ dependencies = [
 [[package]]
 name = "iced_renderer"
 version = "0.14.0-dev"
-source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#27a645d67099ab0420f807337759b7334f57584d"
+source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#15b7dfe006079a4d6ac168f51ecec4cbc4b9336c"
 dependencies = [
  "iced_graphics",
  "iced_tiny_skia",
@@ -2378,10 +2446,10 @@ dependencies = [
 [[package]]
 name = "iced_runtime"
 version = "0.14.0-dev"
-source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#27a645d67099ab0420f807337759b7334f57584d"
+source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#15b7dfe006079a4d6ac168f51ecec4cbc4b9336c"
 dependencies = [
  "bytes",
- "cosmic-client-toolkit 0.1.0 (git+https://github.com/pop-os/cosmic-protocols?rev=6254f50)",
+ "cosmic-client-toolkit",
  "dnd",
  "iced_accessibility",
  "iced_core",
@@ -2394,7 +2462,7 @@ dependencies = [
 [[package]]
 name = "iced_tiny_skia"
 version = "0.14.0-dev"
-source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#27a645d67099ab0420f807337759b7334f57584d"
+source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#15b7dfe006079a4d6ac168f51ecec4cbc4b9336c"
 dependencies = [
  "bytemuck",
  "cosmic-text",
@@ -2410,12 +2478,12 @@ dependencies = [
 [[package]]
 name = "iced_wgpu"
 version = "0.14.0-dev"
-source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#27a645d67099ab0420f807337759b7334f57584d"
+source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#15b7dfe006079a4d6ac168f51ecec4cbc4b9336c"
 dependencies = [
  "as-raw-xcb-connection",
  "bitflags 2.9.4",
  "bytemuck",
- "cosmic-client-toolkit 0.1.0 (git+https://github.com/pop-os/cosmic-protocols?rev=6254f50)",
+ "cosmic-client-toolkit",
  "futures",
  "glam",
  "guillotiere",
@@ -2441,9 +2509,9 @@ dependencies = [
 [[package]]
 name = "iced_widget"
 version = "0.14.0-dev"
-source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#27a645d67099ab0420f807337759b7334f57584d"
+source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#15b7dfe006079a4d6ac168f51ecec4cbc4b9336c"
 dependencies = [
- "cosmic-client-toolkit 0.1.0 (git+https://github.com/pop-os/cosmic-protocols?rev=6254f50)",
+ "cosmic-client-toolkit",
  "dnd",
  "iced_accessibility",
  "iced_renderer",
@@ -2461,9 +2529,9 @@ dependencies = [
 [[package]]
 name = "iced_winit"
 version = "0.14.0-dev"
-source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#27a645d67099ab0420f807337759b7334f57584d"
+source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#15b7dfe006079a4d6ac168f51ecec4cbc4b9336c"
 dependencies = [
- "cosmic-client-toolkit 0.1.0 (git+https://github.com/pop-os/cosmic-protocols?rev=6254f50)",
+ "cosmic-client-toolkit",
  "dnd",
  "iced_accessibility",
  "iced_futures",
@@ -2865,13 +2933,13 @@ checksum = "6a82ae493e598baaea5209805c49bbf2ea7de956d50d7da0da1164f9c6d28543"
 [[package]]
 name = "libcosmic"
 version = "0.1.0"
-source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#27a645d67099ab0420f807337759b7334f57584d"
+source = "git+https://github.com/cappsyco/libcosmic?branch=logomenu-patch#15b7dfe006079a4d6ac168f51ecec4cbc4b9336c"
 dependencies = [
  "apply",
- "ashpd",
+ "ashpd 0.12.0",
  "auto_enums",
  "chrono",
- "cosmic-client-toolkit 0.1.0 (git+https://github.com/pop-os/cosmic-protocols?rev=178eb0b)",
+ "cosmic-client-toolkit",
  "cosmic-config",
  "cosmic-freedesktop-icons",
  "cosmic-panel-config",
@@ -2880,6 +2948,8 @@ dependencies = [
  "css-color",
  "derive_setters",
  "futures",
+ "i18n-embed 0.16.0",
+ "i18n-embed-fl 0.10.0",
  "iced",
  "iced_accessibility",
  "iced_core",
@@ -2891,11 +2961,11 @@ dependencies = [
  "iced_widget",
  "iced_winit",
  "image",
- "lazy_static",
  "palette",
  "raw-window-handle",
  "rfd",
  "ron",
+ "rust-embed",
  "serde",
  "slotmap",
  "taffy",
@@ -4290,7 +4360,7 @@ version = "0.15.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ef2bee61e6cffa4635c72d7d81a84294e28f0930db0ddcb0f66d10244674ebed"
 dependencies = [
- "ashpd",
+ "ashpd 0.11.0",
  "block2 0.6.1",
  "dispatch2",
  "js-sys",
@@ -4319,9 +4389,9 @@ dependencies = [
 
 [[package]]
 name = "ron"
-version = "0.9.0"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "63f3aa105dea217ef30d89581b65a4d527a19afc95ef5750be3890e8d3c5b837"
+checksum = "db09040cc89e461f1a265139777a2bde7f8d8c67c4936f700c63ce3e2904d468"
 dependencies = [
  "base64",
  "bitflags 2.9.4",
@@ -4646,14 +4716,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3457dea1f0eb631b4034d61d4d8c32074caa6cd1ab2d59f2327bd8461e2c0016"
 dependencies = [
  "bitflags 2.9.4",
- "bytemuck",
  "calloop 0.13.0",
  "calloop-wayland-source 0.3.0",
  "cursor-icon",
  "libc",
  "log",
  "memmap2 0.9.8",
- "pkg-config",
  "rustix 0.38.44",
  "thiserror 1.0.69",
  "wayland-backend",
@@ -4663,7 +4731,6 @@ dependencies = [
  "wayland-protocols",
  "wayland-protocols-wlr",
  "wayland-scanner",
- "xkbcommon 0.7.0",
  "xkeysym",
 ]
 
@@ -6358,6 +6425,12 @@ name = "xdg"
 version = "2.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "213b7324336b53d2414b2db8537e56544d981803139155afa84f76eeebb7a546"
+
+[[package]]
+name = "xdg"
+version = "3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2fb433233f2df9344722454bc7e96465c9d03bff9d77c248f9e7523fe79585b5"
 
 [[package]]
 name = "xdg-home"
