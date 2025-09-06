@@ -49,11 +49,15 @@
     <category>Utility</category>
   </categories>
   <releases>
-    <release version="0.6.1" date="2025-08-10">
+    <release version="0.6.2" date="2025-08-10">
       <url type="details">
-        https://github.com/cappsyco/cosmic-applet-logomenu/releases/tag/v0.6.1
+        https://github.com/cappsyco/cosmic-applet-logomenu/releases/tag/v0.6.2
       </url>
       <description>
+        <p><strong>0.6.2</strong></p>
+        <ul>
+          <li>Small visual improvement for dividers in the settings app</li>
+        </ul>
         <p><strong>0.6.1</strong></p>
         <ul>
           <li>Corrected some logo errors and removed others</li>
