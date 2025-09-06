@@ -4,8 +4,8 @@ use crate::config::{load_config, update_config};
 use crate::fl;
 use cosmic::app::context_drawer;
 use cosmic::cosmic_config::Config;
-use cosmic::iced::{Alignment, Length};
-use cosmic::iced_widget::scrollable;
+use cosmic::iced::{Alignment, Length, Radius};
+use cosmic::iced_widget::{rule, scrollable};
 use cosmic::prelude::*;
 use cosmic::widget::{self, Space, container, dropdown, menu, settings, toggler};
 use cosmic::{cosmic_theme, theme};
@@ -297,67 +297,82 @@ impl cosmic::Application for AppModel {
         let menu_items = &self.menu_items;
 
         for (i, menu_item) in menu_items.iter().enumerate() {
-            menu_item_controls = menu_item_controls.add(cosmic::Element::from(
-                widget::row::with_capacity(3)
+            let mut menu_item_row = widget::row::with_capacity(5).push(
+                widget::row::with_capacity(2)
                     .push(
-                        widget::row::with_capacity(2)
-                            .push(
-                                widget::button::icon(widget::icon::from_name("pan-up-symbolic"))
-                                    .on_press(Message::MoveItem(OrderDirection::Up, i)),
-                            )
-                            .push(
-                                widget::button::icon(widget::icon::from_name("pan-down-symbolic"))
-                                    .on_press(Message::MoveItem(OrderDirection::Down, i)),
-                            ),
+                        widget::button::icon(widget::icon::from_name("pan-up-symbolic"))
+                            .on_press(Message::MoveItem(OrderDirection::Up, i)),
                     )
-                    .push(Space::new(10, 0))
                     .push(
-                        container(widget::icon::from_name(match menu_item.item_type() {
-                            MenuItemType::LaunchAction => "utilities-terminal-symbolic",
-                            MenuItemType::PowerAction => "system-shutdown-symbolic",
-                            MenuItemType::Divider => "",
-                        }))
-                        .padding([8, 0, 7, 5]),
-                    )
-                    .push(Space::new(18, 0))
-                    .push(
-                        settings::item::builder(match menu_item.label() {
-                            Some(label) => {
-                                let mut label_string = label;
-                                let command_string = menu_item.command().unwrap_or_default();
-
-                                if command_string != "" {
-                                    label_string.push_str("   ::   ");
-                                    label_string.push_str(&command_string);
-                                }
-
-                                label_string
-                            }
-                            _ => match menu_item.item_type() {
-                                MenuItemType::Divider => String::from(""),
-                                _ => fl!("no-label"),
-                            },
-                        })
-                        .control(
-                            widget::row::with_capacity(2)
-                                .push(
-                                    widget::button::icon(widget::icon::from_name("edit-symbolic"))
-                                        .on_press_maybe(match menu_item.item_type() {
-                                            MenuItemType::Divider => None,
-                                            _ => {
-                                                Some(Message::DialogEditItem(i, menu_item.clone()))
-                                            }
-                                        }),
-                                )
-                                .push(
-                                    widget::button::icon(widget::icon::from_name(
-                                        "edit-delete-symbolic",
-                                    ))
-                                    .on_press(Message::DialogRemoveItem(i)),
-                                ),
-                        ),
+                        widget::button::icon(widget::icon::from_name("pan-down-symbolic"))
+                            .on_press(Message::MoveItem(OrderDirection::Down, i)),
                     ),
-            ));
+            );
+
+            // item icon if not Divider
+            if menu_item.item_type() != MenuItemType::Divider {
+                menu_item_row = menu_item_row.push(
+                    container(widget::icon::from_name(match menu_item.item_type() {
+                        MenuItemType::LaunchAction => "utilities-terminal-symbolic",
+                        MenuItemType::PowerAction => "system-shutdown-symbolic",
+                        _ => "",
+                    }))
+                    .padding([8, 15, 0, 10]),
+                )
+            }
+
+            // item label and controls
+            menu_item_row = menu_item_row
+                .push(match menu_item.label() {
+                    Some(label) => {
+                        let mut label_string = label;
+                        let command_string = menu_item.command().unwrap_or_default();
+
+                        if command_string != "" {
+                            label_string.push_str("   ::   ");
+                            label_string.push_str(&command_string);
+                        }
+
+                        container(cosmic::widget::text(label_string))
+                            .width(Length::Fill)
+                            .padding([5, 10, 0, 0])
+                    }
+                    _ => container(widget::divider::horizontal::default().class(
+                        theme::Rule::custom(move |theme| {
+                            let cosmic = theme.cosmic();
+                            let divider_color = &cosmic.on_primary_component_color();
+
+                            rule::Style {
+                                color: cosmic::iced::Color::from_rgb(
+                                    divider_color.red,
+                                    divider_color.green,
+                                    divider_color.blue,
+                                ),
+                                width: 1,
+                                radius: Radius::new(0),
+                                fill_mode: rule::FillMode::Full,
+                            }
+                        }),
+                    ))
+                    .padding([15, 10]),
+                })
+                .push(
+                    widget::row::with_capacity(2)
+                        .push(
+                            widget::button::icon(widget::icon::from_name("edit-symbolic"))
+                                .on_press_maybe(match menu_item.item_type() {
+                                    MenuItemType::Divider => None,
+                                    _ => Some(Message::DialogEditItem(i, menu_item.clone())),
+                                }),
+                        )
+                        .push(
+                            widget::button::icon(widget::icon::from_name("edit-delete-symbolic"))
+                                .on_press(Message::DialogRemoveItem(i)),
+                        ),
+                );
+
+            // apply row to list
+            menu_item_controls = menu_item_controls.add(cosmic::Element::from(menu_item_row));
         }
         page_content = page_content.push(menu_item_controls);
         page_content = page_content.push(Space::with_height(15));
