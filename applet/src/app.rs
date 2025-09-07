@@ -71,7 +71,7 @@ impl Application for LogoMenu {
         Some(Message::PopupClosed(id))
     }
 
-    fn view(&self) -> Element<Self::Message> {
+    fn view(&self) -> Element<'_, Self::Message> {
         // If custom logo is active and there is a valid one set
         let logo_widget = if self.config.custom_logo_active == true
             && Path::new(&self.config.custom_logo_path).exists()
@@ -97,7 +97,7 @@ impl Application for LogoMenu {
             .into()
     }
 
-    fn view_window(&self, _id: Id) -> Element<Self::Message> {
+    fn view_window(&self, _id: Id) -> Element<'_, Self::Message> {
         let Spacing {
             space_xxs, space_s, ..
         } = cosmic::theme::active().cosmic().spacing;
@@ -242,12 +242,6 @@ impl Application for LogoMenu {
         Some(cosmic::applet::style())
     }
 }
-
-/*
-fn run_command(action: &str) -> Result<(),Err> {
-
-}
-*/
 
 fn close_popup(mut popup: Option<Id>) -> Task<Message> {
     if let Some(p) = popup.take() {
