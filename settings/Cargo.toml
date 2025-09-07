@@ -15,6 +15,7 @@ rust-embed = "8.5.0"
 serde = "1.0.219"
 liblog = { path = "../liblog" }
 rfd = "0.15.4"
+ashpd = "0.12.0"
 
 [dependencies.i18n-embed]
 version = "0.15"
