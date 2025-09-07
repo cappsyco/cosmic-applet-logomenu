@@ -1019,7 +1019,7 @@ dependencies = [
 
 [[package]]
 name = "cosmic-applet-logomenu"
-version = "0.6.1"
+version = "0.6.2"
 dependencies = [
  "libcosmic",
  "liblog",
@@ -1087,7 +1087,7 @@ dependencies = [
 
 [[package]]
 name = "cosmic-logomenu-settings"
-version = "0.6.1"
+version = "0.6.2"
 dependencies = [
  "i18n-embed 0.15.4",
  "i18n-embed-fl 0.9.4",
@@ -2989,7 +2989,7 @@ dependencies = [
 
 [[package]]
 name = "liblog"
-version = "0.6.1"
+version = "0.6.2"
 dependencies = [
  "cosmic-config",
  "phf",
