@@ -12,6 +12,7 @@ target/
 # Packaging assets
 cargo-sources.json
 vendor.tar
+/vendor
 /flatpak-builder-tools
 /.flatpak-builder
 /repo
