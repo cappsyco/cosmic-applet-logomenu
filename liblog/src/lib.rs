@@ -121,6 +121,11 @@ impl Default for MenuItems {
                     command: Some(String::from("cosmic-store")),
                 },
                 MenuItem {
+                    item_type: MenuItemType::LaunchAction,
+                    label: Some(String::from("Settings")),
+                    command: Some(String::from("cosmic-settings")),
+                },
+                MenuItem {
                     item_type: MenuItemType::Divider,
                     label: None,
                     command: None,
