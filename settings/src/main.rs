@@ -4,7 +4,13 @@ mod app;
 mod config;
 mod i18n;
 
+use sysinfo::System;
+
 fn main() -> cosmic::iced::Result {
+    if is_running() {
+        return Ok(());
+    }
+
     let requested_languages = i18n_embed::DesktopLanguageRequester::requested_languages();
     i18n::init(&requested_languages);
 
@@ -15,4 +21,27 @@ fn main() -> cosmic::iced::Result {
     );
 
     cosmic::app::run::<app::AppModel>(settings, ())
+}
+
+fn is_running() -> bool {
+    let current_pid = std::process::id();
+    let current_exe = std::env::current_exe()
+            .ok()
+            .and_then(|p| p.canonicalize().ok());
+
+    let mut system = System::new_all();
+    system.refresh_all();
+    system.processes().values().any(|process| {
+        if process.pid().as_u32() == current_pid {
+            return false;
+        }
+
+        if let Some(exe_path) = process.exe().and_then(|p| p.canonicalize().ok()) {
+            if current_exe.as_ref() == Some(&exe_path) {
+                return true;
+            }
+        }
+
+        false
+    })
 }
