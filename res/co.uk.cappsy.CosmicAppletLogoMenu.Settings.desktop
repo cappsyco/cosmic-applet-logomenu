@@ -1,6 +1,8 @@
 [Desktop Entry]
 Name=Logo Menu Settings
+Name[es]=Ajustes de Menú Logo
 Comment=Settings application for COSMIC™ Logo Menu applet
+Comment[es]=Aplicación de ajuster para el applet de COSMIC™ Menú Logo
 Type=Application
 Icon=co.uk.cappsy.CosmicAppletLogoMenu
 Exec=cosmic-logomenu-settings

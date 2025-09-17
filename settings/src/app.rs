@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 use crate::config::{load_config, update_config};
-use crate::fl;
 use cosmic::app::context_drawer;
 use cosmic::cosmic_config::Config;
 use cosmic::iced::{Alignment, Length, Radius};
@@ -10,6 +9,7 @@ use cosmic::prelude::*;
 use cosmic::widget::{self, Space, container, dropdown, menu, settings, toggler};
 use cosmic::{cosmic_theme, theme};
 use liblog::{IMAGES, MenuItem, MenuItemType, MenuItems};
+use liblog::fl;
 use rfd::FileDialog;
 use std::collections::{HashMap, VecDeque};
 use std::path::Path;
@@ -40,6 +40,7 @@ pub struct AppModel {
     custom_logo_path: String,
     menu_items: Vec<MenuItem>,
     menu_types: Vec<MenuItemType>,
+    menu_type_labels: Vec<String>,
     power_actions: Vec<String>,
 }
 
@@ -122,12 +123,16 @@ impl cosmic::Application for AppModel {
 
         let menu_types = vec![MenuItemType::LaunchAction, MenuItemType::PowerAction];
         let power_actions = vec![
-            String::from("Lock"),
-            String::from("Logout"),
-            String::from("Suspend"),
-            String::from("Restart"),
-            String::from("Shutdown"),
+            fl!("lock"),
+            fl!("logout"),
+            fl!("suspend"),
+            fl!("restart"),
+            fl!("shutdown"),
         ];
+
+        let menu_type_labels: Vec<String> = menu_types.iter()
+            .map(|t| t.as_localized_string())
+            .collect();
 
         let mut app = AppModel {
             core,
@@ -142,6 +147,7 @@ impl cosmic::Application for AppModel {
             custom_logo_active,
             custom_logo_path,
             menu_types,
+            menu_type_labels,
             power_actions,
         };
 
@@ -420,6 +426,7 @@ impl cosmic::Application for AppModel {
                     let menu_item = menu_item.clone();
                     let i = *i;
 
+
                     widget::container(
                         widget::row::with_capacity(2)
                             .push(
@@ -429,7 +436,7 @@ impl cosmic::Application for AppModel {
                                     .width(120),
                             )
                             .push(
-                                dropdown(&self.menu_types, Some(selected_type), move |value| {
+                                dropdown(&self.menu_type_labels, Some(selected_type), move |value| {
                                     let mut command = None;
                                     if menu_types[value] == MenuItemType::PowerAction {
                                         command = Some(String::from("Lock"));
