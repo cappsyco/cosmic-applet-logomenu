@@ -1,3 +1,7 @@
+## The files liblog.ftl and cosmic_logomenu_settings.ftl are hard linked.
+## Please copy the whole directory when creating new languages to maintain this
+## But you will only need to edit one
+
 # Settings UI
 about = About
 add-divider = Add divider
@@ -27,6 +31,7 @@ use-custom-logo = Use custom logo
 view = View
 
 # Launch options
+launch-action = Launch action
 custom-command = Custom command
 default-app = Default app
 power-action = Power action

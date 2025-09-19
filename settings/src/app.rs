@@ -8,8 +8,8 @@ use cosmic::iced_widget::{rule, scrollable};
 use cosmic::prelude::*;
 use cosmic::widget::{self, Space, container, dropdown, menu, settings, toggler};
 use cosmic::{cosmic_theme, theme};
-use liblog::{IMAGES, MenuItem, MenuItemType, MenuItems};
 use liblog::fl;
+use liblog::{IMAGES, MenuItem, MenuItemType, MenuItems, PowerActionOption};
 use rfd::FileDialog;
 use std::collections::{HashMap, VecDeque};
 use std::path::Path;
@@ -41,7 +41,8 @@ pub struct AppModel {
     menu_items: Vec<MenuItem>,
     menu_types: Vec<MenuItemType>,
     menu_type_labels: Vec<String>,
-    power_actions: Vec<String>,
+    power_actions: Vec<PowerActionOption>,
+    power_action_labels: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -122,15 +123,18 @@ impl cosmic::Application for AppModel {
         };
 
         let menu_types = vec![MenuItemType::LaunchAction, MenuItemType::PowerAction];
-        let power_actions = vec![
-            fl!("lock"),
-            fl!("logout"),
-            fl!("suspend"),
-            fl!("restart"),
-            fl!("shutdown"),
-        ];
+        let menu_type_labels: Vec<String> =
+            menu_types.iter().map(|t| t.as_localized_string()).collect();
 
-        let menu_type_labels: Vec<String> = menu_types.iter()
+        let power_actions = vec![
+            PowerActionOption::Lock,
+            PowerActionOption::Logout,
+            PowerActionOption::Suspend,
+            PowerActionOption::Restart,
+            PowerActionOption::Shutdown,
+        ];
+        let power_action_labels: Vec<String> = power_actions
+            .iter()
             .map(|t| t.as_localized_string())
             .collect();
 
@@ -149,6 +153,7 @@ impl cosmic::Application for AppModel {
             menu_types,
             menu_type_labels,
             power_actions,
+            power_action_labels,
         };
 
         let command = app.update_title();
@@ -426,7 +431,6 @@ impl cosmic::Application for AppModel {
                     let menu_item = menu_item.clone();
                     let i = *i;
 
-
                     widget::container(
                         widget::row::with_capacity(2)
                             .push(
@@ -436,20 +440,24 @@ impl cosmic::Application for AppModel {
                                     .width(120),
                             )
                             .push(
-                                dropdown(&self.menu_type_labels, Some(selected_type), move |value| {
-                                    let mut command = None;
-                                    if menu_types[value] == MenuItemType::PowerAction {
-                                        command = Some(String::from("Lock"));
-                                    }
-                                    Message::DialogUpdate(DialogPage::EditItem(
-                                        i,
-                                        MenuItem {
-                                            item_type: menu_types[value],
-                                            command,
-                                            ..menu_item.clone()
-                                        },
-                                    ))
-                                })
+                                dropdown(
+                                    &self.menu_type_labels,
+                                    Some(selected_type),
+                                    move |value| {
+                                        let mut command = None;
+                                        if menu_types[value] == MenuItemType::PowerAction {
+                                            command = Some(String::from("Lock"));
+                                        }
+                                        Message::DialogUpdate(DialogPage::EditItem(
+                                            i,
+                                            MenuItem {
+                                                item_type: menu_types[value],
+                                                command,
+                                                ..menu_item.clone()
+                                            },
+                                        ))
+                                    },
+                                )
                                 .width(Length::Fill),
                             ),
                     )
@@ -483,7 +491,7 @@ impl cosmic::Application for AppModel {
                     let selected_power_action = self
                         .power_actions
                         .iter()
-                        .position(|r| *r == command)
+                        .position(|r| *r.command() == command)
                         .unwrap_or(0);
                     let menu_item = menu_item.clone();
                     let i = *i;
@@ -498,13 +506,13 @@ impl cosmic::Application for AppModel {
                             )
                             .push(
                                 dropdown(
-                                    &self.power_actions,
+                                    &self.power_action_labels,
                                     Some(selected_power_action),
                                     move |value| {
                                         Message::DialogUpdate(DialogPage::EditItem(
                                             i,
                                             MenuItem {
-                                                command: Some(power_actions[value].to_owned()),
+                                                command: Some(power_actions[value].command()),
                                                 ..menu_item.clone()
                                             },
                                         ))

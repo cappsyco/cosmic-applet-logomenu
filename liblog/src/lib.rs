@@ -40,7 +40,38 @@ impl MenuItemType {
         match self {
             MenuItemType::LaunchAction => fl!("launch-action"),
             MenuItemType::PowerAction => fl!("power-action"),
-            MenuItemType::Divider => "Divider".to_string(),
+            MenuItemType::Divider => fl!("divider"),
+        }
+    }
+}
+
+// Power action types
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Copy, Hash)]
+pub enum PowerActionOption {
+    Lock,
+    Logout,
+    Suspend,
+    Restart,
+    Shutdown,
+}
+// localised option strings
+impl PowerActionOption {
+    pub fn command(&self) -> String {
+        match self {
+            PowerActionOption::Lock => "Lock".to_owned(),
+            PowerActionOption::Logout => "Logout".to_owned(),
+            PowerActionOption::Suspend => "Suspend".to_owned(),
+            PowerActionOption::Restart => "Restart".to_owned(),
+            PowerActionOption::Shutdown => "Shutdown".to_owned(),
+        }
+    }
+    pub fn as_localized_string(&self) -> String {
+        match self {
+            PowerActionOption::Lock => fl!("lock"),
+            PowerActionOption::Logout => fl!("logout"),
+            PowerActionOption::Suspend => fl!("suspend"),
+            PowerActionOption::Restart => fl!("restart"),
+            PowerActionOption::Shutdown => fl!("shutdown"),
         }
     }
 }
@@ -64,7 +95,7 @@ impl MenuItem {
     }
 }
 
-// Top lebel menu items struct
+// Top level menu items struct
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct MenuItems {
     pub items: Vec<MenuItem>,

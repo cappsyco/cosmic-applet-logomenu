@@ -1,3 +1,7 @@
+## The files liblog.ftl and cosmic_logomenu_settings.ftl are hard linked.
+## Please copy the whole directory when creating new languages to maintain this
+## But you will only need to edit one
+
 # Settings UI
 app-title = Menú Logo COSMIC™
 about = Acerca de
