@@ -12,7 +12,6 @@ use cosmic::iced_winit::commands::popup::{destroy_popup, get_popup};
 use cosmic::widget;
 use cosmic::{Application, Element};
 use liblog::{IMAGES, LogoMenuConfig, MenuItemType};
-use std::env;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
@@ -108,7 +107,7 @@ impl Application for LogoMenu {
         let mut content_list = widget::column().padding([8, 0]).spacing(0);
         for item in &config_menuitems.items {
             match item.item_type() {
-                MenuItemType::LaunchAction => {
+                MenuItemType::LaunchAction | MenuItemType::DefaultAction => {
                     content_list = content_list.push(
                         menu_button(widget::text::body(item.label().unwrap_or_default()))
                             .on_press(Message::Run(item.command().unwrap_or_default())),
@@ -181,7 +180,7 @@ impl Application for LogoMenu {
                     power::PowerAction::Shutdown => "shutdown",
                     _ => return action.perform(),
                 };
-                let is_flatpak = is_flatpak();
+                let is_flatpak = liblog::is_flatpak();
 
                 if is_flatpak {
                     if let Err(_err) = Command::new("flatpak-spawn")
@@ -212,7 +211,7 @@ impl Application for LogoMenu {
             }
             Message::Run(action) => {
                 // TODO: Refactor to avoid code duplication
-                if is_flatpak() && action != "cosmic-logomenu-settings" {
+                if liblog::is_flatpak() && action != "cosmic-logomenu-settings" {
                     let action_parts = action.split_whitespace();
                     match Command::new("flatpak-spawn")
                         .arg("--host")
@@ -249,12 +248,4 @@ fn close_popup(mut popup: Option<Id>) -> Task<Message> {
     } else {
         Task::none()
     }
-}
-
-fn is_flatpak() -> bool {
-    env::var("FLATPAK_ID").is_ok()
-        || Path::new("/.flatpak-info").exists()
-        || env::var("container")
-            .map(|v| v == "flatpak")
-            .unwrap_or(false)
 }

@@ -1,9 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 use cosmic_config::{CosmicConfigEntry, cosmic_config_derive::CosmicConfigEntry};
+use freedesktop_desktop_entry::{Iter, default_paths, get_languages_from_env};
+use once_cell::sync::Lazy;
 use phf::phf_map;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::env;
 use std::fmt;
+use std::io;
+use std::path::Path;
+use std::process::Command;
 
 pub mod i18n;
 pub use crate::i18n::init;
@@ -32,6 +39,7 @@ impl Default for LogoMenuConfig {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Copy)]
 pub enum MenuItemType {
     LaunchAction,
+    DefaultAction,
     PowerAction,
     Divider,
 }
@@ -39,8 +47,53 @@ impl MenuItemType {
     pub fn as_localized_string(&self) -> String {
         match self {
             MenuItemType::LaunchAction => fl!("launch-action"),
+            MenuItemType::DefaultAction => fl!("default-app"),
             MenuItemType::PowerAction => fl!("power-action"),
             MenuItemType::Divider => fl!("divider"),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Copy, Hash)]
+pub enum DefaultAppOption {
+    WebBrowser,
+    FileManager,
+    MailClient,
+    Music,
+    Video,
+    Photos,
+    Calendar,
+    Terminal,
+    TextEditor,
+}
+// localised option strings
+impl DefaultAppOption {
+    // TODO: Commands are translated to strings so they can share a field with normal launch commands.
+    // This should probably work better than this
+    pub fn command(&self) -> String {
+        match self {
+            DefaultAppOption::WebBrowser => "WebBrowser".to_owned(),
+            DefaultAppOption::FileManager => "FileManager".to_owned(),
+            DefaultAppOption::MailClient => "MailClient".to_owned(),
+            DefaultAppOption::Music => "Music".to_owned(),
+            DefaultAppOption::Video => "Video".to_owned(),
+            DefaultAppOption::Photos => "Photos".to_owned(),
+            DefaultAppOption::Calendar => "Calendar".to_owned(),
+            DefaultAppOption::Terminal => "Terminal".to_owned(),
+            DefaultAppOption::TextEditor => "TextEditor".to_owned(),
+        }
+    }
+    pub fn as_localized_string(&self) -> String {
+        match self {
+            DefaultAppOption::WebBrowser => fl!("web-browser"),
+            DefaultAppOption::FileManager => fl!("file-manager"),
+            DefaultAppOption::MailClient => fl!("mail-client"),
+            DefaultAppOption::Music => fl!("music"),
+            DefaultAppOption::Video => fl!("video"),
+            DefaultAppOption::Photos => fl!("photos"),
+            DefaultAppOption::Calendar => fl!("calendar"),
+            DefaultAppOption::Terminal => fl!("terminal"),
+            DefaultAppOption::TextEditor => fl!("text-editor"),
         }
     }
 }
@@ -56,6 +109,8 @@ pub enum PowerActionOption {
 }
 // localised option strings
 impl PowerActionOption {
+    // TODO: Commands are translated to strings so they can share a field with normal launch commands.
+    // This should probably work better than this
     pub fn command(&self) -> String {
         match self {
             PowerActionOption::Lock => "Lock".to_owned(),
@@ -92,6 +147,21 @@ impl MenuItem {
     }
     pub fn command(&self) -> Option<String> {
         self.command.clone()
+    }
+    pub fn command_label(&self) -> Option<String> {
+        match &self.item_type() {
+            MenuItemType::DefaultAction => {
+                let desktop_file = get_default_app(&self.command.clone().unwrap_or("".to_string()));
+                match desktop_file {
+                    Ok(result) => match parse_desktop_file(&result.unwrap_or("".to_string())) {
+                        Ok(desktop_info) => Some(desktop_info.0),
+                        Err(_) => None,
+                    },
+                    Err(_) => None,
+                }
+            }
+            _ => self.command.clone(),
+        }
     }
 }
 
@@ -208,6 +278,94 @@ impl Default for MenuItems {
         }
     }
 }
+
+pub fn is_flatpak() -> bool {
+    env::var("FLATPAK_ID").is_ok()
+        || Path::new("/.flatpak-info").exists()
+        || env::var("container")
+            .map(|v| v == "flatpak")
+            .unwrap_or(false)
+}
+
+pub fn get_default_app(default_type: &str) -> Result<Option<String>, io::Error> {
+    for mime in &DEFAULT_APP_MIMES[default_type] {
+        let output = if is_flatpak() == true {
+            Command::new("flatpak-spawn")
+                .args(&["--host", "xdg-mime", "query", "default", mime])
+                .output()?
+        } else {
+            Command::new("xdg-mime")
+                .args(&["query", "default", mime])
+                .output()?
+        };
+
+        if output.status.success() {
+            let app = String::from_utf8_lossy(&output.stdout).trim().to_string();
+            return Ok(Some(str::replace(&app, ".desktop", "")));
+        }
+    }
+
+    Ok(None)
+}
+
+fn get_default_app_via_portal(mime: &str) -> Result<String, Box<dyn std::error::Error>> {
+    let output = Command::new("dbus-send")
+        .args(&[
+            "--session",
+            "--print-reply",
+            "--dest=org.freedesktop.portal.Desktop",
+            "/org/freedesktop/portal/desktop",
+            "org.freedesktop.portal.AppChooser.ChooseApplication",
+            &format!("string:{}", mime),
+            "dict:string:variant:",
+        ])
+        .output()?;
+
+    // Parse the D-Bus response to extract the application ID
+    let response = String::from_utf8(output.stdout)?;
+    // You'll need to parse the D-Bus response format here
+    Ok(response)
+}
+
+fn parse_desktop_file(app_desktop: &str) -> Result<(String, String), Box<dyn std::error::Error>> {
+    let locales = get_languages_from_env();
+
+    // Search for the desktop entry by app ID
+    let entry = Iter::new(default_paths())
+        .entries(Some(&locales))
+        .find(|entry| {
+            entry.appid.to_lowercase() == app_desktop.to_lowercase()
+                || entry.appid.to_lowercase() == format!("{}.desktop", app_desktop.to_lowercase())
+        })
+        .ok_or_else(|| format!("Desktop entry for '{}' not found", app_desktop))?;
+
+    let name = entry.name(&locales).ok_or("")?.to_string();
+    let exec = entry.exec().ok_or("")?.to_string();
+
+    Ok((name, exec))
+}
+
+static DEFAULT_APP_MIMES: Lazy<HashMap<&str, Vec<&str>>> = Lazy::new(|| {
+    let mut map = HashMap::new();
+
+    map.insert("WebBrowser", vec!["x-scheme-handler/http"]);
+    map.insert("FileManager", vec!["inode/directory"]);
+    map.insert("MailClient", vec!["x-scheme-handler/mailto"]);
+    map.insert("Music", vec!["audio/mp3", "application/ogg", "video/mp4"]);
+    map.insert("Video", vec!["video/mp4"]);
+    map.insert("Photos", vec!["image/png"]);
+    map.insert("Calendar", vec!["text/calendar"]);
+    map.insert(
+        "Terminal",
+        vec![
+            "x-scheme-handler/terminal",
+            "application/x-terminal-emulator",
+        ],
+    );
+    map.insert("TextEditor", vec!["text/plain"]);
+
+    map
+});
 
 // Preload all logos
 pub static IMAGES: phf::Map<&'static str, (&[u8], bool)> = phf_map! {

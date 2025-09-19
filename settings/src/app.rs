@@ -8,7 +8,7 @@ use cosmic::iced_widget::{rule, scrollable};
 use cosmic::prelude::*;
 use cosmic::widget::{self, Space, container, dropdown, menu, settings, toggler};
 use cosmic::{cosmic_theme, theme};
-use liblog::fl;
+use liblog::{DefaultAppOption, fl};
 use liblog::{IMAGES, MenuItem, MenuItemType, MenuItems, PowerActionOption};
 use rfd::FileDialog;
 use std::collections::{HashMap, VecDeque};
@@ -41,6 +41,8 @@ pub struct AppModel {
     menu_items: Vec<MenuItem>,
     menu_types: Vec<MenuItemType>,
     menu_type_labels: Vec<String>,
+    default_apps: Vec<DefaultAppOption>,
+    default_app_labels: Vec<String>,
     power_actions: Vec<PowerActionOption>,
     power_action_labels: Vec<String>,
 }
@@ -122,9 +124,29 @@ impl cosmic::Application for AppModel {
             None => "".to_owned(),
         };
 
-        let menu_types = vec![MenuItemType::LaunchAction, MenuItemType::PowerAction];
+        let menu_types = vec![
+            MenuItemType::LaunchAction,
+            MenuItemType::DefaultAction,
+            MenuItemType::PowerAction,
+        ];
         let menu_type_labels: Vec<String> =
             menu_types.iter().map(|t| t.as_localized_string()).collect();
+
+        let default_apps = vec![
+            DefaultAppOption::WebBrowser,
+            DefaultAppOption::FileManager,
+            DefaultAppOption::MailClient,
+            DefaultAppOption::Music,
+            DefaultAppOption::Video,
+            DefaultAppOption::Photos,
+            DefaultAppOption::Calendar,
+            DefaultAppOption::Terminal,
+            DefaultAppOption::TextEditor,
+        ];
+        let default_app_labels: Vec<String> = default_apps
+            .iter()
+            .map(|t| t.as_localized_string())
+            .collect();
 
         let power_actions = vec![
             PowerActionOption::Lock,
@@ -152,6 +174,8 @@ impl cosmic::Application for AppModel {
             custom_logo_path,
             menu_types,
             menu_type_labels,
+            default_apps,
+            default_app_labels,
             power_actions,
             power_action_labels,
         };
@@ -325,6 +349,7 @@ impl cosmic::Application for AppModel {
                 menu_item_row = menu_item_row.push(
                     container(widget::icon::from_name(match menu_item.item_type() {
                         MenuItemType::LaunchAction => "utilities-terminal-symbolic",
+                        MenuItemType::DefaultAction => "preferences-default-applications-symbolic",
                         MenuItemType::PowerAction => "system-shutdown-symbolic",
                         _ => "",
                     }))
@@ -337,7 +362,7 @@ impl cosmic::Application for AppModel {
                 .push(match menu_item.label() {
                     Some(label) => {
                         let mut label_string = label;
-                        let command_string = menu_item.command().unwrap_or_default();
+                        let command_string = menu_item.command_label().unwrap_or_default();
 
                         if command_string != "" {
                             label_string.push_str("   ::   ");
@@ -346,7 +371,7 @@ impl cosmic::Application for AppModel {
 
                         container(cosmic::widget::text(label_string))
                             .width(Length::Fill)
-                            .padding([5, 10, 0, 0])
+                            .padding([7, 10, 0, 0])
                     }
                     _ => container(widget::divider::horizontal::default().class(
                         theme::Rule::custom(move |theme| {
@@ -447,6 +472,8 @@ impl cosmic::Application for AppModel {
                                         let mut command = None;
                                         if menu_types[value] == MenuItemType::PowerAction {
                                             command = Some(String::from("Lock"));
+                                        } else if menu_types[value] == MenuItemType::DefaultAction {
+                                            command = Some(String::from("WebBrowser"));
                                         }
                                         Message::DialogUpdate(DialogPage::EditItem(
                                             i,
@@ -513,6 +540,41 @@ impl cosmic::Application for AppModel {
                                             i,
                                             MenuItem {
                                                 command: Some(power_actions[value].command()),
+                                                ..menu_item.clone()
+                                            },
+                                        ))
+                                    },
+                                )
+                                .width(Length::Fill),
+                            ),
+                    )
+                } else if item_type == MenuItemType::DefaultAction {
+                    let default_apps = self.default_apps.clone();
+                    let selected_default_app = self
+                        .default_apps
+                        .iter()
+                        .position(|r| *r.command() == command)
+                        .unwrap_or(0);
+                    let menu_item = menu_item.clone();
+                    let i = *i;
+
+                    widget::container(
+                        widget::row::with_capacity(2)
+                            .push(
+                                widget::text(fl!("command"))
+                                    .align_y(Alignment::Center)
+                                    .height(30)
+                                    .width(120),
+                            )
+                            .push(
+                                dropdown(
+                                    &self.default_app_labels,
+                                    Some(selected_default_app),
+                                    move |value| {
+                                        Message::DialogUpdate(DialogPage::EditItem(
+                                            i,
+                                            MenuItem {
+                                                command: Some(default_apps[value].command()),
                                                 ..menu_item.clone()
                                             },
                                         ))

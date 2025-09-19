@@ -9,6 +9,8 @@ rust-embed = "8.5.0"
 phf = "0.11"
 serde = "1.0.219"
 cosmic-config = { git = "https://github.com/pop-os/libcosmic" }
+freedesktop-desktop-entry = "0.7.16"
+once_cell = "1.21.3"
 
 [dependencies.i18n-embed]
 version = "0.15"
