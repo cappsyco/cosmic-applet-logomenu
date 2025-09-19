@@ -146,7 +146,20 @@ impl MenuItem {
         self.label.clone()
     }
     pub fn command(&self) -> Option<String> {
-        self.command.clone()
+        match &self.item_type() {
+            MenuItemType::DefaultAction => {
+                let desktop_file = get_default_app(&self.command.clone().unwrap_or("".to_string()));
+
+                match desktop_file {
+                    Ok(result) => match parse_desktop_file(&result.unwrap_or("".to_string())) {
+                        Ok(desktop_info) => Some(desktop_info.1),
+                        Err(_) => None,
+                    },
+                    Err(_) => None,
+                }
+            }
+            _ => self.command.clone(),
+        }
     }
     pub fn command_label(&self) -> Option<String> {
         match &self.item_type() {
@@ -308,7 +321,7 @@ pub fn get_default_app(default_type: &str) -> Result<Option<String>, io::Error> 
     Ok(None)
 }
 
-fn get_default_app_via_portal(mime: &str) -> Result<String, Box<dyn std::error::Error>> {
+fn _get_default_app_via_portal(mime: &str) -> Result<String, Box<dyn std::error::Error>> {
     let output = Command::new("dbus-send")
         .args(&[
             "--session",
