@@ -2993,7 +2993,10 @@ name = "liblog"
 version = "0.6.2"
 dependencies = [
  "cosmic-config",
+ "i18n-embed 0.15.4",
+ "i18n-embed-fl 0.9.4",
  "phf",
+ "rust-embed",
  "serde",
 ]
 

@@ -2,7 +2,6 @@
 
 mod app;
 mod config;
-mod i18n;
 
 use sysinfo::System;
 
@@ -12,7 +11,7 @@ fn main() -> cosmic::iced::Result {
     }
 
     let requested_languages = i18n_embed::DesktopLanguageRequester::requested_languages();
-    i18n::init(&requested_languages);
+    liblog::init(&requested_languages);
 
     let settings = cosmic::app::Settings::default().size_limits(
         cosmic::iced::Limits::NONE

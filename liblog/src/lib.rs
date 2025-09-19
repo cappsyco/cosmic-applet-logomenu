@@ -5,6 +5,9 @@ use phf::phf_map;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
+pub mod i18n;
+pub use crate::i18n::init;
+
 // Config
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, CosmicConfigEntry)]
 #[version = 1]
@@ -32,12 +35,43 @@ pub enum MenuItemType {
     PowerAction,
     Divider,
 }
-impl AsRef<str> for MenuItemType {
-    fn as_ref(&self) -> &str {
+impl MenuItemType {
+    pub fn as_localized_string(&self) -> String {
         match self {
-            MenuItemType::LaunchAction => "Launch Action",
-            MenuItemType::PowerAction => "Power Action",
-            MenuItemType::Divider => "Divider",
+            MenuItemType::LaunchAction => fl!("launch-action"),
+            MenuItemType::PowerAction => fl!("power-action"),
+            MenuItemType::Divider => fl!("divider"),
+        }
+    }
+}
+
+// Power action types
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Copy, Hash)]
+pub enum PowerActionOption {
+    Lock,
+    Logout,
+    Suspend,
+    Restart,
+    Shutdown,
+}
+// localised option strings
+impl PowerActionOption {
+    pub fn command(&self) -> String {
+        match self {
+            PowerActionOption::Lock => "Lock".to_owned(),
+            PowerActionOption::Logout => "Logout".to_owned(),
+            PowerActionOption::Suspend => "Suspend".to_owned(),
+            PowerActionOption::Restart => "Restart".to_owned(),
+            PowerActionOption::Shutdown => "Shutdown".to_owned(),
+        }
+    }
+    pub fn as_localized_string(&self) -> String {
+        match self {
+            PowerActionOption::Lock => fl!("lock"),
+            PowerActionOption::Logout => fl!("logout"),
+            PowerActionOption::Suspend => fl!("suspend"),
+            PowerActionOption::Restart => fl!("restart"),
+            PowerActionOption::Shutdown => fl!("shutdown"),
         }
     }
 }
@@ -61,7 +95,7 @@ impl MenuItem {
     }
 }
 
-// Top lebel menu items struct
+// Top level menu items struct
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct MenuItems {
     pub items: Vec<MenuItem>,
@@ -77,7 +111,7 @@ impl Default for MenuItems {
             items: vec![
                 MenuItem {
                     item_type: MenuItemType::LaunchAction,
-                    label: Some(String::from("About your system")),
+                    label: Some(fl!("about-system")),
                     command: Some(String::from("cosmic-settings about")),
                 },
                 MenuItem {
@@ -87,17 +121,17 @@ impl Default for MenuItems {
                 },
                 MenuItem {
                     item_type: MenuItemType::LaunchAction,
-                    label: Some(String::from("Applications")),
+                    label: Some(fl!("applications")),
                     command: Some(String::from("cosmic-app-library")),
                 },
                 MenuItem {
                     item_type: MenuItemType::LaunchAction,
-                    label: Some(String::from("Launcher")),
+                    label: Some(fl!("launcher")),
                     command: Some(String::from("cosmic-launcher")),
                 },
                 MenuItem {
                     item_type: MenuItemType::LaunchAction,
-                    label: Some(String::from("Workspaces")),
+                    label: Some(fl!("workspaces")),
                     command: Some(String::from("cosmic-workspaces")),
                 },
                 MenuItem {
@@ -107,22 +141,22 @@ impl Default for MenuItems {
                 },
                 MenuItem {
                     item_type: MenuItemType::LaunchAction,
-                    label: Some(String::from("Terminal")),
+                    label: Some(fl!("terminal")),
                     command: Some(String::from("cosmic-term")),
                 },
                 MenuItem {
                     item_type: MenuItemType::LaunchAction,
-                    label: Some(String::from("Files")),
+                    label: Some(fl!("files")),
                     command: Some(String::from("cosmic-files")),
                 },
                 MenuItem {
                     item_type: MenuItemType::LaunchAction,
-                    label: Some(String::from("Software")),
+                    label: Some(fl!("software")),
                     command: Some(String::from("cosmic-store")),
                 },
                 MenuItem {
                     item_type: MenuItemType::LaunchAction,
-                    label: Some(String::from("Settings")),
+                    label: Some(fl!("settings")),
                     command: Some(String::from("cosmic-settings")),
                 },
                 MenuItem {
@@ -132,17 +166,17 @@ impl Default for MenuItems {
                 },
                 MenuItem {
                     item_type: MenuItemType::PowerAction,
-                    label: Some(String::from("Lock")),
+                    label: Some(fl!("lock")),
                     command: Some(String::from("Lock")),
                 },
                 MenuItem {
                     item_type: MenuItemType::PowerAction,
-                    label: Some(String::from("Log out")),
+                    label: Some(fl!("logout")),
                     command: Some(String::from("Logout")),
                 },
                 MenuItem {
                     item_type: MenuItemType::PowerAction,
-                    label: Some(String::from("Suspend")),
+                    label: Some(fl!("suspend")),
                     command: Some(String::from("Suspend")),
                 },
                 MenuItem {
@@ -152,12 +186,12 @@ impl Default for MenuItems {
                 },
                 MenuItem {
                     item_type: MenuItemType::PowerAction,
-                    label: Some(String::from("Restart")),
+                    label: Some(fl!("restart")),
                     command: Some(String::from("Restart")),
                 },
                 MenuItem {
                     item_type: MenuItemType::PowerAction,
-                    label: Some(String::from("Shutdown")),
+                    label: Some(fl!("shutdown")),
                     command: Some(String::from("Shutdown")),
                 },
                 MenuItem {
@@ -167,7 +201,7 @@ impl Default for MenuItems {
                 },
                 MenuItem {
                     item_type: MenuItemType::LaunchAction,
-                    label: Some(String::from("Menu settings...")),
+                    label: Some(fl!("menu-settings").to_string()),
                     command: Some(String::from("cosmic-logomenu-settings")),
                 },
             ],
