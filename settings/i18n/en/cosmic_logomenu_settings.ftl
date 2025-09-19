@@ -1,1 +1,0 @@
-../../../liblog/i18n/en/liblog.ftl

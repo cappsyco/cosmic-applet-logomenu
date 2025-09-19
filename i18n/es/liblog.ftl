@@ -1,5 +1,4 @@
-## Settings
-
+# Settings UI
 app-title = Menú Logo COSMIC™
 about = Acerca de
 add-divider = Agregar divisor

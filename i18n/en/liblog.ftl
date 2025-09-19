@@ -1,3 +1,4 @@
+# Settings UI
 about = About
 add-divider = Add divider
 add-menu-item = Add menu item
@@ -26,10 +27,23 @@ use-custom-logo = Use custom logo
 view = View
 
 # Launch options
-launch-action = Launch Action
-power-action = Power Action
+custom-command = Custom command
+default-app = Default app
+power-action = Power action
+divider = Divider
 
-# Default menu items
+# Default app categories
+web-browser = Web browser
+file-manager = File manager
+mail-client = Mail client
+music = Music
+video = Video
+photos = Photos
+calendar = Calendar
+terminal = Terminal
+text-editor = Text editor
+
+# Default menu items and power options
 about-system = About system
 menu-settings = Menu settings...
 applications = Applications
