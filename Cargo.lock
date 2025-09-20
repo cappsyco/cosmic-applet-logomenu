@@ -1087,7 +1087,7 @@ dependencies = [
 
 [[package]]
 name = "cosmic-logomenu-settings"
-version = "0.6.2"
+version = "0.7.0"
 dependencies = [
  "i18n-embed 0.15.4",
  "i18n-embed-fl 0.9.4",
@@ -3024,7 +3024,7 @@ dependencies = [
 
 [[package]]
 name = "liblog"
-version = "0.6.2"
+version = "0.7.0"
 dependencies = [
  "cosmic-config",
  "freedesktop-desktop-entry",
