@@ -558,6 +558,9 @@ impl cosmic::Application for AppModel {
                     let menu_item = menu_item.clone();
                     let i = *i;
 
+                    println!("{:?}", default_apps);
+                    //println!("{:?}", selected_default_app);
+
                     widget::container(
                         widget::row::with_capacity(2)
                             .push(

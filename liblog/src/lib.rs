@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 use cosmic_config::{CosmicConfigEntry, cosmic_config_derive::CosmicConfigEntry};
-use freedesktop_desktop_entry::{Iter, default_paths, get_languages_from_env};
+use freedesktop_desktop_entry::{
+    DesktopEntry, Iter, default_paths, find_app_by_id, get_languages_from_env,
+};
 use once_cell::sync::Lazy;
 use phf::phf_map;
 use serde::{Deserialize, Serialize};
@@ -146,6 +148,8 @@ impl MenuItem {
         self.label.clone()
     }
     pub fn command(&self) -> Option<String> {
+        self.command.clone()
+        /*
         match &self.item_type() {
             MenuItemType::DefaultAction => {
                 let desktop_file = get_default_app(&self.command.clone().unwrap_or("".to_string()));
@@ -160,8 +164,10 @@ impl MenuItem {
             }
             _ => self.command.clone(),
         }
+        */
     }
     pub fn command_label(&self) -> Option<String> {
+        let command = self.command.clone();
         match &self.item_type() {
             MenuItemType::DefaultAction => {
                 let desktop_file = get_default_app(&self.command.clone().unwrap_or("".to_string()));
@@ -314,6 +320,7 @@ pub fn get_default_app(default_type: &str) -> Result<Option<String>, io::Error> 
 
         if output.status.success() {
             let app = String::from_utf8_lossy(&output.stdout).trim().to_string();
+
             return Ok(Some(str::replace(&app, ".desktop", "")));
         }
     }
@@ -321,39 +328,59 @@ pub fn get_default_app(default_type: &str) -> Result<Option<String>, io::Error> 
     Ok(None)
 }
 
-fn _get_default_app_via_portal(mime: &str) -> Result<String, Box<dyn std::error::Error>> {
-    let output = Command::new("dbus-send")
-        .args(&[
-            "--session",
-            "--print-reply",
-            "--dest=org.freedesktop.portal.Desktop",
-            "/org/freedesktop/portal/desktop",
-            "org.freedesktop.portal.AppChooser.ChooseApplication",
-            &format!("string:{}", mime),
-            "dict:string:variant:",
-        ])
-        .output()?;
+fn get_default_app_dir(default_type: &str) -> Result<Option<String>, Box<dyn std::error::Error>> {
+    for mime in &DEFAULT_APP_MIMES[default_type] {
+        // Get the desktop file name
+        let output = Command::new("flatpak-spawn")
+            .arg("--host")
+            .arg("xdg-mime")
+            .arg("query")
+            .arg("default")
+            .arg(mime)
+            .output()?;
 
-    // Parse the D-Bus response to extract the application ID
-    let response = String::from_utf8(output.stdout)?;
-    // You'll need to parse the D-Bus response format here
-    Ok(response)
+        let desktop_file = String::from_utf8(output.stdout)?.trim().to_string();
+
+        // Search for the desktop file including Flatpak directories
+        let output = Command::new("flatpak-spawn")
+            .arg("--host")
+            .arg("sh")
+            .arg("-c")
+            .arg(format!(
+                "find \
+                /usr/share/applications \
+                /usr/local/share/applications \
+                ~/.local/share/applications \
+                /var/lib/flatpak/exports/share/applications \
+                ~/.local/share/flatpak/exports/share/applications \
+                ~/.var/app/*/data/applications \
+                -name '{}' 2>/dev/null | head -n 1",
+                desktop_file
+            ))
+            .output()?;
+
+        let path = String::from_utf8(output.stdout)?.trim().to_string();
+
+        if !path.is_empty() {
+            return Ok(Some(path));
+        }
+    }
+
+    Ok(None)
 }
 
 fn parse_desktop_file(app_desktop: &str) -> Result<(String, String), Box<dyn std::error::Error>> {
     let locales = get_languages_from_env();
+    let app_lower = app_desktop.to_lowercase();
 
-    // Search for the desktop entry by app ID
     let entry = Iter::new(default_paths())
         .entries(Some(&locales))
-        .find(|entry| {
-            entry.appid.to_lowercase() == app_desktop.to_lowercase()
-                || entry.appid.to_lowercase() == format!("{}.desktop", app_desktop.to_lowercase())
-        })
+        .find(|entry| entry.appid.to_lowercase() == app_lower)
         .ok_or_else(|| format!("Desktop entry for '{}' not found", app_desktop))?;
 
-    let name = entry.name(&locales).ok_or("")?.to_string();
-    let exec = entry.exec().ok_or("")?.to_string();
+    // Use unwrap_or_default to avoid Option handling if appropriate for your use case
+    let name = entry.name(&locales).unwrap().to_string();
+    let exec = entry.exec().unwrap_or("").to_string();
 
     Ok((name, exec))
 }
