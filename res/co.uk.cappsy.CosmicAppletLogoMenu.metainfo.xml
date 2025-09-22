@@ -17,10 +17,14 @@
   </url>
   <content_rating type="oars-1.1" />
   <name>Logo Menu</name>
-  <summary>Customisable menu applet</summary>
+  <summary>Customisable menu applet for the COSMIC™ desktop.</summary>
   <description>
     <p>
-      A fully customisable menu applet for the COSMIC™ desktop. Pick your distro logo of choice and fully customise the menu applet as you please, bringing all your common applications and actions into one, neat place.
+      <ul>
+        <li>Pick your distro logo of choice for your menu. The one you want not there? Then you can add your own custom one!</li>
+        <li>Fully customise your menu with items that launch custom commands.</li>
+        <li>Bring all your common applications and actions into one, neat place!</li>
+      </ul>
     </p>
   </description>
   <launchable type="desktop-id">
