@@ -2,12 +2,15 @@
 
 use crate::config::{load_config, update_config};
 use cosmic::app::context_drawer;
+use cosmic::app::context_drawer::ContextDrawer;
 use cosmic::cosmic_config::Config;
 use cosmic::iced::{Alignment, Length, Radius};
 use cosmic::iced_widget::{rule, scrollable};
 use cosmic::prelude::*;
-use cosmic::widget::{self, Space, container, dropdown, menu, settings, toggler};
-use cosmic::{cosmic_theme, theme};
+use cosmic::theme;
+use cosmic::widget::{
+    self, Space, about, about::About, container, dropdown, menu, settings, toggler,
+};
 use liblog::fl;
 use liblog::{IMAGES, MenuItem, MenuItemType, MenuItems, PowerActionOption};
 use rfd::FileDialog;
@@ -32,6 +35,7 @@ pub struct AppModel {
     key_binds: HashMap<menu::KeyBind, MenuAction>,
     config: Config,
     dialog_pages: VecDeque<DialogPage>,
+    about_page: About,
 
     logo_options: Vec<String>,
     selected_logo_idx: Option<usize>,
@@ -61,6 +65,7 @@ pub enum Message {
     DialogEditItem(usize, MenuItem),
     DialogRemoveItem(usize),
     DialogResetMenu,
+    OpenUrl(String),
 }
 
 #[derive(Debug, Clone)]
@@ -144,6 +149,7 @@ impl cosmic::Application for AppModel {
             key_binds: HashMap::new(),
             config: Config::new(CONFIG_ID, CONFIG_VER).unwrap(),
             dialog_pages: VecDeque::new(),
+            about_page: build_about(),
             logo_options,
             selected_logo_idx,
             selected_logo_name,
@@ -177,13 +183,16 @@ impl cosmic::Application for AppModel {
             return None;
         }
 
-        Some(match self.context_page {
-            ContextPage::About => context_drawer::context_drawer(
-                self.about(),
-                Message::ToggleContextPage(ContextPage::About),
-            )
-            .title(fl!("about")),
-        })
+        match self.context_page {
+            ContextPage::About => Some(ContextDrawer {
+                title: Some("About".into()),
+                content: about(&self.about_page, Message::OpenUrl),
+                on_close: Message::ToggleContextPage(ContextPage::About),
+                header: None,
+                header_actions: Vec::new(),
+                footer: None,
+            }),
+        }
     }
 
     fn view(&self) -> Element<'_, Self::Message> {
@@ -599,6 +608,11 @@ impl cosmic::Application for AppModel {
 
     fn update(&mut self, message: Self::Message) -> Task<cosmic::Action<Self::Message>> {
         match message {
+            Message::OpenUrl(url) => match open::that_detached(url) {
+                Ok(_) => (),
+                Err(err) => eprintln!("Failed to open URL: {err}"),
+            },
+
             Message::ToggleContextPage(context_page) => {
                 if self.context_page == context_page {
                     self.core.window.show_context = !self.core.window.show_context;
@@ -732,21 +746,6 @@ impl cosmic::Application for AppModel {
 }
 
 impl AppModel {
-    pub fn about(&self) -> Element<'_, Message> {
-        let cosmic_theme::Spacing { space_xxs, .. } = theme::active().cosmic().spacing;
-        let icon = widget::svg(widget::svg::Handle::from_memory(APP_ICON)).width(120);
-        let title = widget::text::title3(fl!("app-title"));
-
-        widget::column()
-            .push(icon)
-            .push(Space::with_height(10))
-            .push(title)
-            .align_x(Alignment::Center)
-            .spacing(space_xxs)
-            .width(Length::Fill)
-            .into()
-    }
-
     pub fn update_title(&mut self) -> Task<cosmic::Action<Message>> {
         if let Some(id) = self.core.main_window_id() {
             self.set_window_title(fl!("app-title"), id)
@@ -788,4 +787,15 @@ pub fn get_menu_items() -> Vec<MenuItem> {
     }
 
     display_items
+}
+
+pub fn build_about() -> About {
+    About::default()
+        .developers([("Jonathan Capps", "cappsy@gmail.com")])
+        .version(env!("CARGO_PKG_VERSION"))
+        .name(fl!("app-title"))
+        .icon(widget::icon::from_svg_bytes(APP_ICON))
+        .license(env!("CARGO_PKG_LICENSE"))
+        .author("Jonathan Capps")
+        .links([(fl!("repository"), env!("CARGO_PKG_REPOSITORY"))])
 }

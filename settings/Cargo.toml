@@ -1,8 +1,8 @@
 [package]
 name = "cosmic-logomenu-settings"
-version = "0.6.3"
+version = "0.6.4"
 edition = "2024"
-license = "MPL-2.0"
+license = "GPL-3.0"
 description = "Settings application for COSMIC Logo Menu applet"
 repository = "https://github.com/cappsyco/cosmic-applet-logomenu"
 
@@ -16,6 +16,7 @@ serde = "1.0.219"
 liblog = { path = "../liblog" }
 rfd = "0.15.4"
 sysinfo = "0.37.0"
+open = "5.3.0"
 
 [dependencies.i18n-embed]
 version = "0.15"
@@ -25,6 +26,7 @@ features = ["fluent-system", "desktop-requester"]
 git = "https://github.com/pop-os/libcosmic.git"
 features = [
     "a11y",
+    "about",
     "multi-window",
     "single-instance",
     "winit",

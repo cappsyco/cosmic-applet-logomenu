@@ -29,6 +29,7 @@ select-custom-logo = Select custom logo
 type = Type
 use-custom-logo = Use custom logo
 view = View
+repository = Repository
 
 # Launch options
 launch-action = Launch action
