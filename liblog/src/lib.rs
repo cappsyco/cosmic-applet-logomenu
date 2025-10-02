@@ -167,10 +167,10 @@ impl MenuItem {
         */
     }
     pub fn command_label(&self) -> Option<String> {
-        let command = self.command.clone();
         match &self.item_type() {
             MenuItemType::DefaultAction => {
                 let desktop_file = get_default_app(&self.command.clone().unwrap_or("".to_string()));
+                println!("{:?}", desktop_file);
                 match desktop_file {
                     Ok(result) => match parse_desktop_file(&result.unwrap_or("".to_string())) {
                         Ok(desktop_info) => Some(desktop_info.0),
@@ -320,49 +320,7 @@ pub fn get_default_app(default_type: &str) -> Result<Option<String>, io::Error> 
 
         if output.status.success() {
             let app = String::from_utf8_lossy(&output.stdout).trim().to_string();
-
             return Ok(Some(str::replace(&app, ".desktop", "")));
-        }
-    }
-
-    Ok(None)
-}
-
-fn get_default_app_dir(default_type: &str) -> Result<Option<String>, Box<dyn std::error::Error>> {
-    for mime in &DEFAULT_APP_MIMES[default_type] {
-        // Get the desktop file name
-        let output = Command::new("flatpak-spawn")
-            .arg("--host")
-            .arg("xdg-mime")
-            .arg("query")
-            .arg("default")
-            .arg(mime)
-            .output()?;
-
-        let desktop_file = String::from_utf8(output.stdout)?.trim().to_string();
-
-        // Search for the desktop file including Flatpak directories
-        let output = Command::new("flatpak-spawn")
-            .arg("--host")
-            .arg("sh")
-            .arg("-c")
-            .arg(format!(
-                "find \
-                /usr/share/applications \
-                /usr/local/share/applications \
-                ~/.local/share/applications \
-                /var/lib/flatpak/exports/share/applications \
-                ~/.local/share/flatpak/exports/share/applications \
-                ~/.var/app/*/data/applications \
-                -name '{}' 2>/dev/null | head -n 1",
-                desktop_file
-            ))
-            .output()?;
-
-        let path = String::from_utf8(output.stdout)?.trim().to_string();
-
-        if !path.is_empty() {
-            return Ok(Some(path));
         }
     }
 
@@ -379,8 +337,8 @@ fn parse_desktop_file(app_desktop: &str) -> Result<(String, String), Box<dyn std
         .ok_or_else(|| format!("Desktop entry for '{}' not found", app_desktop))?;
 
     // Use unwrap_or_default to avoid Option handling if appropriate for your use case
-    let name = entry.name(&locales).unwrap().to_string();
-    let exec = entry.exec().unwrap_or("").to_string();
+    let name: String = entry.name(&locales).unwrap().to_string();
+    let exec: String = entry.exec().unwrap_or("").to_string();
 
     Ok((name, exec))
 }
