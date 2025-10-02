@@ -210,18 +210,19 @@ impl Application for LogoMenu {
                 }
             }
             Message::Run(action) => {
-                if liblog::is_flatpak() && action != "cosmic-logomenu-settings" {
-                    let action_parts = action.split_whitespace();
+                if is_flatpak() && action != "cosmic-logomenu-settings" {
                     match Command::new("flatpak-spawn")
                         .arg("--host")
-                        .args(action_parts)
+                        .arg("sh")
+                        .arg("-c")
+                        .arg(&action)
                         .spawn()
                     {
                         Ok(_) => {}
                         Err(e) => eprintln!("Error executing command: {}", e),
                     }
                 } else {
-                    match Command::new("sh").arg("-c").arg(action).spawn() {
+                    match Command::new("sh").arg("-c").arg(&action).spawn() {
                         Ok(_) => {}
                         Err(e) => eprintln!("Error executing command: {}", e),
                     };

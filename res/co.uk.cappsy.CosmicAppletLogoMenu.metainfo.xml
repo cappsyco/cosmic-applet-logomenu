@@ -17,10 +17,14 @@
   </url>
   <content_rating type="oars-1.1" />
   <name>Logo Menu</name>
-  <summary>Customisable menu applet</summary>
+  <summary>Customisable menu applet for the COSMIC™ desktop.</summary>
   <description>
     <p>
-      A fully customisable menu applet for the COSMIC™ desktop. Pick your distro logo of choice and fully customise the menu applet as you please, bringing all your common applications and actions into one, neat place.
+      <ul>
+        <li>Pick your distro logo of choice for your menu. The one you want not there? Then you can add your own custom one!</li>
+        <li>Fully customise your menu with items that launch custom commands.</li>
+        <li>Bring all your common applications and actions into one, neat place!</li>
+      </ul>
     </p>
   </description>
   <launchable type="desktop-id">
@@ -49,11 +53,19 @@
     <category>Utility</category>
   </categories>
   <releases>
-    <release version="0.6.2" date="2025-08-10">
+    <release version="0.6.4" date="2025-09-29">
       <url type="details">
-        https://github.com/cappsyco/cosmic-applet-logomenu/releases/tag/v0.6.2
+        https://github.com/cappsyco/cosmic-applet-logomenu/releases/tag/v0.6.4
       </url>
       <description>
+        <p><strong>0.6.4</strong> - Welcome to the COSMIC Beta!</p>
+        <ul>
+            <li>Expanded localisation to cover default menu items</li>
+            <li>Added Spanish translations</li>
+            <li>Added Alpine and postmarketOS logos</li>
+            <li>Fixed bug that allowed multiple instances of the Settings app to open</li>
+            <li>Fixed a bug that prevented more complex custom commands from running correctly</li>
+        </ul>
         <p><strong>0.6.2</strong></p>
         <ul>
           <li>Small visual improvement for dividers in the settings app</li>
