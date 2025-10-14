@@ -1,6 +1,6 @@
 # COSMIC™ Logo Menu
 
-![The Logo Menu logo, showing a mouse pointer clicking on a logo of Pop!_OS.](https://raw.githubusercontent.com/cappsyco/cosmic-applet-logomenu/refs/heads/main/res/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.svg)
+![The Logo Menu logo, showing a mouse pointer clicking on a logo of Pop!_OS.](https://raw.githubusercontent.com/cappsyco/cosmic-applet-logomenu/refs/heads/main/res/logo.png)
 
 A simple logo menu (in the style of the popular [GNOME extension](https://github.com/Aryan20/Logomenu)) to collect your launcher options in a nice menu.
 
