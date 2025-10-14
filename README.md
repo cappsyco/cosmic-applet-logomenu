@@ -1,5 +1,7 @@
 # COSMIC™ Logo Menu
 
+https://raw.githubusercontent.com/cappsyco/cosmic-applet-logomenu/refs/heads/main/res/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.svg
+
 A simple logo menu (in the style of the popular [GNOME extension](https://github.com/Aryan20/Logomenu)) to collect your launcher options in a nice menu.
 
 ![A view of the open applet with the default menu items, alongside the included settings application.](https://raw.githubusercontent.com/cappsyco/cosmic-applet-logomenu/main/screenshots/cosmic-applet-logomenu.png)
@@ -15,7 +17,7 @@ flatpak install co.uk.cappsy.CosmicAppletLogoMenu
 
 ## Arch User Repository installation
 
-The applet and settings app can be installed directly from [one package in the AUR](https://aur.archlinux.org/packages/cosmic-applet-logomenu). You will need `base-devel` and `git` if you don't have them already.
+The applet and settings app can be installed directly from [one package in the AUR](https://aur.archlinux.org/packages/cosmic-applet-logomenu), and this will get you very latest code and not be tied to tagged releases. You will need `base-devel` and `git` if you don't have them already.
 
 ```sh
 sudo pacman -S base-devel git
@@ -30,15 +32,15 @@ Two binaries are currently required for the Logo Menu to be fully functional (on
 ### .deb distros (Pop!\_OS, Debian, Ubuntu etc.)
 
 ```sh
-sudo dpkg -i cosmic-applet-logomenu_0.5.0_amd64.deb
-sudo dpkg -i cosmic-logomenu-settings_0.5.0_amd64.deb
+sudo dpkg -i cosmic-applet-logomenu_0.6.4_amd64.deb
+sudo dpkg -i cosmic-logomenu-settings_0.6.4_amd64.deb
 ```
 
 ### .rpm distros (Fedora, Nobara etc.)
 
 ```sh
-sudo dnf install cosmic-applet-logomenu-0.5.0-1.fc42.x86_64.rpm
-sudo dnf install cosmic-logomenu-settings-0.5.0-1.fc42.x86_64.rpm
+sudo dnf install cosmic-applet-logomenu-0.6.4-1.fc42.x86_64.rpm
+sudo dnf install cosmic-logomenu-settings-0.6.4-1.fc42.x86_64.rpm
 ```
 
 
