@@ -14,7 +14,7 @@ custom-logo-path-desc = Ange absolut sökväg till en SVG
 edit-menu-item = Redigera menyalternativ
 label = Etikett
 logo = Logotyp
-menu-items = Meny objekt
+menu-items = Menyobjekt
 new-launcher =Ny uppstartare
 no-label = Ingen etikett
 no-logo-selected = Ingen logotyp vald
@@ -29,19 +29,19 @@ select-custom-logo = Välj anpassad logotyp
 type = Typ
 use-custom-logo = Använd anpassad logotyp
 view = Visa
-repository = Förådd
+repository = Förråd
 
 # Upptartsalternativ
-launch-action = Upptartsåtgärd
-custom-command = Anpassat Kommando
-default-app = Standard program
+launch-action = Uppstartsåtgärd
+custom-command = Anpassat kommando
+default-app = Standardprogram
 power-action = Strömåtgärd
 divider = Avdelare
 
 # Standard program kategorier
 web-browser = Webbläsare
 file-manager = Filhanterare
-mail-client = E-post klient
+mail-client = E-post-klient
 music = Musik
 video = Video
 photos = Foton
@@ -50,8 +50,8 @@ terminal = Terminal
 text-editor = Textredigerare
 
 # Standardmenyalternativ och energialternativ
-about-system = Om system
-menu-settings = Meny inställningar...
+about-system = Om systemet
+menu-settings = Meny-inställningar...
 applications = Program
 launcher = Uppstartare
 workspaces = Arbetsytor
