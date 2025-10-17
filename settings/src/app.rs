@@ -186,13 +186,17 @@ impl cosmic::Application for AppModel {
         match self.context_page {
             ContextPage::About => Some(ContextDrawer {
                 title: Some("About".into()),
-                content: about(&self.about_page, Message::OpenUrl),
+                content: about(&self.about_page, |s| Message::OpenUrl(s.to_string())),
                 on_close: Message::ToggleContextPage(ContextPage::About),
                 header: None,
                 header_actions: Vec::new(),
                 footer: None,
             }),
         }
+
+
+
+
     }
 
     fn view(&self) -> Element<'_, Self::Message> {
@@ -608,7 +612,7 @@ impl cosmic::Application for AppModel {
 
     fn update(&mut self, message: Self::Message) -> Task<cosmic::Action<Self::Message>> {
         match message {
-            Message::OpenUrl(url) => match open::that_detached(url) {
+            Message::OpenUrl(url) => match open::that_detached(&url) {
                 Ok(_) => (),
                 Err(err) => eprintln!("Failed to open URL: {err}"),
             },
@@ -795,7 +799,7 @@ pub fn build_about() -> About {
         .version(env!("CARGO_PKG_VERSION"))
         .name(fl!("app-title"))
         .icon(widget::icon::from_svg_bytes(APP_ICON))
-        .license(env!("CARGO_PKG_LICENSE"))
         .author("Jonathan Capps")
-        .links([(fl!("repository"), env!("CARGO_PKG_REPOSITORY"))])
+        .links([(fl!("repository"), env!("CARGO_PKG_REPOSITORY")),(fl!("contributors"), "https://github.com/cappsyco/cosmic-applet-logomenu/graphs/contributors")])
+        .license(env!("CARGO_PKG_LICENSE"))
 }

@@ -30,6 +30,7 @@ type = Type
 use-custom-logo = Use custom logo
 view = View
 repository = Repository
+contributors = Contributors
 
 # Launch options
 launch-action = Launch action
