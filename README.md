@@ -21,7 +21,7 @@ The applet and settings app can be installed directly from [one package in the A
 
 ```sh
 sudo pacman -S base-devel git
-git clone https://aur.archlinux.org/cosmic-ext-applet-logomenu.git
+git clone https://aur.archlinux.org/cosmic-ext-applet-logomenu-git.git
 cd cosmic-ext-applet-logomenu && makepkg -si
 ```
 
