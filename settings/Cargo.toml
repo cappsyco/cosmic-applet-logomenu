@@ -1,10 +1,10 @@
 [package]
-name = "cosmic-logomenu-settings"
-version = "0.6.4"
+name = "cosmic-ext-logomenu-settings"
+version = "0.6.5"
 edition = "2024"
 license = "GPL-3.0"
 description = "Settings application for COSMIC Logo Menu applet"
-repository = "https://github.com/cappsyco/cosmic-applet-logomenu"
+repository = "https://github.com/cappsyco/cosmic-ext-applet-logomenu"
 
 [build-dependencies]
 vergen = { version = "8", features = ["git", "gitcl"] }

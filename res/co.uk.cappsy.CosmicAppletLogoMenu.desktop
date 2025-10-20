@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Logo Menu
 Name[es]=Menú logo
-Exec=cosmic-applet-logomenu
+Exec=cosmic-ext-applet-logomenu
 Terminal=false
 Type=Application
 StartupNotify=true
@@ -12,6 +12,6 @@ Keywords=Folder;Manager;
 Keywords[es]=Carpeta;Gestor;
 MimeType=inode/directory;
 NoDisplay=true
-StartupWMClass=cosmic-applet-logomenu
+StartupWMClass=cosmic-ext-applet-logomenu
 X-CosmicApplet=true
 X-CosmicHoverPopup=Auto

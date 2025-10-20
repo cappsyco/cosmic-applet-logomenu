@@ -9,11 +9,14 @@
   </developer>
   <developer_name>Jonathan Capps</developer_name>
   <update_contact>cappsy@gmail.com</update_contact>
-  <url type="homepage">https://github.com/cappsyco/cosmic-applet-logomenu</url>
+  <url type="homepage">
+    https://github.com/cappsyco/cosmic-ext-applet-logomenu
+  </url>
   <url type="bugtracker">
-    https://github.com/cappsyco/cosmic-applet-logomenu/issues</url>
+    https://github.com/cappsyco/cosmic-ext-applet-logomenu/issues
+  </url>
   <url type="contribute">
-    https://github.com/cappsyco/cosmic-applet-logomenu
+    https://github.com/cappsyco/cosmic-ext-applet-logomenu
   </url>
   <content_rating type="oars-1.1" />
   <name>Logo Menu</name>
@@ -37,7 +40,7 @@
   <screenshots>
     <screenshot type="default">
       <image>
-        https://raw.githubusercontent.com/cappsyco/cosmic-applet-logomenu/main/screenshots/cosmic-applet-logomenu.png
+        https://raw.githubusercontent.com/cappsyco/cosmic-ext-applet-logomenu/main/screenshots/cosmic-ext-applet-logomenu.png
       </image>
       <caption>
         A view of the open applet with the default menu items, alongside the included settings application.
@@ -46,18 +49,23 @@
   </screenshots>
   <provides>
     <id>com.system76.CosmicApplet</id>
-    <binary>cosmic-applet-logomenu</binary>
-    <binary>cosmic-logomenu-settings</binary>
+    <binary>cosmic-ext-applet-logomenu</binary>
+    <binary>cosmic-ext-logomenu-settings</binary>
   </provides>
   <categories>
     <category>Utility</category>
   </categories>
   <releases>
-    <release version="0.6.4" date="2025-09-29">
+    <release version="0.6.5" date="2025-10-21">
       <url type="details">
-        https://github.com/cappsyco/cosmic-applet-logomenu/releases/tag/v0.6.4
+        https://github.com/cappsyco/cosmic-ext-applet-logomenu/releases/tag/v0.6.5
       </url>
       <description>
+        <p><strong>0.6.5</strong></p>
+        <ul>
+            <li>Added Swedish and Polish translations</li>
+            <li>Added contributor link to the About page</li>
+        </ul>
         <p><strong>0.6.4</strong> - Welcome to the COSMIC Beta!</p>
         <ul>
             <li>Expanded localisation to cover default menu items</li>

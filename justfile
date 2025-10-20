@@ -1,8 +1,8 @@
 export APPID1 := 'co.uk.cappsy.CosmicAppletLogoMenu'
 export APPID2 := 'co.uk.cappsy.CosmicAppletLogoMenu.Settings'
 
-name1 := 'cosmic-applet-logomenu'
-name2 := 'cosmic-logomenu-settings'
+name1 := 'cosmic-ext-applet-logomenu'
+name2 := 'cosmic-ext-logomenu-settings'
 summary := 'A customisable menu applet for the COSMIC desktop.'
 dev_name := 'Jonathan Capps'
 email := 'cappsy@gmail.com'
@@ -203,15 +203,14 @@ rpm_bin_dst2 := rpminstall2 / 'bin' / name2
 rpm_desktop_dst1 := rpminstall1 / 'share' / 'applications' / desktop1
 rpm_desktop_dst2 := rpminstall2 / 'share' / 'applications' / desktop2
 rpm_metainfo_dst := rpminstall1 / 'share' / 'metainfo' / metainfo
-rpm_icons_dst1 := rpminstall1 / 'share' / 'icons' / 'hicolor' / 'scalable' / 'apps'
-rpm_icons_dst2 := rpminstall2 / 'share' / 'icons' / 'hicolor' / 'scalable' / 'apps'
+rpm_icons_dst := rpminstall1 / 'share' / 'icons' / 'hicolor' / 'scalable' / 'apps'
 
 rpm:
     strip {{bin-src1}}
     install -D {{bin-src1}} {{rpm_bin_dst1}}
     install -D {{desktop-src1}} {{rpm_desktop_dst1}}
     install -D {{metainfo-src}} {{rpm_metainfo_dst}}
-    install -D "{{icons-src}}/scalable/apps/{{APPID1}}.svg" "{{rpm_icons_dst1}}/{{APPID1}}.svg"; \
+    install -D "{{icons-src}}/scalable/apps/{{APPID1}}.svg" "{{rpm_icons_dst}}/{{APPID1}}.svg"; \
 
     mkdir -p {{rpmname1}}
     echo "Name: {{name1}}" > {{rpmname1}}/spec.spec

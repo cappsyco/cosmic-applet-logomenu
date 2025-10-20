@@ -202,7 +202,7 @@ impl Application for LogoMenu {
             }
             Message::Zbus(result) => {
                 if let Err(e) = result {
-                    eprintln!("cosmic-applet-logomenu ERROR: '{}'", e);
+                    eprintln!("cosmic-ext-applet-logomenu ERROR: '{}'", e);
                 }
             }
             Message::PopupClosed(id) => {
@@ -211,7 +211,7 @@ impl Application for LogoMenu {
                 }
             }
             Message::Run(action) => {
-                if is_flatpak() && action != "cosmic-logomenu-settings" {
+                if is_flatpak() && action != "cosmic-ext-logomenu-settings" {
                     match Command::new("flatpak-spawn")
                         .arg("--host")
                         .arg("sh")
@@ -223,7 +223,15 @@ impl Application for LogoMenu {
                         Err(e) => eprintln!("Error executing command: {}", e),
                     }
                 } else {
-                    match Command::new("sh").arg("-c").arg(&action).spawn() {
+                    match Command::new("sh")
+                        .arg("-c")
+                        .arg(if &action == "cosmic-logomenu-settings" {
+                            "cosmic-ext-logomenu-settings"
+                        } else {
+                            &action
+                        })
+                        .spawn()
+                    {
                         Ok(_) => {}
                         Err(e) => eprintln!("Error executing command: {}", e),
                     };

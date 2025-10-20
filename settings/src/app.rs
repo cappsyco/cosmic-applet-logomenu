@@ -193,10 +193,6 @@ impl cosmic::Application for AppModel {
                 footer: None,
             }),
         }
-
-
-
-
     }
 
     fn view(&self) -> Element<'_, Self::Message> {
@@ -668,7 +664,7 @@ impl cosmic::Application for AppModel {
                     },
                     command: match &item_type {
                         MenuItemType::LaunchAction => {
-                            Some(String::from("cosmic-logomenu-settings"))
+                            Some(String::from("cosmic-ext-logomenu-settings"))
                         }
                         _ => None,
                     },
@@ -800,6 +796,12 @@ pub fn build_about() -> About {
         .name(fl!("app-title"))
         .icon(widget::icon::from_svg_bytes(APP_ICON))
         .author("Jonathan Capps")
-        .links([(fl!("repository"), env!("CARGO_PKG_REPOSITORY")),(fl!("contributors"), "https://github.com/cappsyco/cosmic-applet-logomenu/graphs/contributors")])
+        .links([
+            (fl!("repository"), env!("CARGO_PKG_REPOSITORY")),
+            (
+                fl!("contributors"),
+                "https://github.com/cappsyco/cosmic-ext-applet-logomenu/graphs/contributors",
+            ),
+        ])
         .license(env!("CARGO_PKG_LICENSE"))
 }

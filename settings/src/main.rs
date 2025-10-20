@@ -25,8 +25,8 @@ fn main() -> cosmic::iced::Result {
 fn is_running() -> bool {
     let current_pid = std::process::id();
     let current_exe = std::env::current_exe()
-            .ok()
-            .and_then(|p| p.canonicalize().ok());
+        .ok()
+        .and_then(|p| p.canonicalize().ok());
 
     let mut system = System::new_all();
     system.refresh_all();

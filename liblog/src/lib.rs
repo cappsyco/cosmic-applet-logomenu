@@ -202,7 +202,7 @@ impl Default for MenuItems {
                 MenuItem {
                     item_type: MenuItemType::LaunchAction,
                     label: Some(fl!("menu-settings").to_string()),
-                    command: Some(String::from("cosmic-logomenu-settings")),
+                    command: Some(String::from("cosmic-ext-logomenu-settings")),
                 },
             ],
         }

@@ -1,6 +1,6 @@
 [package]
-name = "cosmic-applet-logomenu"
-version = "0.6.4"
+name = "cosmic-ext-applet-logomenu"
+version = "0.6.5"
 edition = "2024"
 license = "GPL-3.0"
 
