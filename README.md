@@ -8,11 +8,18 @@ A simple logo menu (in the style of the popular [GNOME extension](https://github
 
 ## Flatpak installation (recommended)
 
+### Important note: due to a ID change, anyone who's previously installed Logo Menu through the COSMIC store will need to run the following commands to migrate and continue recieving updates:
+
+```sh
+flatpak remove co.uk.cappsy.CosmicAppletLogoMenu
+flatpak install dev.cappsy.CosmicExtAppletLogoMenu
+```
+
 By far the best way to install the Logo Menu is through the official COSMIC™ Flatpak repository. Firstly, ensure you have Flatpak itself installed. You then should be able to search for and install Logo Menu from the COSMIC™ Store, under the Applets category. Alternatively, you can ensure you have the correct repo enabled and install Logo Menu through the command line.
 
 ```sh
 flatpak remote-add --if-not-exists --user cosmic https://apt.pop-os.org/cosmic/cosmic.flatpakrepo
-flatpak install co.uk.cappsy.CosmicAppletLogoMenu
+flatpak install dev.cappsy.CosmicExtAppletLogoMenu
 ```
 
 ## Arch User Repository installation

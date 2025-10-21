@@ -1,5 +1,5 @@
-export APPID1 := 'co.uk.cappsy.CosmicAppletLogoMenu'
-export APPID2 := 'co.uk.cappsy.CosmicAppletLogoMenu.Settings'
+export APPID1 := 'dev.cappsy.CosmicExtAppletLogoMenu'
+export APPID2 := 'dev.cappsy.CosmicExtAppletLogoMenu.Settings'
 
 name1 := 'cosmic-ext-applet-logomenu'
 name2 := 'cosmic-ext-logomenu-settings'
@@ -104,7 +104,7 @@ flatpak-builder:
         --install-deps-from=flathub \
         --repo=repo \
         flatpak-out \
-        co.uk.cappsy.CosmicAppletLogoMenu.json
+        dev.cappsy.CosmicExtAppletLogoMenu.json
 
 # Update flatpak cargo-sources.json
 flatpak-cargo-sources:

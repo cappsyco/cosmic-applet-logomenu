@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <component type="desktop-application">
-  <id>co.uk.cappsy.CosmicAppletLogoMenu</id>
+  <id>dev.cappsy.CosmicExtAppletLogoMenu</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-only</project_license>
   <project_group>COSMIC</project_group>
-  <developer id="co.uk.cappsy">
+  <developer id="dev.cappsy">
     <name>Jonathan Capps</name>
   </developer>
   <developer_name>Jonathan Capps</developer_name>
@@ -22,6 +22,7 @@
   <name>Logo Menu</name>
   <summary>Customisable menu applet for the COSMIC™ desktop.</summary>
   <description>
+    <p>**Important notice: If you've previously installed this applet please refer to the 'Homepage' link below for instructions on migrating.**</p>
     <p>
       <ul>
         <li>Pick your distro logo of choice for your menu. The one you want not there? Then you can add your own custom one!</li>
@@ -31,12 +32,12 @@
     </p>
   </description>
   <launchable type="desktop-id">
-    co.uk.cappsy.CosmicAppletLogoMenu.desktop
+    dev.cappsy.CosmicExtAppletLogoMenu.desktop
   </launchable>
   <launchable type="desktop-id">
-    co.uk.cappsy.CosmicAppletLogoMenu.Settings.desktop
+    dev.cappsy.CosmicExtAppletLogoMenu.Settings.desktop
   </launchable>
-  <icon type="stock">co.uk.cappsy.CosmicAppletLogoMenu.svg</icon>
+  <icon type="stock">dev.cappsy.CosmicExtAppletLogoMenu.svg</icon>
   <screenshots>
     <screenshot type="default">
       <image>
@@ -61,6 +62,10 @@
         https://github.com/cappsyco/cosmic-ext-applet-logomenu/releases/tag/v0.6.5
       </url>
       <description>
+        <p><strong>0.6.6</strong></p>
+        <ul>
+            <li>Package maintainence.</li>
+        </ul>
         <p><strong>0.6.5</strong></p>
         <ul>
             <li>Added Swedish and Polish translations</li>

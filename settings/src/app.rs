@@ -18,7 +18,7 @@ use std::collections::{HashMap, VecDeque};
 use std::path::Path;
 
 const APP_ICON: &[u8] =
-    include_bytes!("../../res/icons/hicolor/scalable/apps/co.uk.cappsy.CosmicAppletLogoMenu.svg");
+    include_bytes!("../../res/icons/hicolor/scalable/apps/dev.cappsy.CosmicExtAppletLogoMenu.svg");
 const CONFIG_VER: u64 = 1;
 const CONFIG_ID: &str = "co.uk.cappsy.CosmicAppletLogoMenu";
 
@@ -79,7 +79,7 @@ impl cosmic::Application for AppModel {
     type Flags = ();
     type Message = Message;
 
-    const APP_ID: &'static str = "co.uk.cappsy.CosmicAppletLogoMenu.Settings";
+    const APP_ID: &'static str = "dev.cappsy.CosmicExtAppletLogoMenu.Settings";
 
     fn core(&self) -> &cosmic::Core {
         &self.core
