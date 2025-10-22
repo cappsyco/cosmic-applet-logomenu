@@ -12,6 +12,7 @@ A simple logo menu (in the style of the popular [GNOME extension](https://github
 
 ```sh
 flatpak remove co.uk.cappsy.CosmicAppletLogoMenu
+mv ~/.config/cosmic/co.uk.cappsy.CosmicAppletLogoMenu ~/.config/cosmic/dev.cappsy.CosmicExtAppletLogoMenu
 flatpak install dev.cappsy.CosmicExtAppletLogoMenu
 ```
 
