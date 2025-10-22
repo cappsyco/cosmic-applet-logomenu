@@ -18,7 +18,6 @@ use std::path::Path;
 use std::process::Command;
 
 const ID: &str = "dev.cappsy.CosmicExtAppletLogoMenu";
-const CONF_ID: &str = "co.uk.cappsy.CosmicAppletLogoMenu";
 
 pub struct LogoMenu {
     core: Core,
@@ -52,7 +51,7 @@ impl Application for LogoMenu {
 
     fn init(core: Core, _flags: Self::Flags) -> (Self, Task<Self::Message>) {
         // Load config
-        let helper = Config::new(CONF_ID, LogoMenuConfig::VERSION).ok();
+        let helper = Config::new(ID, LogoMenuConfig::VERSION).ok();
         let config: LogoMenuConfig = helper
             .as_ref()
             .map(|helper| {
@@ -147,7 +146,7 @@ impl Application for LogoMenu {
     fn subscription(&self) -> Subscription<Message> {
         Subscription::batch(vec![
             self.core
-                .watch_config(CONF_ID)
+                .watch_config(ID)
                 .map(|res| Message::ConfigUpdate(res.config)),
         ])
     }

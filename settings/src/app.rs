@@ -20,7 +20,7 @@ use std::path::Path;
 const APP_ICON: &[u8] =
     include_bytes!("../../res/icons/hicolor/scalable/apps/dev.cappsy.CosmicExtAppletLogoMenu.svg");
 const CONFIG_VER: u64 = 1;
-const CONFIG_ID: &str = "co.uk.cappsy.CosmicAppletLogoMenu";
+const CONFIG_ID: &str = "dev.cappsy.CosmicExtAppletLogoMenu";
 
 #[derive(Clone, Debug)]
 pub enum DialogPage {

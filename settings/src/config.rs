@@ -15,9 +15,9 @@ pub fn load_config<T>(key: &str, config_vers: u64) -> Option<T>
 where
     T: DeserializeOwned,
 {
-    let config = match Config::new("co.uk.cappsy.CosmicAppletLogoMenu", config_vers) {
+    let config = match Config::new("dev.cappsy.CosmicExtAppletLogoMenu", config_vers) {
         Ok(config) => config,
-        Err(_e) => Config::system("co.uk.cappsy.CosmicAppletLogoMenu", 1).unwrap(),
+        Err(_e) => Config::system("dev.cappsy.CosmicExtAppletLogoMenu", 1).unwrap(),
     };
 
     config.get(key).ok()
