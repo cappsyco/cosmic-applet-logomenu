@@ -211,7 +211,10 @@ impl Application for LogoMenu {
                 }
             }
             Message::Run(action) => {
-                if is_flatpak() && action != "cosmic-ext-logomenu-settings" {
+                if is_flatpak()
+                    && action != "cosmic-ext-logomenu-settings"
+                    && action != "cosmic-logomenu-settings"
+                {
                     match Command::new("flatpak-spawn")
                         .arg("--host")
                         .arg("sh")
