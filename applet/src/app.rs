@@ -12,7 +12,6 @@ use cosmic::iced_winit::commands::popup::{destroy_popup, get_popup};
 use cosmic::widget;
 use cosmic::{Application, Element};
 use liblog::{IMAGES, LogoMenuConfig, MenuItemType};
-use std::env;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
@@ -262,10 +261,12 @@ fn close_popup(mut popup: Option<Id>) -> Task<Message> {
     }
 }
 
+#[cfg(feature = "flatpak")]
 fn is_flatpak() -> bool {
-    env::var("FLATPAK_ID").is_ok()
-        || Path::new("/.flatpak-info").exists()
-        || env::var("container")
-            .map(|v| v == "flatpak")
-            .unwrap_or(false)
+    true
+}
+
+#[cfg(not(feature = "flatpak"))]
+fn is_flatpak() -> bool {
+    false
 }

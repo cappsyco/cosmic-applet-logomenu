@@ -38,3 +38,4 @@ features = [
 [features]
 default = ["xdg-portal"]
 xdg-portal = ["libcosmic/xdg-portal"]
+flatpak = []
